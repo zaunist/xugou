@@ -16,8 +16,8 @@ vars = { NODE_ENV = "development" }
 [[d1_databases]]
 binding = "DB"
 database_name = "xugou_db"
-database_id = "32a2ca5f-3a77-4b08-965e-804612557880"
+database_id = "dbc86b64-2abf-43a1-8402-222c3bb9b542"
 
 [vars]
-JWT_SECRET = "your-secret-key-change-in-production" 
+JWT_SECRET = "your-secret-key-change-in-production-monitor" 
 ENABLE_DB_INIT = "false" 
