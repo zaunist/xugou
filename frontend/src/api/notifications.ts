@@ -478,17 +478,47 @@ export const deleteNotificationTemplate = async (id: string): Promise<{
   message?: string;
 }> => {
   try {
-    const response = await api.delete<{
-      success: boolean;
-      message?: string;
-    }>(`/api/notifications/templates/${id}`);
-    
+    const response = await api.delete(`/api/notifications/templates/${id}`);
     return response.data;
   } catch (error) {
     console.error('删除通知模板失败:', error);
     return {
       success: false,
       message: '删除通知模板失败'
+    };
+  }
+};
+
+// 验证电子邮件SMTP配置
+export const verifyEmailConfig = async (
+  smtpServer: string,
+  smtpPort: string,
+  smtpUsername: string,
+  smtpPassword: string,
+  useSSL: boolean = false,
+  sendTestEmail: boolean = false,
+  testRecipient?: string
+): Promise<{
+  success: boolean;
+  message?: string;
+}> => {
+  try {
+    const response = await api.post('/api/notifications/verify-email', {
+      smtpServer,
+      smtpPort,
+      smtpUsername,
+      smtpPassword,
+      useSSL,
+      sendTestEmail,
+      testRecipient
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('验证邮件配置失败:', error);
+    return {
+      success: false,
+      message: '验证邮件配置失败，请检查网络连接'
     };
   }
 }; 

@@ -18,10 +18,10 @@ Currently implemented features:
 - ✅ HTTP Monitoring - API endpoint health detection and analysis
 - ✅ Data Visualization - Real-time data display and historical trend analysis
 - ✅ Status Page - Customizable service status page
+- ✅ Alert Notifications - Anomaly event notifications through multiple channels (Email, Telegram, etc.)
 
 Planned features:
 
-- 🚧 Real-time Notifications - Anomaly event notifications through multiple channels (Email, Webhook, Slack, etc.)
 - 📱 Mobile APP - Convenient monitoring status check on mobile devices
 
 ## ✨ Core Features
@@ -55,49 +55,19 @@ XUGOU adopts a modern system architecture, including the following components:
 
 ## 🚀 Quick Start
 
-### Requirements
+### Deployment Guide
 
-- Node.js >= 18
-- Go >= 1.24
+Default username: admin  Default password: admin123
 
-### Deployment Steps
+[XUGOU wiki Deployment Guide](https://github.com/zaunist/xugou/wiki)
 
-1. Clone the repository
-```bash
-git clone https://github.com/zaunist/xugou.git
-cd xugou
-```
-
-2. Install dependencies
-```bash
-# Frontend dependencies
-cd frontend
-npm install
-
-# Backend dependencies
-cd ../backend
-npm install
-```
-
-3. Start services
-```bash
-# Start backend service
-cd backend
-npm run dev
-
-# Start frontend service
-cd frontend
-npm run dev
-```
-
-5. Access the system
-Open your browser and visit `http://localhost:5173`
-
-6. Default username: admin  Default password: admin123
-
-## Detailed Video Tutorial
+### Video Tutorial
 
 Not yet available
+
+## FAQ
+
+[XUGOU wiki FAQ](https://github.com/zaunist/xugou/wiki)
 
 ## ⭐ Support the Author
 

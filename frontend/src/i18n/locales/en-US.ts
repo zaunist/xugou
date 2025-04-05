@@ -435,13 +435,13 @@ const enUS = {
     
     // Notification settings
     'notifications.title': 'Notification Configuration',
-    'notifications.description': 'Configure system notifications for API monitors, agents and system events.',
+    'notifications.description': 'Configure system notifications for API monitors and agents events.',
     'notifications.tabs.global': 'Global Settings',
     'notifications.tabs.specificMonitors': 'API Monitor Config',
     'notifications.tabs.specificAgents': 'Agent Config',
     'notifications.globalSettings.description': 'Configure global notification settings, including notification channels, monitoring settings, and message templates. These settings will apply to all monitors and clients unless overridden by specific configurations.',
     'notifications.channels.title': 'Notification Channels',
-    'notifications.channels.description': 'Configure different notification channels to receive alerts about monitors, agents and system events.',
+    'notifications.channels.description': 'Configure different notification channels to receive alerts about monitors and agents events.',
     'notifications.channels.add': 'Add Channel',
     'notifications.channels.edit': 'Edit Channel',
     'notifications.channels.delete': 'Delete Channel',

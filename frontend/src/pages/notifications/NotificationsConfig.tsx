@@ -14,7 +14,8 @@ import {
   saveNotificationSettings,
   createNotificationChannel,
   updateNotificationChannel,
-  deleteNotificationChannel
+  deleteNotificationChannel,
+  verifyEmailConfig
 } from '../../api/notifications';
 
 const NotificationsConfig = () => {
@@ -46,12 +47,12 @@ const NotificationsConfig = () => {
       chatId: '',
       // Email configuration
       smtpServer: '',
-      smtpPort: '587',
+      smtpPort: '',
       smtpUsername: '',
       smtpPassword: '',
       senderEmail: '',
       recipients: '',
-      useSSL: true
+      receipts: ''
     },
     enabled: true
   });
@@ -272,12 +273,12 @@ const NotificationsConfig = () => {
         chatId: '',
         // 邮件配置
         smtpServer: '',
-        smtpPort: '587',
+        smtpPort: '',
         smtpUsername: '',
         smtpPassword: '',
         senderEmail: '',
         recipients: '',
-        useSSL: true
+        receipts: ''
       },
       enabled: true
     });
@@ -307,64 +308,53 @@ const NotificationsConfig = () => {
     
     setSelectedChannelId(channel.id);
     
-    // 检查是否是默认的Telegram通知渠道
-    const isDefaultTelegram = (() => {
-      try {
-        if (channel.type === 'telegram' && channel.config) {
-          const config = typeof channel.config === 'string' 
-            ? JSON.parse(channel.config) 
-            : channel.config;
-          return config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
-                config.chatId === '-1002608818360';
-        }
-        return false;
-      } catch (e) {
-        return false;
-      }
-    })();
-    
     // 根据渠道类型设置表单
     if (channel.type === 'telegram') {
-      let config = channel.config ? (typeof channel.config === 'object' ? channel.config : JSON.parse(channel.config)) : {};
+      let config = channel.config ? (typeof channel.config === 'string' ? JSON.parse(channel.config) : channel.config) : {};
       
-      // 如果是默认的Telegram通知渠道，保持原有的token和chatId
-      if (isDefaultTelegram) {
-        setChannelForm({
-          name: channel.name,
-          type: channel.type,
-          config: {
-            botToken: '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU',
-            chatId: '-1002608818360',
-            smtpServer: '',
-            smtpPort: '587',
-            smtpUsername: '',
-            smtpPassword: '',
-            senderEmail: '',
-            recipients: '',
-            useSSL: true
-          },
-          enabled: channel.enabled
-        });
-      } else {
-        setChannelForm({
-          name: channel.name,
-          type: channel.type,
-          config: {
-            botToken: config.botToken || '',
-            chatId: config.chatId || '',
-            smtpServer: '',
-            smtpPort: '587',
-            smtpUsername: '',
-            smtpPassword: '',
-            senderEmail: '',
-            recipients: '',
-            useSSL: true
-          },
-          enabled: channel.enabled
-        });
+      // 确保config是一个对象
+      if (typeof config === 'string') {
+        try {
+          config = JSON.parse(config);
+        } catch (e) {
+          console.error('解析Telegram渠道配置失败:', e);
+          config = {};
+        }
       }
+      
+      console.log('编辑Telegram渠道, 原始配置:', config);
+      
+      // 允许编辑默认渠道的配置，不再特殊处理
+      setChannelForm({
+        name: channel.name,
+        type: channel.type,
+        config: {
+          botToken: config.botToken || '',
+          chatId: config.chatId || '',
+          smtpServer: '',
+          smtpPort: '',
+          smtpUsername: '',
+          smtpPassword: '',
+          senderEmail: '',
+          recipients: '',
+          receipts: ''
+        },
+        enabled: channel.enabled
+      });
     } else if (channel.type === 'email') {
       let config = channel.config || {};
+      
+      // 确保config是一个对象
+      if (typeof config === 'string') {
+        try {
+          config = JSON.parse(config);
+        } catch (e) {
+          console.error('解析邮件渠道配置失败:', e);
+          config = {};
+        }
+      }
+      
+      console.log('编辑邮件渠道, 原始配置:', config);
       
       setChannelForm({
         name: channel.name,
@@ -373,31 +363,47 @@ const NotificationsConfig = () => {
           botToken: '',
           chatId: '',
           smtpServer: config.smtpServer || '',
-          smtpPort: config.smtpPort || '587',
+          smtpPort: config.smtpPort || '',
           smtpUsername: config.smtpUsername || '',
           smtpPassword: config.smtpPassword || '',
           senderEmail: config.senderEmail || '',
-          recipients: config.recipients || '',
-          useSSL: config.useSSL !== false
+          recipients: config.recipients || config.receipts || '',    // 优先使用receipts，否则使用recipients
+          receipts: config.recipients || config.receipts || '',    // 优先使用receipts，否则使用recipients
         },
         enabled: channel.enabled
       });
     } else {
-      // 对于其他类型的渠道，使用默认空值
+      // 对于其他类型的渠道，处理配置
+      let config = channel.config || {};
+      
+      // 确保config是一个对象
+      if (typeof config === 'string') {
+        try {
+          config = JSON.parse(config);
+        } catch (e) {
+          console.error(`解析渠道类型${channel.type}的配置失败:`, e);
+          config = {};
+        }
+      }
+      
+      console.log(`编辑${channel.type}渠道, 原始配置:`, config);
+      
+      // 对于其他类型的渠道，合并现有配置
       setChannelForm({
         name: channel.name,
         type: channel.type,
         config: {
-          ...(typeof channel.config === 'object' ? channel.config : {}),
-          botToken: '',
-          chatId: '',
-          smtpServer: '',
-          smtpPort: '587',
-          smtpUsername: '',
-          smtpPassword: '',
-          senderEmail: '',
-          recipients: '',
-          useSSL: true
+          ...config,  // 保留所有现有配置
+          // 设置默认值，避免undefined
+          botToken: config.botToken || '',
+          chatId: config.chatId || '',
+          smtpServer: config.smtpServer || '',
+          smtpPort: config.smtpPort || '',
+          smtpUsername: config.smtpUsername || '',
+          smtpPassword: config.smtpPassword || '',
+          senderEmail: config.senderEmail || '',
+          recipients: config.recipients || '',
+          receipts: config.receipts || config.recipients || '',  // 添加receipts字段
         },
         enabled: channel.enabled
       });
@@ -516,22 +522,31 @@ const NotificationsConfig = () => {
     setSaving(true);
 
     try {
-      const isDefaultTelegram = channelForm.config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
-                               channelForm.config.chatId === '-1002608818360';
-                               
       let channelData: any = {
-        name: isDefaultTelegram ? `${t('common.default')} ${t('notifications.channels.type.telegram')}` : channelForm.name,
-        type: 'telegram',
+        name: channelForm.name,  // 使用用户输入的名称
+        type: channelForm.type,
         enabled: channelForm.enabled
       };
 
       // 处理配置
-      if (channelData.type === 'telegram') {
+      if (channelForm.type === 'telegram') {
         const configObj = {
-          botToken: isDefaultTelegram ? '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' : channelForm.config.botToken,
-          chatId: isDefaultTelegram ? '-1002608818360' : channelForm.config.chatId
+          botToken: channelForm.config.botToken,
+          chatId: channelForm.config.chatId
         };
         // 将配置对象转换为字符串
+        channelData.config = JSON.stringify(configObj);
+      } else if (channelForm.type === 'email') {
+        const configObj = {
+          smtpServer: channelForm.config.smtpServer,
+          smtpPort: channelForm.config.smtpPort,
+          smtpUsername: channelForm.config.smtpUsername,
+          smtpPassword: channelForm.config.smtpPassword,
+          senderEmail: channelForm.config.senderEmail,
+          recipients: channelForm.config.recipients,
+          receipts: channelForm.config.receipts,
+          useSSL: false // 固定为 false，保持与后端 API 兼容
+        };
         channelData.config = JSON.stringify(configObj);
       } else {
         // 将其他类型的配置也转换为字符串
@@ -660,6 +675,8 @@ const NotificationsConfig = () => {
       ? t('notifications.channels.edit') 
       : t('notifications.channels.add');
     
+    // 如果是编辑模式，确保表单中显示的是完整的现有配置
+    // 所有的配置字段都已经在handleEditChannelClick函数中被正确解析并设置
     return (
       <Dialog.Root 
         open={isOpen} 
@@ -681,23 +698,13 @@ const NotificationsConfig = () => {
               <Text as="label" size="2" mb="1" weight="medium">
                 {t('notifications.channels.name')}
               </Text>
-              {channelForm.config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
-                channelForm.config.chatId === '-1002608818360' ? (
-                <Box mt="1">
-                  <TextField.Input
-                    value={t('common.default') + ' ' + t('notifications.channels.type.telegram')}
-                    disabled={true}
-                  />
-                </Box>
-              ) : (
-                <Box mt="1">
-                  <TextField.Input
-                    placeholder={t('notifications.channels.namePlaceholder')}
-                    value={channelForm.name}
-                    onChange={(e) => setChannelForm({...channelForm, name: e.target.value})}
-                  />
-                </Box>
-              )}
+              <Box mt="1">
+                <TextField.Input
+                  placeholder={t('notifications.channels.namePlaceholder')}
+                  value={channelForm.name}
+                  onChange={(e) => setChannelForm({...channelForm, name: e.target.value})}
+                />
+              </Box>
               {channelFormErrors.name && (
                 <Text size="1" color="red" mt="1">{channelFormErrors.name}</Text>
               )}
@@ -707,39 +714,68 @@ const NotificationsConfig = () => {
               <Text as="label" size="2" mb="1" weight="medium">
                 {t('common.type')}
               </Text>
-              {channelForm.config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
-                channelForm.config.chatId === '-1002608818360' ? (
-                <TextField.Input
-                  value={t('notifications.channels.type.telegram')}
-                  disabled={true}
-                />
-              ) : (
-                <Box mt="1">
-                  <Select.Root 
-                    defaultValue={channelForm.type}
-                    onValueChange={(value) => {
-                      setChannelForm({
-                        ...channelForm,
-                        type: value,
-                        config: value === 'telegram' 
-                          ? { botToken: '', chatId: '', smtpServer: '', smtpPort: '', smtpUsername: '', smtpPassword: '', senderEmail: '', recipients: '', useSSL: false } 
-                          : { botToken: '', chatId: '', smtpServer: '', smtpPort: '', smtpUsername: '', smtpPassword: '', senderEmail: '', recipients: '', useSSL: false }
-                      });
-                    }}
-                  >
-                    <Select.Trigger style={{ width: '100%' }} />
-                    <Select.Content>
-                      <Select.Item value="telegram">{t('notifications.channels.type.telegram')}</Select.Item>
-                      <Select.Item value="email" disabled>{t('notifications.channels.type.email')} (Coming Soon)</Select.Item>
-                      <Select.Item value="webhook" disabled>{t('notifications.channels.type.webhook')} (Coming Soon)</Select.Item>
-                      <Select.Item value="slack" disabled>{t('notifications.channels.type.slack')} (Coming Soon)</Select.Item>
-                      <Select.Item value="dingtalk" disabled>{t('notifications.channels.type.dingtalk')} (Coming Soon)</Select.Item>
-                      <Select.Item value="wecom" disabled>{t('notifications.channels.type.wecom')} (Coming Soon)</Select.Item>
-                      <Select.Item value="feishu" disabled>{t('notifications.channels.type.feishu')} (Coming Soon)</Select.Item>
-                    </Select.Content>
-                  </Select.Root>
-                </Box>
-              )}
+              <Box mt="1">
+                <Select.Root 
+                  defaultValue={channelForm.type}
+                  value={channelForm.type}
+                  onValueChange={(value) => {
+                    // 切换类型时，重置表单错误
+                    setChannelFormErrors({
+                      name: '',
+                      botToken: '',
+                      chatId: '',
+                      smtpServer: '',
+                      smtpPort: '',
+                      smtpUsername: '',
+                      smtpPassword: '',
+                      senderEmail: '',
+                      recipients: ''
+                    });
+                    
+                    // 根据选择的类型设置默认的配置值
+                    setChannelForm({
+                      ...channelForm,
+                      type: value,
+                      config: value === 'telegram' 
+                        ? { 
+                            botToken: '', 
+                            chatId: '', 
+                            smtpServer: '', 
+                            smtpPort: '', 
+                            smtpUsername: '', 
+                            smtpPassword: '', 
+                            senderEmail: '', 
+                            recipients: '', 
+                            receipts: ''
+                          } 
+                        : { 
+                            botToken: '', 
+                            chatId: '', 
+                            smtpServer: '', 
+                            smtpPort: '', 
+                            smtpUsername: '', 
+                            smtpPassword: '', 
+                            senderEmail: '', 
+                            recipients: '', 
+                            receipts: ''
+                          }
+                    });
+                    
+                    console.log(`[通知渠道] 选择类型: ${value}`); // 调试信息
+                  }}
+                >
+                  <Select.Trigger style={{ width: '100%' }} />
+                  <Select.Content>
+                    <Select.Item value="telegram">{t('notifications.channels.type.telegram')}</Select.Item>
+                    <Select.Item value="email">{t('notifications.channels.type.email')}</Select.Item>
+                    <Select.Item value="webhook" disabled>{t('notifications.channels.type.webhook')} (Coming Soon)</Select.Item>
+                    <Select.Item value="slack" disabled>{t('notifications.channels.type.slack')} (Coming Soon)</Select.Item>
+                    <Select.Item value="dingtalk" disabled>{t('notifications.channels.type.dingtalk')} (Coming Soon)</Select.Item>
+                    <Select.Item value="wecom" disabled>{t('notifications.channels.type.wecom')} (Coming Soon)</Select.Item>
+                    <Select.Item value="feishu" disabled>{t('notifications.channels.type.feishu')} (Coming Soon)</Select.Item>
+                  </Select.Content>
+                </Select.Root>
+              </Box>
             </Box>
             
             {channelForm.type === 'telegram' && (
@@ -748,26 +784,20 @@ const NotificationsConfig = () => {
                   <Text as="label" size="2" mb="1" weight="medium">
                     Bot Token
                   </Text>
-                  {channelForm.config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
-                   channelForm.config.chatId === '-1002608818360' ? (
-                    <Box mt="1">
-                      <TextField.Input
-                        value="••••••••••••••••••••••••••••••••"
-                        disabled={true}
-                      />
-                    </Box>
-                  ) : (
-                    <Box mt="1">
-                      <TextField.Input
-                        placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
-                        value={channelForm.config.botToken}
-                        onChange={(e) => setChannelForm({
-                          ...channelForm, 
-                          config: {...channelForm.config, botToken: e.target.value}
-                        })}
-                      />
-                    </Box>
-                  )}
+                  <Box mt="1">
+                    <TextField.Input
+                      placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                      value={channelForm.config.botToken}
+                      onChange={(e) => setChannelForm({
+                        ...channelForm, 
+                        config: {
+                          ...channelForm.config, 
+                          botToken: e.target.value,
+                          receipts: channelForm.config.recipients  // 保持receipts与recipients同步
+                        }
+                      })}
+                    />
+                  </Box>
                   {channelFormErrors.botToken && (
                     <Text size="1" color="red" mt="1">{channelFormErrors.botToken}</Text>
                   )}
@@ -777,26 +807,20 @@ const NotificationsConfig = () => {
                   <Text as="label" size="2" mb="1" weight="medium">
                     Chat ID
                   </Text>
-                  {channelForm.config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
-                   channelForm.config.chatId === '-1002608818360' ? (
-                    <Box mt="1">
-                      <TextField.Input
-                        value="••••••••••••••"
-                        disabled={true}
-                      />
-                    </Box>
-                  ) : (
-                    <Box mt="1">
-                      <TextField.Input
-                        placeholder="123456789"
-                        value={channelForm.config.chatId}
-                        onChange={(e) => setChannelForm({
-                          ...channelForm, 
-                          config: {...channelForm.config, chatId: e.target.value}
-                        })}
-                      />
-                    </Box>
-                  )}
+                  <Box mt="1">
+                    <TextField.Input
+                      placeholder="123456789"
+                      value={channelForm.config.chatId}
+                      onChange={(e) => setChannelForm({
+                        ...channelForm, 
+                        config: {
+                          ...channelForm.config, 
+                          chatId: e.target.value,
+                          receipts: channelForm.config.recipients  // 保持receipts与recipients同步
+                        }
+                      })}
+                    />
+                  </Box>
                   {channelFormErrors.chatId && (
                     <Text size="1" color="red" mt="1">{channelFormErrors.chatId}</Text>
                   )}
@@ -815,7 +839,11 @@ const NotificationsConfig = () => {
                     value={channelForm.config.smtpServer}
                     onChange={(e) => setChannelForm({
                       ...channelForm, 
-                      config: {...channelForm.config, smtpServer: e.target.value}
+                      config: {
+                        ...channelForm.config, 
+                        smtpServer: e.target.value,
+                        receipts: channelForm.config.recipients  // 保持receipts与recipients同步
+                      }
                     })}
                   />
                   {channelFormErrors.smtpServer && (
@@ -828,11 +856,15 @@ const NotificationsConfig = () => {
                     {t('notifications.channels.smtpPort')}
                   </Text>
                   <TextField.Input
-                    placeholder="587"
+                    placeholder="25"
                     value={channelForm.config.smtpPort}
                     onChange={(e) => setChannelForm({
                       ...channelForm, 
-                      config: {...channelForm.config, smtpPort: e.target.value}
+                      config: {
+                        ...channelForm.config, 
+                        smtpPort: e.target.value,
+                        receipts: channelForm.config.recipients  // 保持receipts与recipients同步
+                      }
                     })}
                   />
                   {channelFormErrors.smtpPort && (
@@ -849,7 +881,11 @@ const NotificationsConfig = () => {
                     value={channelForm.config.smtpUsername}
                     onChange={(e) => setChannelForm({
                       ...channelForm, 
-                      config: {...channelForm.config, smtpUsername: e.target.value}
+                      config: {
+                        ...channelForm.config, 
+                        smtpUsername: e.target.value,
+                        receipts: channelForm.config.recipients  // 保持receipts与recipients同步
+                      }
                     })}
                   />
                   {channelFormErrors.smtpUsername && (
@@ -863,15 +899,29 @@ const NotificationsConfig = () => {
                   </Text>
                   <TextField.Input
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="••••••••••••••"
                     value={channelForm.config.smtpPassword}
                     onChange={(e) => setChannelForm({
                       ...channelForm, 
-                      config: {...channelForm.config, smtpPassword: e.target.value}
+                      config: {
+                        ...channelForm.config, 
+                        smtpPassword: e.target.value,
+                        receipts: channelForm.config.recipients  // 保持receipts与recipients同步
+                      }
                     })}
                   />
                   {channelFormErrors.smtpPassword && (
                     <Text size="1" color="red" mt="1">{channelFormErrors.smtpPassword}</Text>
+                  )}
+                  {channelForm.config.smtpServer && channelForm.config.smtpServer.includes('163.com') && (
+                    <Text size="1" color="orange" mt="1">
+                      注意: 163邮箱需要使用<strong>授权码</strong>而不是登录密码，<a href="https://help.mail.163.com/faq.do?m=list&categoryID=90" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>如何获取授权码?</a>
+                    </Text>
+                  )}
+                  {channelForm.config.smtpServer && channelForm.config.smtpServer.includes('gmail.com') && (
+                    <Text size="1" color="orange" mt="1">
+                      注意: Gmail需要使用<strong>应用密码</strong>而非Google账号密码，<a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>如何获取应用密码?</a>
+                    </Text>
                   )}
                 </Box>
                 
@@ -884,7 +934,11 @@ const NotificationsConfig = () => {
                     value={channelForm.config.senderEmail}
                     onChange={(e) => setChannelForm({
                       ...channelForm, 
-                      config: {...channelForm.config, senderEmail: e.target.value}
+                      config: {
+                        ...channelForm.config, 
+                        senderEmail: e.target.value,
+                        receipts: channelForm.config.recipients  // 保持receipts与recipients同步
+                      }
                     })}
                   />
                   {channelFormErrors.senderEmail && (
@@ -901,27 +955,76 @@ const NotificationsConfig = () => {
                     value={channelForm.config.recipients}
                     onChange={(e) => setChannelForm({
                       ...channelForm, 
-                      config: {...channelForm.config, recipients: e.target.value}
+                      config: {
+                        ...channelForm.config,
+                        recipients: e.target.value,
+                        receipts: e.target.value  // 同时更新receipts字段以匹配后端
+                      }
                     })}
                   />
-                  <Text size="1" color="gray" mt="1">
-                    {t('notifications.channels.recipientsHelp')}
-                  </Text>
                   {channelFormErrors.recipients && (
                     <Text size="1" color="red" mt="1">{channelFormErrors.recipients}</Text>
                   )}
                 </Box>
                 
-                <Flex align="center" gap="2" mt="1">
-                  <Switch 
-                    checked={channelForm.config.useSSL}
-                    onCheckedChange={(checked) => setChannelForm({
-                      ...channelForm,
-                      config: {...channelForm.config, useSSL: checked}
-                    })}
-                  />
-                  <Text size="2">{t('notifications.channels.useSSL')}</Text>
-                </Flex>
+                {/* 测试配置按钮 */}
+                <Box mt="2">
+                  <Button 
+                    variant="soft" 
+                    size="2" 
+                    color="blue"
+                    onClick={async () => {
+                      try {
+                        let smtpServer = channelForm.config.smtpServer;
+                        let smtpPort = channelForm.config.smtpPort;
+                        let smtpUsername = channelForm.config.smtpUsername;
+                        let smtpPassword = channelForm.config.smtpPassword;
+                        let testRecipient = channelForm.config.recipients;
+                        
+                        if (!smtpServer || !smtpPort || !smtpUsername || !smtpPassword || !testRecipient) {
+                          setToastMessage('请先完成所有SMTP配置字段');
+                          setShowErrorToast(true);
+                          setTimeout(() => setShowErrorToast(false), 3000);
+                          return;
+                        }
+                        
+                        setToastMessage('正在验证SMTP配置并发送测试邮件...');
+                        setShowInfoToast(true);
+                        
+                        // 调用验证API并发送测试邮件
+                        const response = await verifyEmailConfig(
+                          smtpServer,
+                          smtpPort,
+                          smtpUsername,
+                          smtpPassword,
+                          false, // useSSL 参数固定为 false
+                          true, // 发送测试邮件
+                          testRecipient // 测试邮件接收者
+                        );
+                        
+                        setShowInfoToast(false);
+                        
+                        if (response.success) {
+                          setToastMessage(`SMTP配置验证成功，测试邮件已发送到 ${testRecipient}`);
+                          setShowSuccessToast(true);
+                          setTimeout(() => setShowSuccessToast(false), 5000);
+                        } else {
+                          setToastMessage(response.message || 'SMTP配置验证失败');
+                          setShowErrorToast(true);
+                          setTimeout(() => setShowErrorToast(false), 5000);
+                        }
+                      } catch (error) {
+                        setShowInfoToast(false);
+                        setToastMessage('验证过程中发生错误');
+                        setShowErrorToast(true);
+                        setTimeout(() => setShowErrorToast(false), 3000);
+                        console.error('验证邮件配置失败', error);
+                      }
+                    }}
+                  >
+                    测试SMTP配置
+                  </Button>
+                </Box>
               </>
             )}
           </Flex>
@@ -1039,6 +1142,21 @@ const NotificationsConfig = () => {
                             variant="soft" 
                             size="1" 
                             onClick={() => handleEditChannelClick(channel)}
+                            disabled={
+                              channel.type === 'telegram' && 
+                              channel.config && 
+                              (() => {
+                                try {
+                                  const config = typeof channel.config === 'string' 
+                                    ? JSON.parse(channel.config) 
+                                    : channel.config;
+                                  return config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
+                                        config.chatId === '-1002608818360';
+                                } catch (e) {
+                                  return false;
+                                }
+                              })()
+                            }
                           >
                             {t('common.edit')}
                           </Button>
@@ -1047,19 +1165,6 @@ const NotificationsConfig = () => {
                             color="red" 
                             size="1"
                             onClick={() => handleDeleteChannelClick(channel.id)}
-                            disabled={channel.type === 'telegram' && 
-                                     channel.config && 
-                                     (() => {
-                                       try {
-                                         const config = typeof channel.config === 'string' 
-                                           ? JSON.parse(channel.config) 
-                                           : channel.config;
-                                         return config.botToken === '8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU' && 
-                                                config.chatId === '-1002608818360';
-                                       } catch (e) {
-                                         return false;
-                                       }
-                                     })()}
                           >
                             {t('common.delete')}
                           </Button>

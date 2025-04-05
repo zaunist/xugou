@@ -383,7 +383,6 @@ const StatusPageConfig = () => {
                     <Tabs.Trigger value="general" className="tab-trigger">{t('statusPageConfig.general')}</Tabs.Trigger>
                     <Tabs.Trigger value="services" className="tab-trigger">{t('statusPageConfig.services')}</Tabs.Trigger>
                     <Tabs.Trigger value="agents" className="tab-trigger">{t('statusPageConfig.agents')}</Tabs.Trigger>
-                    <Tabs.Trigger value="appearance" className="tab-trigger">{t('statusPageConfig.appearance')}</Tabs.Trigger>
                   </Tabs.List>
 
                   <Box pt="5" px="2" className="tab-content-container">
@@ -525,76 +524,6 @@ const StatusPageConfig = () => {
                             })}
                           </Box>
                         )}
-                      </Flex>
-                    </Tabs.Content>
-
-                    <Tabs.Content value="appearance" className="tab-content">
-                      <Flex direction="column" gap="5">
-                        <Box>
-                          <Text as="label" size="2" weight="medium" style={{ marginBottom: '6px', display: 'block' }}>
-                            {t('statusPageConfig.logoUrl')}
-                          </Text>
-                          <TextField.Input
-                            name="logoUrl"
-                            value={config.logoUrl}
-                            onChange={handleChange}
-                            placeholder={t('statusPageConfig.logoUrlPlaceholder')}
-                            size="3"
-                          />
-                        </Box>
-
-                        <Box>
-                          <Text as="label" size="2" weight="medium" style={{ marginBottom: '6px', display: 'block' }}>
-                            {t('statusPageConfig.customCss')}
-                          </Text>
-                          <TextArea
-                            name="customCss"
-                            value={config.customCss}
-                            onChange={handleChange}
-                            placeholder={t('statusPageConfig.customCssPlaceholder')}
-                            style={{ 
-                              minHeight: '150px',
-                              fontFamily: 'monospace'
-                            }}
-                            size="3"
-                          />
-                          <Text size="1" color="gray" style={{ marginTop: '8px' }}>
-                            {t('statusPageConfig.customCssHelp')}
-                          </Text>
-                        </Box>
-                        
-                        {/* 添加组件和事件部分（高级功能） */}
-                        <Separator size="4" my="4" />
-                        
-                        <Flex direction="column" gap="3">
-                          <Flex justify="between" align="center">
-                            <Text as="label" size="2" weight="medium">
-                              {t('statusPageConfig.components')}
-                            </Text>
-                            <Button variant="outline" size="1" disabled>
-                              <Text size="1">{t('statusPageConfig.addComponent')}</Text>
-                            </Button>
-                          </Flex>
-                          <Text size="1" color="gray">
-                            {t('common.comingSoon', { defaultValue: '即将推出的功能' })}
-                          </Text>
-                        </Flex>
-                        
-                        <Separator size="4" my="4" />
-                        
-                        <Flex direction="column" gap="3">
-                          <Flex justify="between" align="center">
-                            <Text as="label" size="2" weight="medium">
-                              {t('statusPageConfig.incidents')}
-                            </Text>
-                            <Button variant="outline" size="1" disabled>
-                              <Text size="1">{t('statusPageConfig.createIncident')}</Text>
-                            </Button>
-                          </Flex>
-                          <Text size="1" color="gray">
-                            {t('common.comingSoon', { defaultValue: '即将推出的功能' })}
-                          </Text>
-                        </Flex>
                       </Flex>
                     </Tabs.Content>
                   </Box>

@@ -435,7 +435,7 @@ const zhCN = {
     
     // 通知设置
     'notifications.title': '通知配置',
-    'notifications.description': '配置系统通知设置，包括API监控、客户端和系统事件的通知。',
+    'notifications.description': '配置系统通知设置，包括API监控、客户端的通知。',
     'notifications.tabs.channels': '通知渠道',
     'notifications.tabs.settings': '通知设置',
     'notifications.tabs.templates': '消息模板',
@@ -443,7 +443,7 @@ const zhCN = {
     'notifications.tabs.specificMonitors': 'API监控配置',
     'notifications.tabs.specificAgents': '客户端配置',
     'notifications.channels.title': '通知渠道',
-    'notifications.channels.description': '配置不同的通知渠道，以接收关于监控、客户端和系统事件的通知。',
+    'notifications.channels.description': '配置不同的通知渠道，以接收关于监控和客户端的通知。',
     'notifications.channels.add': '添加渠道',
     'notifications.channels.edit': '编辑通知渠道',
     'notifications.channels.delete': '删除通知渠道',

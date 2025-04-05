@@ -543,38 +543,80 @@
   padding: 0 8px 0 4px;
   margin-bottom: 0;
   gap: 4px;
+  outline: none !important;
+  box-shadow: none !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
 }
 
-.tab-trigger {
-  transition: all 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+/* Radix UI Tabs 样式重置 - 强力覆盖 */
+/* 这些选择器会覆盖 Radix UI 的默认样式 */
+button[data-radix-collection-item][role="tab"],
+button[data-orientation="horizontal"][role="tab"],
+button[data-state][role="tab"],
+.rt-TabsTrigger,
+.tab-trigger,
+[role="tab"] {
+  all: unset !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+  cursor: pointer;
   margin: 0 2px;
   font-size: 14px;
   position: relative;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
   padding: 10px 14px;
   background-color: transparent;
-  cursor: pointer;
   border-radius: 4px 4px 0 0;
   letter-spacing: 0.01em;
   color: var(--gray-11);
+  text-decoration: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: all 0.25s ease;
 }
 
-.tab-trigger:focus-visible {
+button[data-radix-collection-item][role="tab"]:focus,
+button[data-orientation="horizontal"][role="tab"]:focus,
+button[data-state][role="tab"]:focus,
+.rt-TabsTrigger:focus,
+.tab-trigger:focus,
+[role="tab"]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+button[data-radix-collection-item][role="tab"]:focus-visible,
+button[data-orientation="horizontal"][role="tab"]:focus-visible,
+button[data-state][role="tab"]:focus-visible,
+.rt-TabsTrigger:focus-visible,
+.tab-trigger:focus-visible,
+[role="tab"]:focus-visible {
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
   background-color: var(--gray-2);
 }
 
-.tab-trigger[data-state="active"] {
+button[data-radix-collection-item][role="tab"][data-state="active"],
+button[data-orientation="horizontal"][role="tab"][data-state="active"],
+button[data-state="active"][role="tab"],
+.rt-TabsTrigger[data-state="active"],
+.tab-trigger[data-state="active"],
+[role="tab"][data-state="active"] {
   color: var(--blue-9);
   font-weight: 600;
   background-color: transparent;
 }
 
-.tab-trigger[data-state="active"]::after {
+button[data-radix-collection-item][role="tab"][data-state="active"]::after,
+button[data-orientation="horizontal"][role="tab"][data-state="active"]::after,
+button[data-state="active"][role="tab"]::after,
+.rt-TabsTrigger[data-state="active"]::after,
+.tab-trigger[data-state="active"]::after,
+[role="tab"][data-state="active"]::after {
   content: '';
   position: absolute;
   bottom: -1px;
@@ -582,61 +624,63 @@
   width: 100%;
   height: 2px;
   background-color: var(--blue-9);
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transform: scaleX(0.45);
+  transform: scaleX(1);
   transform-origin: center;
 }
 
-.tab-trigger:hover {
+button[data-radix-collection-item][role="tab"]:hover,
+button[data-orientation="horizontal"][role="tab"]:hover,
+button[data-state][role="tab"]:hover,
+.rt-TabsTrigger:hover,
+.tab-trigger:hover,
+[role="tab"]:hover {
   color: var(--blue-10);
+  background-color: var(--gray-2);
+  transform: translateY(-1px);
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+button[data-radix-collection-item][role="tab"]:not([data-state="active"]):hover::after,
+button[data-orientation="horizontal"][role="tab"]:not([data-state="active"]):hover::after,
+button[data-state][role="tab"]:not([data-state="active"]):hover::after,
+.rt-TabsTrigger:not([data-state="active"]):hover::after,
+.tab-trigger:not([data-state="active"]):hover::after,
+[role="tab"]:not([data-state="active"]):hover::after {
+  content: none;
+}
+
+button[data-radix-collection-item][role="tab"]:active,
+button[data-orientation="horizontal"][role="tab"]:active,
+button[data-state][role="tab"]:active,
+.rt-TabsTrigger:active,
+.tab-trigger:active,
+[role="tab"]:active {
+  transform: translateY(0);
   background-color: var(--gray-3);
-}
-
-.tab-trigger:not([data-state="active"]):hover::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background-color: var(--gray-5);
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transform: scaleX(0.3);
-  transform-origin: center;
-}
-
-/* 添加点击效果 */
-.tab-trigger:active {
-  transform: scale(0.97);
-  background-color: var(--gray-4);
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
 }
 
 /* 标签内容区样式 */
-[data-radix-tabs-content] {
+[data-radix-tabs-content],
+[role="tabpanel"],
+.rt-TabsContent,
+.tab-content {
   padding-top: 24px !important;
   outline: none !important;
   border: none !important;
-}
-
-/* CSS重置，删除不必要的边框 */
-[role="tablist"],
-[role="tab"],
-[role="tabpanel"] {
-  outline: none !important;
   box-shadow: none !important;
-}
-
-[role="tabpanel"] {
   animation: tab-content-fade-in 0.3s ease;
 }
 
 .tab-content-container {
   border-top: none !important;
-}
-
-.tab-content {
-  outline: none !important;
   border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 @keyframes tab-content-fade-in {
@@ -654,6 +698,24 @@
 [data-orientation="horizontal"] {
   border-bottom: 1px solid var(--gray-4) !important;
   padding-bottom: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+/* 解决Safari特定渲染问题 */
+@media not all and (min-resolution: 0.001dpcm) {
+  @supports (-webkit-appearance:none) {
+    button[role="tab"], 
+    .tab-trigger, 
+    .rt-TabsTrigger {
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+  }
 }
 
 /* 表单输入字段样式 */
