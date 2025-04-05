@@ -19,9 +19,17 @@ import {
   getNotificationHistory
 } from '../db/notification';
 import { Context, Next } from 'hono';
-import { validateEmailSMTP } from '../utils/notification';
 
 const notifications = new Hono<{ Bindings: Bindings }>();
+
+// JWT验证中间件
+const jwtMiddleware = (c: Context<{ Bindings: Bindings }>, next: Next) => {
+  const jwtSecret = getJwtSecret(c.env);
+  return jwt({ secret: jwtSecret })(c, next);
+};
+
+// 应用JWT中间件到所有路由
+notifications.use('/*', jwtMiddleware);
 
 // 获取通知配置
 notifications.get('/', async (c) => {
@@ -548,117 +556,4 @@ notifications.get('/history', async (c) => {
   }
 });
 
-// 验证电子邮件配置
-notifications.post('/verify-email', async (c) => {
-  try {
-    const body = await c.req.json();
-    
-    // 验证请求数据
-    const schema = z.object({
-      smtpServer: z.string().min(1, 'SMTP服务器不能为空'),
-      smtpPort: z.string().min(1, '端口不能为空'),
-      smtpUsername: z.string().min(1, '用户名不能为空'),
-      smtpPassword: z.string().min(1, '密码不能为空'),
-      useSSL: z.boolean().optional(),
-      sendTestEmail: z.boolean().optional(),
-      testRecipient: z.string().optional()
-    });
-    
-    const validatedData = schema.parse(body);
-    
-    // 验证SMTP配置
-    const isValid = await validateEmailSMTP(
-      validatedData.smtpServer,
-      validatedData.smtpPort,
-      validatedData.smtpUsername,
-      validatedData.smtpPassword,
-      validatedData.useSSL || false
-    );
-    
-    // 如果SMTP配置有效并且请求发送测试邮件
-    if (isValid && validatedData.sendTestEmail && validatedData.testRecipient) {
-      // 创建临时通知渠道配置
-      const tempChannel = {
-        id: 'temp-test-email',
-        name: 'Test Email',
-        type: 'email',
-        config: {
-          smtpServer: validatedData.smtpServer,
-          smtpPort: validatedData.smtpPort,
-          smtpUsername: validatedData.smtpUsername,
-          smtpPassword: validatedData.smtpPassword,
-          senderEmail: validatedData.smtpUsername,
-          receipts: validatedData.testRecipient,
-          useSSL: validatedData.useSSL || false
-        },
-        enabled: true
-      };
-      
-      // 发送测试邮件
-      console.log(`[验证邮箱] 发送测试邮件到: ${validatedData.testRecipient}`);
-      
-      try {
-        // 导入sendTestEmail函数
-        const { sendTestEmail } = await import('../utils/notification');
-        
-        // 发送测试通知
-        const result = await sendTestEmail(
-          tempChannel, 
-          'SMTP测试邮件', 
-          '这是一封测试邮件，用于验证SMTP配置是否正确。\n\n' +
-          '如果您收到此邮件，说明您的SMTP配置工作正常！\n\n' +
-          `配置信息:\n` +
-          `- SMTP服务器: ${validatedData.smtpServer}\n` +
-          `- 端口: ${validatedData.smtpPort}\n` +
-          `- 用户名: ${validatedData.smtpUsername}\n` +
-          `- SSL: ${validatedData.useSSL ? '启用' : '禁用'}\n\n` +
-          '发送时间: ' + new Date().toLocaleString()
-        );
-        
-        if (result.success) {
-          console.log('[验证邮箱] 测试邮件发送成功');
-          return c.json({
-            success: true,
-            message: '电子邮件配置验证成功，测试邮件已发送'
-          });
-        } else {
-          console.error('[验证邮箱] 测试邮件发送失败:', result.error);
-          return c.json({
-            success: false,
-            message: `电子邮件配置验证失败：${result.error || '无法发送测试邮件'}`
-          });
-        }
-      } catch (emailError) {
-        console.error('[验证邮箱] 测试邮件发送过程出错:', emailError);
-        return c.json({
-          success: false,
-          message: `电子邮件配置验证成功，但测试邮件发送失败: ${emailError instanceof Error ? emailError.message : String(emailError)}`
-        });
-      }
-    }
-    
-    return c.json({
-      success: isValid,
-      message: isValid ? '电子邮件配置验证成功' : '电子邮件配置验证失败，请检查设置'
-    });
-  } catch (error) {
-    console.error('验证电子邮件配置失败:', error);
-    return c.json({
-      success: false,
-      message: '验证电子邮件配置失败',
-      error: error instanceof Error ? error.message : String(error)
-    }, 500);
-  }
-});
-
-const jwtMiddleware = (c: Context<{ Bindings: Bindings }>, next: Next) => {
-  const jwtSecret = getJwtSecret(c.env.JWT_SECRET);
-  return jwt({ secret: jwtSecret })(c, next);
-};
-
-// 应用JWT中间件到所有路由
-export const notificationsWithAuth = new Hono<{ Bindings: Bindings }>();
-notificationsWithAuth.use('*', jwtMiddleware);
-notificationsWithAuth.route('/', notifications);
-
-export default notificationsWithAuth; 
+export { notifications }; 

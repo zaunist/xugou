@@ -457,11 +457,7 @@ export const updateNotificationTemplate = async (id: string, template: Partial<N
   message?: string;
 }> => {
   try {
-    const response = await api.put<{
-      success: boolean;
-      message?: string;
-    }>(`/api/notifications/templates/${id}`, template);
-    
+    const response = await api.put(`/api/notifications/templates/${id}`, template);
     return response.data;
   } catch (error) {
     console.error('更新通知模板失败:', error);
@@ -489,36 +485,36 @@ export const deleteNotificationTemplate = async (id: string): Promise<{
   }
 };
 
-// 验证电子邮件SMTP配置
-export const verifyEmailConfig = async (
-  smtpServer: string,
-  smtpPort: string,
-  smtpUsername: string,
-  smtpPassword: string,
-  useSSL: boolean = false,
-  sendTestEmail: boolean = false,
-  testRecipient?: string
-): Promise<{
+// 获取通知历史记录
+export const getNotificationHistory = async (params: {
+  type?: string;
+  targetId?: number;
+  status?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{
   success: boolean;
   message?: string;
+  data?: any[];
 }> => {
   try {
-    const response = await api.post('/api/notifications/verify-email', {
-      smtpServer,
-      smtpPort,
-      smtpUsername,
-      smtpPassword,
-      useSSL,
-      sendTestEmail,
-      testRecipient
-    });
+    // 构建查询参数
+    const queryParams = new URLSearchParams();
+    if (params.type) queryParams.append('type', params.type);
+    if (params.targetId !== undefined) queryParams.append('targetId', params.targetId.toString());
+    if (params.status) queryParams.append('status', params.status);
+    if (params.limit !== undefined) queryParams.append('limit', params.limit.toString());
+    if (params.offset !== undefined) queryParams.append('offset', params.offset.toString());
+    
+    const url = `/api/notifications/history?${queryParams.toString()}`;
+    const response = await api.get(url);
     
     return response.data;
   } catch (error) {
-    console.error('验证邮件配置失败:', error);
+    console.error('获取通知历史记录失败:', error);
     return {
       success: false,
-      message: '验证邮件配置失败，请检查网络连接'
+      message: '获取通知历史记录失败'
     };
   }
 }; 

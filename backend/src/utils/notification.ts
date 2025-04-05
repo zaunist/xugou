@@ -16,14 +16,11 @@ interface TelegramConfig {
   chatId: string;
 }
 
-interface EmailConfig {
-  receipts: string;
-  smtpServer?: string;
-  smtpPort?: string;
-  smtpUsername?: string;
-  smtpPassword?: string;
-  senderEmail?: string;
-  useSSL?: boolean;
+// 新的Resend配置接口
+interface ResendConfig {
+  apiKey: string;
+  from: string;
+  to: string;
 }
 
 /**
@@ -54,21 +51,21 @@ function parseChannelConfig<T>(channel: NotificationChannel): T {
     }
     
     // 根据渠道类型进行配置验证
-    if (channel.type === 'email') {
-      // 验证邮件配置
-      if (!config.receipts) {
-        console.warn(`[解析配置] 邮件渠道${channel.id}缺少收件人配置`);
+    if (channel.type === 'resend') {
+      // 验证Resend配置
+      if (!config.apiKey) {
+        console.warn(`[解析配置] Resend渠道${channel.id}缺少API密钥配置`);
       }
-      if (!config.smtpServer) {
-        console.warn(`[解析配置] 邮件渠道${channel.id}缺少SMTP服务器配置`);
+      if (!config.from) {
+        console.warn(`[解析配置] Resend渠道${channel.id}缺少发件人配置`);
       }
-      if (!config.smtpUsername) {
-        console.warn(`[解析配置] 邮件渠道${channel.id}缺少SMTP用户名配置`);
+      if (!config.to) {
+        console.warn(`[解析配置] Resend渠道${channel.id}缺少收件人配置`);
       }
       
       // 检查是否可能是配置类型错误 - 包含telegram配置项
       if (config.botToken || config.chatId) {
-        console.error(`[解析配置] 警告: 邮件渠道${channel.id}包含Telegram配置项，可能配置类型错误`);
+        console.error(`[解析配置] 警告: Resend渠道${channel.id}包含Telegram配置项，可能配置类型错误`);
       }
     } else if (channel.type === 'telegram') {
       // 验证Telegram配置
@@ -79,9 +76,9 @@ function parseChannelConfig<T>(channel: NotificationChannel): T {
         console.warn(`[解析配置] Telegram渠道${channel.id}缺少chatId配置`);
       }
       
-      // 检查是否可能是配置类型错误 - 包含email配置项
-      if (config.smtpServer || config.smtpUsername || config.receipts) {
-        console.error(`[解析配置] 警告: Telegram渠道${channel.id}包含邮件配置项，可能配置类型错误`);
+      // 检查是否可能是配置类型错误 - 包含resend配置项
+      if (config.apiKey || config.from || config.to) {
+        console.error(`[解析配置] 警告: Telegram渠道${channel.id}包含Resend配置项，可能配置类型错误`);
       }
     }
     
@@ -113,405 +110,81 @@ function replaceVariables(text: string, variables: Record<string, string>): stri
 }
 
 /**
- * 通过邮件渠道发送通知
+ * 通过Resend API发送邮件通知
  */
-async function sendEmailNotification(
+async function sendResendNotification(
   channel: NotificationChannel,
   subject: string,
   content: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // 解析渠道配置
-    const config = parseChannelConfig<EmailConfig>(channel);
+    const config = parseChannelConfig<ResendConfig>(channel);
     
     // 检查必要参数
-    if (!config.receipts) {
-      return { success: false, error: '邮件接收者不能为空' };
+    if (!config.apiKey) {
+      return { success: false, error: 'Resend API密钥不能为空' };
     }
     
-    // 提取SMTP设置
-    const smtpServer = config.smtpServer || 'smtp.163.com'; // 默认使用163邮箱
-    const smtpPort = parseInt(config.smtpPort || '25');    // 默认使用25端口
-    const smtpUsername = config.smtpUsername || '';
-    const smtpPassword = config.smtpPassword || '';
-    const senderEmail = config.senderEmail || smtpUsername;
-    const useSSL = config.useSSL !== false;
-    const recipients = config.receipts.split(',').map(email => email.trim());
+    if (!config.from) {
+      return { success: false, error: 'Resend发件人不能为空' };
+    }
+    
+    if (!config.to) {
+      return { success: false, error: 'Resend收件人不能为空' };
+    }
+    
+    // 提取配置
+    const apiKey = config.apiKey;
+    const from = config.from;
+    const to = config.to.split(',').map(email => email.trim());
     
     // 记录发送的内容
-    console.log(`[邮件通知] 准备发送邮件通知`);
-    console.log(`[邮件通知] SMTP服务器: ${smtpServer}:${smtpPort}`);
-    console.log(`[邮件通知] 发送者: ${senderEmail}`);
-    console.log(`[邮件通知] 接收者: ${recipients.join(', ')}`);
-    console.log(`[邮件通知] 使用SSL: ${useSSL ? '是' : '否'}`);
-    console.log(`[邮件通知] 主题: ${subject}`);
-    console.log(`[邮件通知] 内容: ${content.substring(0, 100)}${content.length > 100 ? '...' : ''}`);
+    console.log(`[Resend通知] 准备发送邮件通知`);
+    console.log(`[Resend通知] 发送者: ${from}`);
+    console.log(`[Resend通知] A接收者: ${to.join(', ')}`);
+    console.log(`[Resend通知] 主题: ${subject}`);
+    console.log(`[Resend通知] 内容: ${content.substring(0, 100)}${content.length > 100 ? '...' : ''}`);
     
-    // 163邮箱的特别处理
-    if (smtpServer.includes('163.com')) {
-      console.log(`[邮件通知] 检测到163邮箱，应用特殊设置`);
-      
-      // 163邮箱通常需要授权码而不是密码
-      if (smtpPassword.length < 16) {
-        console.log(`[邮件通知] 警告: 163邮箱通常需要使用授权码而不是密码，密码长度过短可能导致认证失败`);
-      }
-      
-      // 163邮箱通常要求发件人地址与登录用户名一致
-      if (senderEmail !== smtpUsername && !senderEmail.includes('@163.com')) {
-        console.log(`[邮件通知] 警告: 163邮箱要求发件人地址与登录用户名匹配`);
-      }
-    }
+    // 构建请求数据
+    const requestData = {
+      from: from,
+      to: to,
+      subject: subject,
+      html: content.replace(/\n/g, '<br>') // 将换行符转换为HTML换行
+    };
     
-    // 构建原始SMTP命令
-    try {
-      console.log(`[邮件通知] ==== 开始SMTP邮件发送流程 ====`);
-      console.log(`[邮件通知] 步骤1: 准备连接到SMTP服务器 ${smtpServer}:${smtpPort}`);
-      
-      // 统一使用非TLS连接，使用原生Socket
-      const net = require('net');
-      const socket = new net.Socket();
-      
-      // 设置数据接收处理
-      let responseBuffer = '';
-      
-      // 数据接收处理函数
-      socket.on('data', (data: Buffer) => {
-        const chunk = data.toString();
-        responseBuffer += chunk;
-        console.log(`[邮件通知] 服务器响应 ==> ${chunk.trim()}`);
-      });
-      
-      const connectPromise = new Promise<void>((resolve, reject) => {
-        socket.once('error', (err: Error) => {
-          console.error('[邮件通知] 连接SMTP服务器失败:', err);
-          console.error('[邮件通知] 错误详情:', err.stack);
-          reject(err);
-        });
-        
-        socket.once('connect', () => {
-          console.log('[邮件通知] 步骤2: 成功连接到SMTP服务器');
-          resolve();
-        });
-        
-        console.log(`[邮件通知] 正在连接到 ${smtpServer}:${smtpPort}...`);
-        socket.connect({
-          host: smtpServer,
-          port: smtpPort
-        });
-      });
-      
-      try {
-        await connectPromise;
-        console.log('[邮件通知] 连接成功，准备开始SMTP会话');
-      } catch (connError) {
-        console.error('[邮件通知] 连接阶段失败，详情:', connError);
-        return { 
-          success: false, 
-          error: `连接到SMTP服务器失败: ${connError instanceof Error ? connError.message : String(connError)}` 
-        };
-      }
-      
-      // 创建一个函数来发送命令并等待响应
-      const sendCommand = (command: string, expectedCode: string): Promise<boolean> => {
-        return new Promise<boolean>((resolve) => {
-          // 清空响应缓冲区
-          responseBuffer = '';
-          
-          // 发送命令
-          console.log(`[邮件通知] 发送命令 ==> ${command || '[邮件数据]'}`);
-          socket.write(command + '\r\n');
-          
-          // 设置超时
-          const timeoutId = setTimeout(() => {
-            console.error('[邮件通知] 等待响应超时 (5秒)');
-            resolve(false);
-          }, 5000);
-          
-          // 等待并检查响应
-          const checkResponse = () => {
-            if (responseBuffer.includes('\r\n')) {
-              clearTimeout(timeoutId);
-              
-              // 检查响应代码
-              const firstLine = responseBuffer.split('\r\n')[0];
-              if (firstLine.startsWith(expectedCode)) {
-                console.log(`[邮件通知] 命令成功，收到预期响应代码: ${expectedCode}`);
-                resolve(true);
-              } else {
-                console.error(`[邮件通知] 收到错误响应: ${responseBuffer}`);
-                console.error(`[邮件通知] 预期代码 ${expectedCode}，但收到: ${firstLine.substring(0, 3)}`);
-                resolve(false);
-              }
-            } else {
-              // 继续等待更多数据
-              setTimeout(checkResponse, 100);
-            }
-          };
-          
-          // 开始检查响应
-          checkResponse();
-        });
-      };
-      
-      // Base64编码用户名和密码 - SMTP认证需要
-      const base64Username = Buffer.from(smtpUsername).toString('base64');
-      const base64Password = Buffer.from(smtpPassword).toString('base64');
-      
-      console.log('[邮件通知] 步骤3: 准备SMTP认证');
-      console.log(`[邮件通知] 用户名: ${smtpUsername} (Base64编码后: ${base64Username})`);
-      console.log('[邮件通知] 密码: ******** (已使用Base64编码)');
-      
-      // 实现简化的SMTP会话流程
-      // 等待服务器欢迎消息
-      console.log('[邮件通知] 步骤4: 等待服务器欢迎消息...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 对于163邮箱和一些特定环境，尝试实现完整的SMTP通信
-      try {
-        // 发送EHLO命令
-        console.log('[邮件通知] 步骤5: 发送EHLO命令...');
-        if (!await sendCommand(`EHLO ${smtpServer}`, '250')) {
-          console.error('[邮件通知] EHLO命令失败');
-          socket.end();
-          return { success: false, error: 'EHLO命令失败' };
-        }
-        
-        // 非SSL连接，不需要处理STARTTLS
-        console.log('[邮件通知] 使用非加密连接，跳过STARTTLS步骤');
-        
-        // 认证
-        console.log('[邮件通知] 步骤6: 开始认证，发送AUTH LOGIN...');
-        if (!await sendCommand('AUTH LOGIN', '334')) {
-          console.error('[邮件通知] AUTH命令失败');
-          socket.end();
-          return { success: false, error: 'AUTH命令失败，服务器可能不支持LOGIN认证方式' };
-        }
-        
-        // 发送用户名
-        console.log('[邮件通知] 步骤7: 发送Base64编码的用户名...');
-        if (!await sendCommand(base64Username, '334')) {
-          console.error('[邮件通知] 用户名认证失败');
-          socket.end();
-          return { success: false, error: '用户名认证失败，请检查用户名格式是否正确' };
-        }
-        
-        // 发送密码
-        console.log('[邮件通知] 步骤8: 发送Base64编码的密码...');
-        if (!await sendCommand(base64Password, '235')) {
-          console.error('[邮件通知] 密码认证失败');
-          socket.end();
-          return { success: false, error: '密码认证失败，请确认密码是否正确（对于163邮箱应使用授权码）' };
-        }
-        console.log('[邮件通知] 认证成功!');
-        
-        // 设置发件人
-        console.log('[邮件通知] 步骤9: 设置发件人...');
-        if (!await sendCommand(`MAIL FROM:<${senderEmail}>`, '250')) {
-          console.error('[邮件通知] MAIL FROM命令失败');
-          socket.end();
-          return { success: false, error: 'MAIL FROM命令失败，请检查发件人地址格式' };
-        }
-        
-        // 设置收件人
-        console.log(`[邮件通知] 步骤10: 设置收件人 (${recipients.length}人)...`);
-        for (const recipient of recipients) {
-          console.log(`[邮件通知] 添加收件人: ${recipient}`);
-          if (!await sendCommand(`RCPT TO:<${recipient}>`, '250')) {
-            console.error(`[邮件通知] RCPT TO命令失败: ${recipient}`);
-            socket.end();
-            return { success: false, error: `收件人${recipient}设置失败，请检查地址格式` };
-          }
-        }
-        
-        // 开始发送数据
-        console.log('[邮件通知] 步骤11: 开始发送邮件内容...');
-        if (!await sendCommand('DATA', '354')) {
-          console.error('[邮件通知] DATA命令失败');
-          socket.end();
-          return { success: false, error: 'DATA命令失败，服务器拒绝接收邮件内容' };
-        }
-        
-        // 构建邮件内容
-        const emailContent = [
-          `From: XUGOU <${senderEmail}>`,
-          `To: ${recipients.join(', ')}`,
-          `Subject: ${subject}`,
-          'MIME-Version: 1.0',
-          'Content-Type: text/plain; charset=utf-8',
-          '',
-          content,
-          '.',  // 邮件结束标记
-          ''
-        ].join('\r\n');
-        
-        console.log('[邮件通知] 步骤12: 发送邮件内容...');
-        console.log(`[邮件通知] 内容预览:\n${emailContent.substring(0, 500)}${emailContent.length > 500 ? '...(省略)' : ''}`);
-        
-        // 发送邮件内容
-        socket.write(emailContent);
-        
-        // 等待发送完成响应
-        console.log('[邮件通知] 步骤13: 等待服务器确认发送状态...');
-        if (!await sendCommand('', '250')) {
-          console.error('[邮件通知] 邮件内容发送失败');
-          socket.end();
-          return { success: false, error: '邮件内容发送失败，服务器拒绝接收邮件' };
-        }
-        
-        // 邮件已成功发送，直接关闭连接
-        console.log('[邮件通知] 邮件已成功进入发送队列，直接关闭连接');
-        socket.end();
-        
-        // 记录成功
-        console.log('[邮件通知] ==== 邮件发送成功! ====');
-        return { success: true };
-      } catch (smtpError) {
-        console.error('[邮件通知] SMTP通信过程中发生错误:', smtpError);
-        console.error('[邮件通知] 错误堆栈:', smtpError instanceof Error ? smtpError.stack : '无堆栈信息');
-        socket.end();
-        return { 
-          success: false, 
-          error: smtpError instanceof Error ? smtpError.message : String(smtpError) 
-        };
-      }
-    } catch (socketError) {
-      console.error('[邮件通知] SMTP操作失败:', socketError);
+    console.log(`[Resend通知] 请求数据: ${JSON.stringify(requestData)}`);
+    
+    // 发送API请求
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestData)
+    });
+    
+    // 解析响应
+    const responseData = await response.json();
+    
+    if (response.ok) {
+      console.log(`[Resend通知] 发送成功: ${JSON.stringify(responseData)}`);
+      return { success: true };
+    } else {
+      console.error(`[Resend通知] 发送失败: ${JSON.stringify(responseData)}`);
       return { 
         success: false, 
-        error: socketError instanceof Error ? socketError.message : String(socketError) 
+        error: responseData.message || `发送失败，HTTP状态码: ${response.status}` 
       };
     }
   } catch (error) {
-    console.error('发送邮件通知失败:', error);
+    console.error('发送Resend通知失败:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : String(error) 
     };
-  }
-}
-
-/**
- * 验证邮箱SMTP配置
- */
-export async function validateEmailSMTP(
-  smtpServer: string,
-  smtpPort: string,
-  smtpUsername: string,
-  smtpPassword: string,
-  useSSL: boolean
-): Promise<boolean> {
-  try {
-    console.log(`[验证邮箱] ==== 开始验证SMTP配置 ====`);
-    console.log(`[验证邮箱] 测试SMTP配置: ${smtpServer}:${smtpPort}`);
-    console.log(`[验证邮箱] 用户名: ${smtpUsername}`);
-    console.log(`[验证邮箱] 使用SSL: ${useSSL ? '是' : '否'}`);
-    
-    // 163邮箱的特别检查
-    if (smtpServer.includes('163.com')) {
-      console.log(`[验证邮箱] 检测到163邮箱配置`);
-      
-      // 检查端口设置
-      if (smtpPort !== '465' && smtpPort !== '994' && smtpPort !== '25') {
-        console.log(`[验证邮箱] 警告: 163邮箱通常使用25(非SSL)或465/994(SSL)端口，当前端口为${smtpPort}`);
-      }
-      
-      // 检查用户名格式
-      if (!smtpUsername.includes('@163.com') && !smtpUsername.endsWith('@163.com')) {
-        console.log(`[验证邮箱] 提示: 163邮箱用户名通常是完整邮箱地址，例如yourname@163.com`);
-      }
-      
-      // 检查密码是否可能是授权码
-      if (smtpPassword.length < 16) {
-        console.log(`[验证邮箱] 警告: 163邮箱需要使用授权码而不是登录密码，密码长度为${smtpPassword.length}，可能不是有效的授权码`);
-      }
-    }
-    
-    // 在实际项目中，我们可以尝试建立SMTP连接并验证身份
-    // 但由于这个操作涉及网络交互，这里简化实现
-    
-    // Base64编码用户名和密码 - 用于SMTP认证
-    const base64Username = Buffer.from(smtpUsername).toString('base64');
-    const base64Password = Buffer.from(smtpPassword).toString('base64');
-    console.log(`[验证邮箱] 用户名和密码已Base64编码，用于SMTP认证`);
-    console.log(`[验证邮箱] 用户名(${smtpUsername})的Base64编码: ${base64Username}`);
-    console.log(`[验证邮箱] 密码的Base64编码: ${base64Password.substring(0, 10)}...（部分显示）`);
-    
-    // 尝试建立连接
-    try {
-      console.log(`[验证邮箱] 开始尝试连接到SMTP服务器 ${smtpServer}:${smtpPort}`);
-      
-      // 统一使用非TLS连接，使用原生Socket
-      const net = require('net');
-      const socket = new net.Socket();
-      
-      // 设置连接超时
-      const connectPromise = new Promise<boolean>((resolve, reject) => {
-        let timeoutId: NodeJS.Timeout;
-        
-        // 响应数据处理
-        socket.on('data', (data: Buffer) => {
-          const response = data.toString().trim();
-          console.log(`[验证邮箱] 服务器响应: ${response}`);
-        });
-        
-        // 错误处理
-        socket.once('error', (err: Error) => {
-          console.error('[验证邮箱] 连接失败:', err.message);
-          console.error('[验证邮箱] 错误详情:', err.stack);
-          clearTimeout(timeoutId);
-          socket.end();
-          resolve(false);
-        });
-        
-        // 连接成功
-        socket.once('connect', () => {
-          console.log('[验证邮箱] 成功连接到SMTP服务器');
-          
-          // 可以尝试发送EHLO命令和身份验证命令
-          try {
-            console.log('[验证邮箱] 发送EHLO命令...');
-            socket.write(`EHLO ${smtpServer}\r\n`);
-            
-            // 简单测试，验证完成后直接关闭连接
-            console.log('[验证邮箱] 命令已发送，验证完成，直接关闭连接');
-            clearTimeout(timeoutId);
-            socket.end();
-            resolve(true);
-          } catch (cmdError) {
-            console.error('[验证邮箱] 发送命令失败:', cmdError);
-            clearTimeout(timeoutId);
-            socket.end();
-            resolve(false);
-          }
-        });
-        
-        // 设置5秒超时
-        timeoutId = setTimeout(() => {
-          console.error('[验证邮箱] 连接超时(5秒)');
-          socket.end();
-          resolve(false);
-        }, 5000);
-        
-        // 尝试连接
-        console.log(`[验证邮箱] 正在连接到 ${smtpServer}:${parseInt(smtpPort)}`);
-        socket.connect({
-          host: smtpServer,
-          port: parseInt(smtpPort)
-        });
-      });
-      
-      const connected = await connectPromise;
-      console.log(`[验证邮箱] 验证结果: ${connected ? '成功' : '失败'}`);
-      return connected;
-    } catch (socketError) {
-      console.error('[验证邮箱] 验证过程中发生错误:', socketError);
-      console.error('[验证邮箱] 错误堆栈:', socketError instanceof Error ? socketError.stack : '无堆栈信息');
-      return false;
-    }
-  } catch (error) {
-    console.error('验证邮箱SMTP配置失败:', error);
-    console.error('[验证邮箱] 错误堆栈:', error instanceof Error ? error.stack : '无堆栈信息');
-    return false;
   }
 }
 
@@ -645,8 +318,8 @@ async function sendNotificationByChannel(
   content: string
 ): Promise<{ success: boolean; error?: string }> {
   switch (channel.type) {
-    case 'email':
-      return await sendEmailNotification(channel, subject, content);
+    case 'resend':
+      return await sendResendNotification(channel, subject, content);
     case 'telegram':
       return await sendTelegramNotification(channel, subject, content);
     default:
@@ -717,7 +390,7 @@ export async function sendNotification(
       // 调试输出当前渠道信息
       console.log(`[通知] 正在通过渠道 ${channel.id}(${channel.name}, 类型:${channel.type}) 发送通知...`);
       
-      // 检查渠道类型是否正确，类型应该是email或telegram
+      // 检查渠道类型是否正确，类型应该是resend或telegram
       console.log(`[通知] 渠道${channel.id}配置信息:`, JSON.stringify({
         id: channel.id,
         name: channel.name,
@@ -730,21 +403,21 @@ export async function sendNotification(
       try {
         const configObj = JSON.parse(channel.config);
         
-        // 检查是否email类型但使用了telegram配置
-        if (channel.type === 'email' && 'botToken' in configObj && 'chatId' in configObj && !('smtpServer' in configObj)) {
-          console.error(`[通知] 错误: 渠道${channel.id}类型为email，但配置是telegram格式!`);
+        // 检查是否resend类型但使用了telegram配置
+        if (channel.type === 'resend' && 'botToken' in configObj && 'chatId' in configObj && !('apiKey' in configObj)) {
+          console.error(`[通知] 错误: 渠道${channel.id}类型为resend，但配置是telegram格式!`);
           
           // 尝试修正渠道类型
           console.log(`[通知] 尝试使用telegram处理流程发送通知...`);
           channel.type = 'telegram';
         } 
-        // 检查是否telegram类型但使用了email配置
-        else if (channel.type === 'telegram' && 'smtpServer' in configObj && 'smtpUsername' in configObj) {
-          console.error(`[通知] 错误: 渠道${channel.id}类型为telegram，但配置是email格式!`);
+        // 检查是否telegram类型但使用了resend配置
+        else if (channel.type === 'telegram' && 'apiKey' in configObj && 'from' in configObj) {
+          console.error(`[通知] 错误: 渠道${channel.id}类型为telegram，但配置是resend格式!`);
           
           // 尝试修正渠道类型
-          console.log(`[通知] 尝试使用email处理流程发送通知...`);
-          channel.type = 'email';
+          console.log(`[通知] 尝试使用resend处理流程发送通知...`);
+          channel.type = 'resend';
         }
       } catch (e) {
         console.error(`[通知] 解析渠道${channel.id}配置失败:`, e);

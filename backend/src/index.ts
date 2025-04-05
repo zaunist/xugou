@@ -49,7 +49,7 @@ import userRoutes from './routes/users';
 import statusRoutes from './routes/status';
 import initDbRoutes from './setup/database';
 import { monitorTask, runScheduledTasks } from './tasks';
-import notificationsRouter from './routes/notifications';
+import { notifications } from './routes/notifications';
 
 // 创建Hono应用
 const app = new Hono<{ Bindings: Bindings }>();
@@ -93,7 +93,7 @@ app.route('/api/agents', agentRoutes);
 app.route('/api/users', userRoutes);
 app.route('/api/status', statusRoutes);
 app.route('/api', initDbRoutes);
-app.route('/api/notifications', notificationsRouter);
+app.route('/api/notifications', notifications);
 
 // 添加监控检查触发路由
 app.get('/api/trigger-check', async (c) => {
