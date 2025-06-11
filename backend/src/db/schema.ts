@@ -22,7 +22,7 @@ export const monitors = sqliteTable("monitors", {
   expected_status: int("expected_status").notNull(),
   headers: text("headers").notNull(),
   body: text("body"),
-  created_by: int("created_by").notNull().references(() => users.id),
+  created_by: int("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
   active: int("active").notNull(), // SQLite 没有布尔类型，用 int 代替
   status: text("status").default("pending"),
   response_time: int("response_time").default(0),
@@ -34,7 +34,7 @@ export const monitors = sqliteTable("monitors", {
 // 24小时监控状态历史表
 export const monitorStatusHistory24h = sqliteTable("monitor_status_history_24h", {
   id: int("id").primaryKey({ autoIncrement: true }),
-  monitor_id: int("monitor_id").notNull().references(() => monitors.id),
+  monitor_id: int("monitor_id").notNull().references(() => monitors.id, { onDelete: "cascade" }),
   status: text("status").notNull(),
   timestamp: text("timestamp").default("CURRENT_TIMESTAMP"),
   response_time: int("response_time"),
@@ -45,7 +45,7 @@ export const monitorStatusHistory24h = sqliteTable("monitor_status_history_24h",
 // 监控每日统计表
 export const monitorDailyStats = sqliteTable("monitor_daily_stats", {
   id: int("id").primaryKey({ autoIncrement: true }),
-  monitor_id: int("monitor_id").notNull().references(() => monitors.id),
+  monitor_id: int("monitor_id").notNull().references(() => monitors.id, { onDelete: "cascade" }),
   date: text("date").notNull(),
   total_checks: int("total_checks").notNull().default(0),
   up_checks: int("up_checks").notNull().default(0),
@@ -62,7 +62,7 @@ export const agents = sqliteTable("agents", {
   id: int("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   token: text("token").notNull().unique(),
-  created_by: int("created_by").notNull().references(() => users.id),
+  created_by: int("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
   status: text("status").default("inactive"),
   created_at: text("created_at").notNull(),
   updated_at: text("updated_at").notNull(),
@@ -76,7 +76,7 @@ export const agents = sqliteTable("agents", {
 // 客户端资源指标表
 export const agentMetrics24h = sqliteTable("agent_metrics_24h", {
   id: int("id").primaryKey({ autoIncrement: true }),
-  agent_id: int("agent_id").notNull().references(() => agents.id),
+  agent_id: int("agent_id").notNull().references(() => agents.id, { onDelete: "cascade" }),
   timestamp: text("timestamp").default("CURRENT_TIMESTAMP"),
   cpu_usage: real("cpu_usage"),
   cpu_cores: int("cpu_cores"),
@@ -95,7 +95,7 @@ export const agentMetrics24h = sqliteTable("agent_metrics_24h", {
 // 状态页配置表
 export const statusPageConfig = sqliteTable("status_page_config", {
   id: int("id").primaryKey({ autoIncrement: true }),
-  user_id: int("user_id").notNull().references(() => users.id),
+  user_id: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull().default("系统状态"),
   description: text("description").default("系统当前运行状态"),
   logo_url: text("logo_url").default(""),
@@ -127,7 +127,7 @@ export const notificationChannels = sqliteTable("notification_channels", {
   type: text("type").notNull(),
   config: text("config").notNull(),
   enabled: int("enabled").notNull().default(1),
-  created_by: int("created_by").notNull().references(() => users.id),
+  created_by: int("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
   created_at: text("created_at").default("CURRENT_TIMESTAMP"),
   updated_at: text("updated_at").default("CURRENT_TIMESTAMP")
 });
@@ -140,7 +140,7 @@ export const notificationTemplates = sqliteTable("notification_templates", {
   subject: text("subject").notNull(),
   content: text("content").notNull(),
   is_default: int("is_default").notNull().default(0),
-  created_by: int("created_by").notNull().references(() => users.id),
+  created_by: int("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
   created_at: text("created_at").default("CURRENT_TIMESTAMP"),
   updated_at: text("updated_at").default("CURRENT_TIMESTAMP")
 });
@@ -148,7 +148,7 @@ export const notificationTemplates = sqliteTable("notification_templates", {
 // 通知设置表
 export const notificationSettings = sqliteTable("notification_settings", {
   id: int("id").primaryKey({ autoIncrement: true }),
-  user_id: int("user_id").notNull().references(() => users.id),
+  user_id: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   target_type: text("target_type").notNull().default("global"),
   target_id: int("target_id"),
   enabled: int("enabled").notNull().default(1),
@@ -171,8 +171,8 @@ export const notificationHistory = sqliteTable("notification_history", {
   id: int("id").primaryKey({ autoIncrement: true }),
   type: text("type").notNull(),
   target_id: int("target_id"),
-  channel_id: int("channel_id").notNull().references(() => notificationChannels.id),
-  template_id: int("template_id").notNull().references(() => notificationTemplates.id),
+  channel_id: int("channel_id").notNull().references(() => notificationChannels.id, { onDelete: "cascade" }),
+  template_id: int("template_id").notNull().references(() => notificationTemplates.id, { onDelete: "cascade" }),
   status: text("status").notNull(),
   content: text("content").notNull(),
   error: text("error"),

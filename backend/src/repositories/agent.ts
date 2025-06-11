@@ -94,9 +94,7 @@ export async function updateAgent(
 
 // 删除客户端
 export async function deleteAgent(id: number) {
-  // 先删除关联的指标数据
-  await db.delete(agentMetrics24h).where(eq(agentMetrics24h.agent_id, id));
-
+  // 执行删除
   const result = await db.delete(agents).where(eq(agents.id, id));
 
   if (!result.success) {

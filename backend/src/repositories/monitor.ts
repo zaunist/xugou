@@ -290,17 +290,6 @@ export async function updateMonitorConfig(
 
 // 删除监控
 export async function deleteMonitor(id: number) {
-  // 先删除关联的历史数据
-
-  await db
-    .delete(monitorStatusHistory24h)
-    .where(eq(monitorStatusHistory24h.monitor_id, id));
-
-  // 删除每日统计数据
-  await db
-    .delete(monitorDailyStats)
-    .where(eq(monitorDailyStats.monitor_id, id));
-
   // 执行删除监控
   return await db.delete(monitors).where(eq(monitors.id, id));
 }

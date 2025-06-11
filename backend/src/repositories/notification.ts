@@ -525,3 +525,26 @@ export const getNotificationConfig = async (): Promise<NotificationConfig> => {
 
   return config;
 };
+
+/**
+ * 删除通知设置
+ * @param type 通知类型，"monitor" 或 "agent"
+ * @param id 目标ID，监控或客户端的ID
+ * @return {Promise<boolean>} 删除是否成功
+ */ 
+export const deleteNotificationSettings = async (
+  type: "monitor" | "agent",
+  id: number
+): Promise<boolean> => {
+  // 执行删除操作
+  const result = await db
+    .delete(notificationSettings)
+    .where(
+      and(
+        eq(notificationSettings.target_type, type),
+        eq(notificationSettings.target_id, id)
+      )
+    );
+
+  return result.length > 0;
+}

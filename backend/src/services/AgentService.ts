@@ -128,6 +128,9 @@ export async function deleteAgentService(agentId: number) {
       throw new Error("客户端不存在");
     }
 
+    // 删除客户端通知设置
+    await AgentRepository.deleteNotificationSettings("agent", agent.id);
+
     // 执行删除客户端
     await AgentRepository.deleteAgent(agent.id);
 
