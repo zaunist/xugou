@@ -265,7 +265,17 @@ export async function deleteMonitor(id: number) {
       return { success: false, message: "监控不存在", status: 404 };
     }
 
-    // 执行删除
+    // 执行通知设置删除
+    const notificationResult = await NotificationService.deleteNotificationSettings(
+      "monitor",
+      id
+    );
+    if (!notificationResult.success) {
+      console.error("删除监控通知设置失败:", notificationResult.message);
+      // 继续执行监控删除，不影响主流程
+    }
+
+    // 执行monitor删除
     const result = await repositories.deleteMonitor(id);
 
     if (!result.success) {
