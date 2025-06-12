@@ -7,12 +7,11 @@ export interface Monitor {
   interval: number;
   timeout: number;
   expected_status: number;
-  headers: string;
+  headers: Record<string, string>;
   body: string;
   created_by: number;
   active: boolean;
   status: string;
-  uptime: number;
   response_time: number;
   last_checked: string;
   created_at: string;
@@ -25,15 +24,21 @@ export interface MonitorStatusHistory {
   monitor_id: number;
   status: string;
   timestamp: string;
-}
-
-// 监控检查记录类型
-export interface MonitorCheck {
-  id: number;
-  monitor_id: number;
-  status: string;
   response_time: number;
   status_code: number;
   error: string | null;
-  checked_at: string;
-} 
+}
+
+// 监控每日统计类型
+export interface MonitorDailyStats {
+  date: string;
+  total_checks: number;
+  up_checks: number;
+  down_checks: number;
+  avg_response_time: number;
+  min_response_time: number;
+  max_response_time: number;
+  availability: number;
+  monitor_id: number;
+  created_at: string;
+}

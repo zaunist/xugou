@@ -14,6 +14,12 @@ export interface D1PreparedStatement {
   raw<T = unknown>(): Promise<T[]>;
 }
 
+// 扩展D1Result meta属性的类型
+export interface D1Meta {
+  last_row_id?: number;
+  changes?: number;
+}
+
 export interface D1Result<T = unknown> {
   results?: T[];
   success: boolean;
@@ -33,4 +39,4 @@ export interface VersionMetadata {
 export type Bindings = {
   DB: D1Database;
   CF_VERSION_METADATA?: VersionMetadata;
-}; 
+};

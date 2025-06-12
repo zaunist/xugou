@@ -19,7 +19,7 @@ Currently implemented features:
 - ✅ Data Visualization - Real-time data display and historical trend analysis
 - ✅ Status Page - Customizable service status page
 - ✅ Alert Notifications - Anomaly event notifications through multiple channels (Email, Telegram, etc.)
-- ✅ Mobile APP - Convenient monitoring status check on mobile devices
+- ❌ Mobile APP - Convenient monitoring status check on mobile devices
 
 ## ✨ Core Features
 
@@ -60,13 +60,7 @@ Default username: admin  Default password: admin123
 
 ### Video Tutorial
 
-Not yet available
-
-### Mobile
-
-Android APP: [Download Link](https://dl.xugou.mdzz.uk/latest/xugou.apk)
-
-iOS: No iOS version available as we haven't paid Apple's developer fee
+[![XUGOU Video Tutorial](https://img.youtube.com/vi/jisEpcqDego/0.jpg)](https://youtu.be/J7_xtsJIYiM)
 
 ## FAQ
 
@@ -74,19 +68,34 @@ iOS: No iOS version available as we haven't paid Apple's developer fee
 
 ## ⭐ Support the Author
 
-Support us in any way you can:
+Sponsor me in any way you can:
 
 - Star the project and share it with your friends
-- Support ongoing development through WeChat donations
+- Buy me a coffee
 
 <div align="center">
-  <img src="frontend/public/wechat-reward.png" alt="WeChat Reward Code" width="300">
+  <a href="https://buymeacoffee.com/real_zaunist" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200" height="51">
+  </a>
+      <a href="https://buymeacoke.realyourdad.workers.dev/" target="_blank">
+      <img src="https://img.shields.io/badge/Buy_Me_A_Coke-FF5E5B?style=for-the-badge&logo=coca-cola&logoColor=white" alt="Buy Me A Coke" width="200" height="51" style="border-radius: 8px;" />
+    </a>
 </div>
 
 ## 🤝 Contribution
 
 All forms of contributions are welcome, whether it's new features, bug fixes, or documentation improvements.
 
+## 🏢 Sponsorship
+
+Thanks to the following sponsors for supporting the development of XUGOU:
+
+[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
+
 ## 📄 License
 
 This project is open-sourced under the MIT License. See the [LICENSE](./LICENSE) file for details. 
+
+## 🔥 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=zaunist/xugou&type=Date)](https://www.star-history.com/#zaunist/xugou&Date)

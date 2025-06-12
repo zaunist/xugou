@@ -1,13 +1,14 @@
 {
   "name": "backend",
-  "version": "1.0.0",
+  "version": "0.0.5",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --test-scheduled",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "deploy": "wrangler deploy"
+    "build": "tsc && npm run generate:migrations",
+    "deploy": "wrangler deploy",
+    "db:generate": "drizzle-kit generate",
+    "generate:migrations": "tsx scripts/generate-migrations.ts"
   },
   "keywords": [],
   "author": "",
@@ -19,15 +20,19 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.13.10",
     "bcryptjs": "^2.4.3",
+    "dotenv": "^16.5.0",
+    "drizzle-orm": "^0.44.1",
     "hono": "^4.7.4",
     "jsonwebtoken": "^9.0.2",
     "typescript": "^5.8.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250317.0",
+    "cross-env": "^7.0.3",
+    "drizzle-kit": "^0.31.1",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
-    "wrangler": "^3.114.1"
-  },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+    "tsx": "^4.19.4",
+    "wrangler": "^4.13.1"
+  }
 }

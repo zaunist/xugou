@@ -4,42 +4,52 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"net"
+	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
 
-	"github.com/xugou/agent/pkg/collector"
+	"github.com/xugou/agent/pkg/config"
+	"github.com/xugou/agent/pkg/model"
+	"github.com/xugou/agent/pkg/utils"
 )
+
+// setDefaultHeaders 设置所有请求的通用头部
+func setDefaultHeaders(req *http.Request) {
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36")
+	req.Header.Set("Referer", "https://www.google.com/")
+}
 
 // Reporter 定义数据上报器接口
 type Reporter interface {
-	Report(ctx context.Context, info *collector.SystemInfo) error
+	Report(ctx context.Context, info *model.SystemInfo) error            // 上报单个采集的系统信息
+	ReportBatch(ctx context.Context, infoList []*model.SystemInfo) error // 上报批量采集的系统信息
 }
 
-// HTTPReporter 是基于HTTP的数据上报器实现
-type HTTPReporter struct {
-	serverURL      string
-	apiToken       string
-	proxyURL       string
-	client         *http.Client
-	lastNetworkRX  uint64    // 上次网络接收字节数
-	lastNetworkTX  uint64    // 上次网络发送字节数
-	lastUpdateTime time.Time // 上次更新时间
-	registered     bool      // 是否已注册
+type DefaultReporter struct {
+	reporter *model.HTTPReporter
+}
+
+func NewReporter() Reporter {
+	return &DefaultReporter{
+		reporter: NewHTTPReporter(),
+	}
 }
 
 // NewHTTPReporter 创建一个新的HTTP数据上报器
-func NewHTTPReporter(serverURL, apiToken, proxyURL string) Reporter {
+func NewHTTPReporter() *model.HTTPReporter {
 	// 创建HTTP客户端
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}
 
 	// 如果设置了代理，配置代理
-	if proxyURL != "" {
-		proxy, err := url.Parse(proxyURL)
+	if config.ProxyURL != "" {
+		proxy, err := url.Parse(config.ProxyURL)
 		if err != nil {
 			fmt.Printf("警告: 代理URL解析失败: %v，将不使用代理\n", err)
 		} else {
@@ -49,272 +59,140 @@ func NewHTTPReporter(serverURL, apiToken, proxyURL string) Reporter {
 		}
 	}
 
-	return &HTTPReporter{
-		serverURL:      normalizeURL(serverURL),
-		apiToken:       apiToken,
-		proxyURL:       proxyURL,
-		client:         client,
-		lastUpdateTime: time.Now(),
-		registered:     false,
-	}
-}
-
-// normalizeURL 处理URL格式，确保URL末尾没有斜杠
-func normalizeURL(url string) string {
-	// 移除URL末尾的斜杠
-	if len(url) > 0 && url[len(url)-1] == '/' {
-		return url[:len(url)-1]
-	}
-	return url
-}
-
-// StatusPayload 定义上报到后端的数据结构
-type StatusPayload struct {
-	Token       string   `json:"token"` // API令牌
-	CPUUsage    float64  `json:"cpu_usage"`
-	MemoryTotal uint64   `json:"memory_total"`
-	MemoryUsed  uint64   `json:"memory_used"`
-	DiskTotal   uint64   `json:"disk_total"`
-	DiskUsed    uint64   `json:"disk_used"`
-	NetworkRX   uint64   `json:"network_rx"`
-	NetworkTX   uint64   `json:"network_tx"`
-	Hostname    string   `json:"hostname"`     // 主机名
-	IPAddresses []string `json:"ip_addresses"` // IP地址列表
-	OS          string   `json:"os"`           // 操作系统
-	Version     string   `json:"version"`      // 操作系统版本
-}
-
-// RegisterPayload 定义注册到后端的数据结构
-type RegisterPayload struct {
-	Token       string   `json:"token"`        // API令牌
-	Name        string   `json:"name"`         // 客户端名称
-	Hostname    string   `json:"hostname"`     // 主机名
-	IPAddresses []string `json:"ip_addresses"` // IP地址列表
-	OS          string   `json:"os"`           // 操作系统
-	Version     string   `json:"version"`      // 操作系统版本
-}
-
-// RegisterResponse 定义注册响应结构
-type RegisterResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-	Agent   struct {
-		ID int `json:"id"`
-	} `json:"agent"`
-}
-
-// ensureRegistered 确保客户端已经在服务器端注册
-func (r *HTTPReporter) ensureRegistered(ctx context.Context, info *collector.SystemInfo) error {
-	if r.registered {
-		return nil
+	reporter := &model.HTTPReporter{
+		ServerURL:  utils.NormalizeURL(config.ServerURL),
+		ApiToken:   config.Token,
+		ProxyURL:   config.ProxyURL,
+		Client:     client,
+		Registered: false,
 	}
 
-	// 构建注册的数据结构
-	payload := RegisterPayload{
-		Token:       r.apiToken,
+	return reporter
+}
+
+func (r *DefaultReporter) Report(ctx context.Context, info *model.SystemInfo) error {
+	if !r.reporter.Registered {
+		// 客户端未注册，先注册
+		if err := r.register(ctx, info); err != nil {
+			log.Printf("注册客户端失败: %v", err)
+			return err
+		}
+	}
+	reportURL := fmt.Sprintf("%s/api/agents/status", r.reporter.ServerURL)
+	reportPaylod, err := json.Marshal(info)
+
+	log.Println("即将上报数据: ", info)
+
+	if err != nil {
+		log.Println("注册客户端失败: ", err)
+		return err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", reportURL, bytes.NewBuffer(reportPaylod))
+	if err != nil {
+		log.Println("创建请求失败：", err)
+		return err
+	}
+	setDefaultHeaders(req)
+
+	resp, err := r.reporter.Client.Do(req)
+	if err != nil {
+		log.Println("上报数据失败：", err)
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
+
+// ReportBatch 将多个系统信息批量上报到服务器
+func (r *DefaultReporter) ReportBatch(ctx context.Context, infoList []*model.SystemInfo) error {
+	// 客户端未注册，先注册
+	if err := r.register(ctx, infoList[0]); err != nil {
+		log.Printf("注册客户端失败: %v", err)
+		return err
+	}
+
+	reportURL := fmt.Sprintf("%s/api/agents/status", r.reporter.ServerURL)
+	reportPaylod, err := json.Marshal(infoList)
+
+	if err != nil {
+		log.Println("注册客户端失败: ", err)
+		return err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", reportURL, bytes.NewBuffer(reportPaylod))
+	if err != nil {
+		log.Println("创建请求失败：", err)
+		return err
+	}
+	setDefaultHeaders(req)
+
+	resp, err := r.reporter.Client.Do(req)
+	if err != nil {
+		log.Println("上报数据失败：", err)
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
+
+func (r *DefaultReporter) register(ctx context.Context, info *model.SystemInfo) error {
+
+	log.Println("开始检查是否客户端已经注册，未注册将会自动注册")
+
+	registerURL := fmt.Sprintf("%s/api/agents/register", r.reporter.ServerURL)
+	registerPaylod := &model.RegisterPayload{
+		Token:       config.Token,
 		Name:        info.Hostname,
 		Hostname:    info.Hostname,
-		IPAddresses: getLocalIPs(),
+		IPAddresses: utils.GetLocalIPs(),
 		OS:          info.OS,
 		Version:     info.Version,
 	}
 
-	// 将数据转换为JSON
-	data, err := json.Marshal(payload)
+	data, err := json.Marshal(registerPaylod)
+
 	if err != nil {
-		return fmt.Errorf("序列化注册信息失败: %w", err)
+		log.Println("注册客户端失败: ", err)
+		return err
 	}
 
-	// 构建注册URL
-	url := fmt.Sprintf("%s/api/agents/register", r.serverURL)
-
-	// 创建HTTP请求
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(data))
+	req, err := http.NewRequestWithContext(ctx, "POST", registerURL, bytes.NewBuffer(data))
 	if err != nil {
-		return fmt.Errorf("创建注册HTTP请求失败: %w", err)
+		log.Println("创建请求失败: ", err)
+		return err
 	}
+	setDefaultHeaders(req)
 
-	// 设置请求头
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "XUGOU-Agent/1.0")
-
-	// 发送请求
-	resp, err := r.client.Do(req)
+	resp, err := r.reporter.Client.Do(req)
 	if err != nil {
-		return fmt.Errorf("发送注册HTTP请求失败: %w", err)
+		log.Println("注册客户端失败: ", err)
+		return err
 	}
 	defer resp.Body.Close()
 
-	// 检查是否收到"客户端已存在"的响应
-	if resp.StatusCode == 400 {
-		var errorResponse RegisterResponse
-		decoder := json.NewDecoder(resp.Body)
-		if err := decoder.Decode(&errorResponse); err != nil {
-			return fmt.Errorf("解析错误响应失败: %w", err)
-		}
+	body, err := io.ReadAll(resp.Body)
 
-		if errorResponse.Message == "客户端已存在" {
-			fmt.Printf("客户端已存在，将直接更新状态，token: %s\n", r.apiToken)
-			r.registered = true
-			return nil
-		}
-
-		return fmt.Errorf("注册失败: %s", errorResponse.Message)
-	}
-
-	// 检查其他错误状态码
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("服务器返回错误状态码: %d", resp.StatusCode)
-	}
-
-	// 解析响应
-	var response RegisterResponse
-	decoder := json.NewDecoder(resp.Body)
-	if err := decoder.Decode(&response); err != nil {
-		return fmt.Errorf("解析注册响应失败: %w", err)
-	}
-
-	if !response.Success {
-		return fmt.Errorf("注册失败: %s", response.Message)
-	}
-
-	// 根据响应消息区分是新注册还是状态更新
-	if response.Message == "客户端状态更新成功" {
-		fmt.Printf("客户端状态更新成功，通过Token: %s\n", r.apiToken)
-	} else {
-		fmt.Printf("客户端注册成功，通过Token: %s\n", r.apiToken)
-	}
-
-	r.registered = true
-	return nil
-}
-
-// reportStatus 将系统信息上报到服务器，不检查注册状态
-func (r *HTTPReporter) reportStatus(ctx context.Context, info *collector.SystemInfo) error {
-	// 提取所有磁盘的总容量和使用量
-	var diskTotal, diskUsed uint64
-	for _, disk := range info.DiskInfo {
-		diskTotal += disk.Total
-		diskUsed += disk.Used
-	}
-
-	// 提取网络传输数据（简单汇总所有网络接口）
-	var currentNetworkRX, currentNetworkTX uint64
-	for _, net := range info.NetworkInfo {
-		currentNetworkRX += net.BytesRecv
-		currentNetworkTX += net.BytesSent
-	}
-
-	// 计算网络流量速率（KB/s）
-	now := time.Now()
-	var networkRXRate, networkTXRate float64
-
-	if !r.lastUpdateTime.IsZero() {
-		timeDiff := now.Sub(r.lastUpdateTime).Seconds()
-		if timeDiff > 0 {
-			networkRXRate = float64(currentNetworkRX-r.lastNetworkRX) / timeDiff / 1024 // 转换为KB/s
-			networkTXRate = float64(currentNetworkTX-r.lastNetworkTX) / timeDiff / 1024 // 转换为KB/s
-		}
-	}
-
-	// 更新历史数据
-	r.lastNetworkRX = currentNetworkRX
-	r.lastNetworkTX = currentNetworkTX
-	r.lastUpdateTime = now
-
-	// 构建上报的数据结构
-	payload := StatusPayload{
-		Token:       r.apiToken,
-		CPUUsage:    info.CPUInfo.Usage,
-		MemoryTotal: info.MemoryInfo.Total / 1024, // 转换为 KB
-		MemoryUsed:  info.MemoryInfo.Used / 1024,  // 转换为 KB
-		DiskTotal:   diskTotal / 1024,             // 转换为 KB
-		DiskUsed:    diskUsed / 1024,              // 转换为 KB
-		NetworkRX:   uint64(networkRXRate),        // 网络接收速率（KB/s）
-		NetworkTX:   uint64(networkTXRate),        // 网络发送速率（KB/s）
-		Hostname:    info.Hostname,                // 添加主机名
-		IPAddresses: getLocalIPs(),
-		OS:          info.OS,      // 添加操作系统信息
-		Version:     info.Version, // 添加操作系统版本
-	}
-
-	// 将数据转换为JSON
-	data, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("序列化系统信息失败: %w", err)
+		log.Println("注册客户端失败: ", err)
+		return err
 	}
 
-	// 构建请求URL - 使用新的基于token的API
-	url := fmt.Sprintf("%s/api/agents/status", r.serverURL)
+	var respData *model.RegisterResponse
 
-	// 创建HTTP请求
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(data))
-	if err != nil {
-		return fmt.Errorf("创建HTTP请求失败: %w", err)
+	if err := json.Unmarshal(body, &respData); err != nil {
+		log.Println("注册客户端失败: ", err)
+		return err
 	}
 
-	// 设置请求头
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "XUGOU-Agent/1.0")
-
-	// 发送请求
-	resp, err := r.client.Do(req)
-	if err != nil {
-		return fmt.Errorf("发送HTTP请求失败: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// 检查响应状态码
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("服务器返回错误状态码: %d", resp.StatusCode)
+	if !respData.Success {
+		log.Println("注册客户端失败: ", respData.Message)
+		return errors.New(respData.Message)
 	}
 
-	fmt.Printf("成功上报数据到服务器，token: %s, CPU: %.2f%%, 内存: %.2f%%, 硬盘: %.2f%%, 网络下载: %.2f KB/s, 网络上传: %.2f KB/s\n",
-		r.apiToken,
-		payload.CPUUsage,
-		float64(payload.MemoryUsed)/float64(payload.MemoryTotal)*100,
-		float64(payload.DiskUsed)/float64(payload.DiskTotal)*100,
-		float64(payload.NetworkRX),
-		float64(payload.NetworkTX))
+	log.Printf("客户端 ID: %d", respData.Agent.ID)
+
+	r.reporter.Registered = true
 
 	return nil
-}
-
-// Report 将系统信息上报到服务器
-func (r *HTTPReporter) Report(ctx context.Context, info *collector.SystemInfo) error {
-	// 确保客户端已注册
-	if err := r.ensureRegistered(ctx, info); err != nil {
-		return fmt.Errorf("客户端注册或状态更新失败: %w", err)
-	}
-
-	// 如果注册成功但未直接上报状态（通过客户端已存在的分支），则调用上报
-	if r.registered {
-		return r.reportStatus(ctx, info)
-	}
-
-	return nil
-}
-
-// getLocalIPs 获取所有本地IPv4地址
-func getLocalIPs() []string {
-	ips := []string{}
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return append(ips, "unknown")
-	}
-
-	for _, addr := range addrs {
-		// 检查IP地址类型
-		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				ips = append(ips, ipnet.IP.String())
-			}
-		}
-	}
-
-	if len(ips) == 0 {
-		return append(ips, "unknown")
-	}
-
-	return ips
 }

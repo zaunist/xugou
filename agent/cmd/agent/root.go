@@ -28,14 +28,19 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "配置文件路径 (默认为 $HOME/.xugou-agent.yaml)")
-	rootCmd.PersistentFlags().String("server", "", "监控服务器地址")
-	rootCmd.PersistentFlags().String("token", "", "API 令牌")
-	rootCmd.PersistentFlags().String("log-level", "info", "日志级别 (debug, info, warn, error)")
-	rootCmd.PersistentFlags().Int("agent-id", 0, "客户端 ID，需要与服务器中注册的 ID 一致")
+	rootCmd.PersistentFlags().String("server", "", "监控服务器地址（例如:https://api.xugou.mdzz.uk）")
+	rootCmd.PersistentFlags().String("token", "", "API 令牌（例如： xugou_maxln220_df8900585981ab775b36dcaaaee772d8.f668c0cf84d1840d）")
+	rootCmd.PersistentFlags().StringSlice("devices", []string{}, "指定监控的硬盘设备列表 (例如: /dev/sda1,/dev/sdb1)")
+	rootCmd.PersistentFlags().StringSlice("interfaces", []string{}, "指定监控的网络接口列表 (例如: eth0,wlan0)")
+	rootCmd.PersistentFlags().IntP("interval", "i", 60, "数据采集和上报间隔（秒）")
+	rootCmd.PersistentFlags().StringP("proxy", "p", "", "HTTP代理服务器地址（例如：http://proxy.example.com:8080）")
 
+	viper.BindPFlag("interval", rootCmd.PersistentFlags().Lookup("interval"))
+	viper.BindPFlag("proxy", rootCmd.PersistentFlags().Lookup("proxy"))
 	viper.BindPFlag("server", rootCmd.PersistentFlags().Lookup("server"))
 	viper.BindPFlag("token", rootCmd.PersistentFlags().Lookup("token"))
-	viper.BindPFlag("log_level", rootCmd.PersistentFlags().Lookup("log-level"))
+	viper.BindPFlag("devices", rootCmd.PersistentFlags().Lookup("devices"))
+	viper.BindPFlag("interfaces", rootCmd.PersistentFlags().Lookup("interfaces"))
 }
 
 func initConfig() {

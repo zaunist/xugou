@@ -1,12 +1,17 @@
-import { Box, Card, Flex, Text, Badge } from '@radix-ui/themes';
-import { CheckCircledIcon, CrossCircledIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
-import { Monitor } from '../api/monitors';
-import HeartbeatGrid from './HeartbeatGrid';
-import '../styles/components.css';
-import { useTranslation } from 'react-i18next';
+import { Box, Flex, Text } from "@radix-ui/themes";
+import {
+  CheckCircledIcon,
+  CrossCircledIcon,
+  QuestionMarkCircledIcon,
+} from "@radix-ui/react-icons";
+import { Card, Badge } from "./ui";
+import { MonitorWithDailyStatsAndStatusHistory } from "../types/monitors";
+import { useTranslation } from "react-i18next";
+import StatusBar from "./MonitorStatusBar";
+import ResponseTimeChart from "./ResponseTimeChart";
 
 interface MonitorCardProps {
-  monitor: Monitor;
+  monitor: MonitorWithDailyStatsAndStatusHistory;
 }
 
 /**
@@ -15,15 +20,23 @@ interface MonitorCardProps {
  */
 const MonitorCard = ({ monitor }: MonitorCardProps) => {
   const { t } = useTranslation();
-  
+
   // 状态图标组件
   const StatusIcon = ({ status }: { status: string }) => {
     switch (status) {
-      case 'up':
-        return <CheckCircledIcon width="16" height="16" color="var(--green-9)" />;
-      case 'pending':
-        return <QuestionMarkCircledIcon width="16" height="16" color="var(--amber-9)" />;
-      case 'down':
+      case "up":
+        return (
+          <CheckCircledIcon width="16" height="16" color="var(--green-9)" />
+        );
+      case "pending":
+        return (
+          <QuestionMarkCircledIcon
+            width="16"
+            height="16"
+            color="var(--amber-9)"
+          />
+        );
+      case "down":
       default:
         return <CrossCircledIcon width="16" height="16" color="var(--red-9)" />;
     }
@@ -31,25 +44,25 @@ const MonitorCard = ({ monitor }: MonitorCardProps) => {
 
   // 状态颜色映射
   const statusColors: { [key: string]: string } = {
-    'up': 'green',
-    'down': 'red',
-    'pending': 'amber'
+    up: "green",
+    down: "red",
+    pending: "amber",
   };
 
   // 状态文本映射
   const statusText: { [key: string]: string } = {
-    'up': t('monitorCard.status.up'),
-    'down': t('monitorCard.status.down'),
-    'pending': t('monitorCard.status.pending')
+    up: t("monitorCard.status.up"),
+    down: t("monitorCard.status.down"),
+    pending: t("monitorCard.status.pending"),
   };
 
   // 获取当前监控的状态
-  const currentStatus = monitor.status || 'pending';
+  const currentStatus = monitor.status || "pending";
 
   return (
-    <Card className="monitor-card">
+    <Card>
       <Flex justify="between" align="start" p="4" gap="2" direction="column">
-        <Flex justify="between" align="center" style={{ width: '100%' }}>
+        <Flex justify="between" align="center" style={{ width: "100%" }}>
           <Flex align="center" gap="2">
             <StatusIcon status={currentStatus} />
             <Text weight="medium">{monitor.name}</Text>
@@ -58,17 +71,18 @@ const MonitorCard = ({ monitor }: MonitorCardProps) => {
             {statusText[currentStatus]}
           </Badge>
         </Flex>
-        
-        <Flex align="center" gap="2" style={{ width: '100%', minHeight: '8px' }}>
-          <Text size="1" color="gray">
-            {t('monitorCard.responseTime')}: {monitor.response_time || t('monitorCard.unknown')}ms
-          </Text>
-        </Flex>
-          
-        <Box pt="2" style={{ width: '100%' }}>
-          <HeartbeatGrid 
-            uptime={monitor.uptime} 
-            history={monitor.history} 
+
+        {/* 状态条显示 */}
+        <Box pt="2" style={{ width: "100%" }}>
+          <StatusBar dailyStats={monitor.dailyStats} />
+        </Box>
+
+        {/* 响应时间图表 */}
+        <Box pt="2" style={{ width: "100%" }}>
+          <ResponseTimeChart
+            history={monitor.history}
+            height={150}
+            showTimeLabels={true}
           />
         </Box>
       </Flex>

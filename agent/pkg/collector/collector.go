@@ -6,74 +6,23 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/spf13/viper"
+
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/net"
+	"github.com/xugou/agent/pkg/config"
+	"github.com/xugou/agent/pkg/model"
+	"github.com/xugou/agent/pkg/utils"
 )
-
-// SystemInfo 包含系统的各种信息
-type SystemInfo struct {
-	Timestamp   time.Time     `json:"timestamp"`
-	Hostname    string        `json:"hostname"`
-	Platform    string        `json:"platform"`
-	OS          string        `json:"os"`
-	Version     string        `json:"version"` // 操作系统版本
-	CPUInfo     CPUInfo       `json:"cpu"`
-	MemoryInfo  MemoryInfo    `json:"memory"`
-	DiskInfo    []DiskInfo    `json:"disks"`
-	NetworkInfo []NetworkInfo `json:"network"`
-	LoadInfo    LoadInfo      `json:"load"`
-}
-
-// CPUInfo 包含CPU相关信息
-type CPUInfo struct {
-	Usage       float64 `json:"usage"`
-	Cores       int     `json:"cores"`
-	ModelName   string  `json:"model_name"`
-	Temperature float64 `json:"temperature,omitempty"`
-}
-
-// MemoryInfo 包含内存相关信息
-type MemoryInfo struct {
-	Total     uint64  `json:"total"`
-	Used      uint64  `json:"used"`
-	Free      uint64  `json:"free"`
-	UsageRate float64 `json:"usage_rate"`
-}
-
-// DiskInfo 包含磁盘相关信息
-type DiskInfo struct {
-	Device     string  `json:"device"`
-	MountPoint string  `json:"mount_point"`
-	Total      uint64  `json:"total"`
-	Used       uint64  `json:"used"`
-	Free       uint64  `json:"free"`
-	UsageRate  float64 `json:"usage_rate"`
-	FSType     string  `json:"fs_type"`
-}
-
-// NetworkInfo 包含网络相关信息
-type NetworkInfo struct {
-	Interface   string `json:"interface"`
-	BytesSent   uint64 `json:"bytes_sent"`
-	BytesRecv   uint64 `json:"bytes_recv"`
-	PacketsSent uint64 `json:"packets_sent"`
-	PacketsRecv uint64 `json:"packets_recv"`
-}
-
-// LoadInfo 包含系统负载信息
-type LoadInfo struct {
-	Load1  float64 `json:"load1"`
-	Load5  float64 `json:"load5"`
-	Load15 float64 `json:"load15"`
-}
 
 // Collector 定义数据收集器接口
 type Collector interface {
-	Collect(ctx context.Context) (*SystemInfo, error)
+	Collect(ctx context.Context) (*model.SystemInfo, error)
+	CollectBatch(ctx context.Context) ([]*model.SystemInfo, error) // 批量采集一段时间内的系统信息
 }
 
 // DefaultCollector 是默认的数据收集器实现
@@ -85,10 +34,13 @@ func NewCollector() Collector {
 }
 
 // Collect 收集系统信息
-func (c *DefaultCollector) Collect(ctx context.Context) (*SystemInfo, error) {
-	info := &SystemInfo{
+func (c *DefaultCollector) Collect(ctx context.Context) (*model.SystemInfo, error) {
+	info := &model.SystemInfo{
 		Timestamp: time.Now(),
+		Keepalive: config.Interval,
 	}
+
+	info.Token = config.Token
 
 	// 获取主机信息
 	hostInfo, err := host.Info()
@@ -100,6 +52,9 @@ func (c *DefaultCollector) Collect(ctx context.Context) (*SystemInfo, error) {
 	info.OS = hostInfo.OS
 	// 设置操作系统版本，格式化为更有意义的信息
 	info.Version = fmt.Sprintf("%s %s (%s)", hostInfo.Platform, hostInfo.PlatformVersion, hostInfo.KernelVersion)
+
+	// 获取本地IP地址
+	info.IPAddresses = utils.GetLocalIPs()
 
 	// 获取CPU信息
 	cpuPercent, err := cpu.Percent(time.Second, false)
@@ -117,7 +72,7 @@ func (c *DefaultCollector) Collect(ctx context.Context) (*SystemInfo, error) {
 		modelName = cpuInfo[0].ModelName
 	}
 
-	info.CPUInfo = CPUInfo{
+	info.CPUInfo = model.CPUInfo{
 		Usage:     cpuPercent[0],
 		Cores:     runtime.NumCPU(),
 		ModelName: modelName,
@@ -129,7 +84,7 @@ func (c *DefaultCollector) Collect(ctx context.Context) (*SystemInfo, error) {
 		return nil, fmt.Errorf("获取内存信息失败: %w", err)
 	}
 
-	info.MemoryInfo = MemoryInfo{
+	info.MemoryInfo = model.MemoryInfo{
 		Total:     memInfo.Total,
 		Used:      memInfo.Used,
 		Free:      memInfo.Free,
@@ -137,18 +92,34 @@ func (c *DefaultCollector) Collect(ctx context.Context) (*SystemInfo, error) {
 	}
 
 	// 获取磁盘信息
+	configDevices := viper.GetStringSlice("devices")
+	deviceSet := make(map[string]struct{})
+	for _, d := range configDevices {
+		deviceSet[d] = struct{}{}
+	}
+
 	partitions, err := disk.Partitions(false)
 	if err != nil {
 		return nil, fmt.Errorf("获取磁盘分区信息失败: %w", err)
 	}
 
 	for _, partition := range partitions {
+		// 如果指定了设备列表，并且当前分区不在列表中，则跳过
+		if len(configDevices) > 0 {
+			_, deviceMatch := deviceSet[partition.Device]
+			_, mountpointMatch := deviceSet[partition.Mountpoint]
+			if !deviceMatch && !mountpointMatch {
+				continue
+			}
+		}
+
 		usage, err := disk.Usage(partition.Mountpoint)
 		if err != nil {
+			// log.Printf("获取磁盘 %s 使用情况失败: %v", partition.Mountpoint, err) // 可选的日志记录
 			continue
 		}
 
-		diskInfo := DiskInfo{
+		diskInfo := model.DiskInfo{
 			Device:     partition.Device,
 			MountPoint: partition.Mountpoint,
 			Total:      usage.Total,
@@ -161,13 +132,25 @@ func (c *DefaultCollector) Collect(ctx context.Context) (*SystemInfo, error) {
 	}
 
 	// 获取网络信息
+	configInterfaces := viper.GetStringSlice("interfaces")
+	interfaceSet := make(map[string]struct{})
+	for _, i := range configInterfaces {
+		interfaceSet[i] = struct{}{}
+	}
+
 	netIOCounters, err := net.IOCounters(true)
 	if err != nil {
 		return nil, fmt.Errorf("获取网络信息失败: %w", err)
 	}
 
 	for _, netIO := range netIOCounters {
-		networkInfo := NetworkInfo{
+		// 如果指定了接口列表，并且当前接口不在列表中，则跳过
+		if len(configInterfaces) > 0 {
+			if _, ok := interfaceSet[netIO.Name]; !ok {
+				continue
+			}
+		}
+		networkInfo := model.NetworkInfo{
 			Interface:   netIO.Name,
 			BytesSent:   netIO.BytesSent,
 			BytesRecv:   netIO.BytesRecv,
@@ -180,7 +163,7 @@ func (c *DefaultCollector) Collect(ctx context.Context) (*SystemInfo, error) {
 	// 获取系统负载
 	loadAvg, err := load.Avg()
 	if err == nil {
-		info.LoadInfo = LoadInfo{
+		info.LoadInfo = model.LoadInfo{
 			Load1:  loadAvg.Load1,
 			Load5:  loadAvg.Load5,
 			Load15: loadAvg.Load15,
@@ -188,4 +171,19 @@ func (c *DefaultCollector) Collect(ctx context.Context) (*SystemInfo, error) {
 	}
 
 	return info, nil
+}
+
+// CollectBatch 在指定时间段内批量收集系统信息，现在只采集一条，以后再扩展
+func (c *DefaultCollector) CollectBatch(ctx context.Context) ([]*model.SystemInfo, error) {
+	// 创建结果切片
+	results := make([]*model.SystemInfo, 0)
+
+	// 采集第一条数据
+	info, err := c.Collect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	results = append(results, info)
+
+	return results, nil
 }

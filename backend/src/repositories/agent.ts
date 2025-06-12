@@ -1,271 +1,156 @@
-import { Bindings } from '../models/db';
-import { Agent } from '../models/agent';
-
-// 定义操作结果的元数据类型
-interface DbResultMeta {
-  changes?: number;
-  [key: string]: any;
-}
-
+import { Agent, Metrics } from "../models/agent";
+import { agents, agentMetrics24h } from "../db/schema";
+import { db } from "../config";
+import { desc, eq, inArray } from "drizzle-orm";
 /**
  * 客户端相关的数据库操作
  */
 
 // 获取所有客户端
-export async function getAllAgents(db: Bindings['DB']) {
-  return await db.prepare(
-    'SELECT * FROM agents ORDER BY created_at DESC'
-  ).all<Agent>();
+export async function getAllAgents() {
+  return await db.select().from(agents).orderBy(desc(agents.created_at));
 }
 
-// 获取用户创建的客户端
-export async function getAgentsByUser(db: Bindings['DB'], userId: number) {
-  return await db.prepare(
-    'SELECT * FROM agents WHERE created_by = ? ORDER BY created_at DESC'
-  ).bind(userId).all<Agent>();
+// 批量获取客户端详情
+export async function getAgentsByIds(agentIds: number[]) {
+  if (agentIds.length === 0) {
+    return { results: [] };
+  }
+  return await db.select().from(agents).where(inArray(agents.id, agentIds));
+}
+
+// 批量获取客户端指标
+export async function getAgentMetricsByIds(agentIds: number[]) {
+  if (agentIds.length === 0) {
+    return { results: [] };
+  }
+  return await db
+    .select()
+    .from(agentMetrics24h)
+    .where(inArray(agentMetrics24h.agent_id, agentIds));
 }
 
 // 获取单个客户端详情
-export async function getAgentById(db: Bindings['DB'], id: number) {
-  return await db.prepare(
-    'SELECT * FROM agents WHERE id = ?'
-  ).bind(id).first<Agent>();
+export async function getAgentById(id: number) {
+  const agent = await db.select().from(agents).where(eq(agents.id, id)).limit(1);
+  return agent[0];
 }
 
 // 创建新客户端
 export async function createAgent(
-  db: Bindings['DB'],
   name: string,
   token: string,
   createdBy: number,
-  status: string = 'inactive',
+  status: string = "inactive",
   hostname: string | null = null,
   os: string | null = null,
   version: string | null = null,
-  ipAddresses: string[] | null = null
+  ipAddresses: string[] | null = null,
+  keepalive: string | null = null
 ) {
   const now = new Date().toISOString();
-  
+
   // 将 ipAddresses 数组转换为 JSON 字符串
   const ipAddressesJson = ipAddresses ? JSON.stringify(ipAddresses) : null;
-  
-  const result = await db.prepare(
-    `INSERT INTO agents 
-     (name, token, created_by, status, created_at, updated_at, hostname, ip_addresses, os, version) 
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).bind(
+
+  const result = await db.insert(agents).values({
     name,
     token,
-    createdBy,
+    created_by: createdBy,
     status,
-    now,
-    now,
+    created_at: now,
+    updated_at: now,
     hostname,
-    ipAddressesJson,
+    ip_addresses: ipAddressesJson,
     os,
-    version
-  ).run();
-  
-  if (!result.success) {
-    throw new Error('创建客户端失败');
+    version,
+    keepalive,
+  }).returning();
+
+  if (!result) {
+    throw new Error("创建客户端失败");
   }
-  
-  // 获取新创建的客户端
-  return await db.prepare(
-    'SELECT * FROM agents WHERE rowid = last_insert_rowid()'
-  ).first<Agent>();
+  return result[0];
 }
 
 // 更新客户端信息
 export async function updateAgent(
-  db: Bindings['DB'],
-  id: number,
-  fields: {
-    name?: string;
-    hostname?: string;
-    ip_addresses?: string[];
-    os?: string;
-    version?: string;
-    status?: string;
-    cpu_usage?: number;
-    memory_total?: number;
-    memory_used?: number;
-    disk_total?: number;
-    disk_used?: number;
-    network_rx?: number;
-    network_tx?: number;
-  }
+  agent: Agent
 ) {
-  const fieldsToUpdate = [];
-  const values = [];
+  agent.updated_at = new Date().toISOString();
   
-  // 添加需要更新的字段
-  for (const [key, value] of Object.entries(fields)) {
-    if (value !== undefined) {
-      // 特殊处理 ip_addresses 数组，转换为 JSON 字符串
-      if (key === 'ip_addresses' && Array.isArray(value)) {
-        fieldsToUpdate.push(`${key} = ?`);
-        values.push(JSON.stringify(value));
-      } else {
-        fieldsToUpdate.push(`${key} = ?`);
-        values.push(value);
-      }
-    }
-  }
-  
-  // 添加更新时间
-  fieldsToUpdate.push('updated_at = ?');
-  values.push(new Date().toISOString());
-  
-  // 添加ID作为条件
-  values.push(id);
-  
-  // 如果没有要更新的字段，直接返回
-  if (fieldsToUpdate.length === 1) { // 只有updated_at
-    return { success: true, message: '没有更新任何字段' };
-  }
-  
-  // 执行更新
-  const updateSql = `
-    UPDATE agents 
-    SET ${fieldsToUpdate.join(', ')} 
-    WHERE id = ?
-  `;
-  
-  const result = await db.prepare(updateSql).bind(...values).run();
-  
-  if (!result.success) {
-    throw new Error('更新客户端失败');
-  }
-  
-  // 获取更新后的客户端
-  return await getAgentById(db, id);
-}
+  // 从 agent 对象中排除 id 等索引相关属性，避免更新主键
+  const { id, token, created_by, ...updateData } = agent;
 
-// 更新客户端状态和指标
-export async function updateAgentStatus(
-  db: Bindings['DB'],
-  id: number,
-  status: string = 'active',
-  metrics: {
-    cpu_usage?: number;
-    memory_total?: number;
-    memory_used?: number;
-    disk_total?: number;
-    disk_used?: number;
-    network_rx?: number;
-    network_tx?: number;
-    hostname?: string;
-    ip_addresses?: string[];
-    os?: string;
-    version?: string;
+  try {
+    // 确保 updateData 中不包含 id
+    const updatedAgent = await db.update(agents).set(updateData).where(eq(agents.id, id)).returning();
+    return updatedAgent[0];
+  } catch (error) {
+    console.error("更新客户端失败:", error);
+    throw new Error("更新客户端失败");
   }
-) {
-  const now = new Date().toISOString();
-  
-  // 将 ip_addresses 数组转换为 JSON 字符串
-  const ipAddressesJson = metrics.ip_addresses ? JSON.stringify(metrics.ip_addresses) : null;
-  
-  const result = await db.prepare(
-    `UPDATE agents SET 
-     status = ?,
-     cpu_usage = ?, 
-     memory_total = ?, 
-     memory_used = ?, 
-     disk_total = ?, 
-     disk_used = ?, 
-     network_rx = ?, 
-     network_tx = ?, 
-     hostname = ?,
-     ip_addresses = ?,
-     os = ?,
-     version = ?,
-     updated_at = ?
-     WHERE id = ?`
-  ).bind(
-    status,
-    metrics.cpu_usage,
-    metrics.memory_total,
-    metrics.memory_used,
-    metrics.disk_total,
-    metrics.disk_used,
-    metrics.network_rx,
-    metrics.network_tx,
-    metrics.hostname,
-    ipAddressesJson,
-    metrics.os,
-    metrics.version,
-    now,
-    id
-  ).run();
-  
-  if (!result.success) {
-    throw new Error('更新客户端状态失败');
-  }
-  
-  return { success: true, message: '客户端状态已更新' };
 }
 
 // 删除客户端
-export async function deleteAgent(db: Bindings['DB'], id: number) {
-  const result = await db.prepare(
-    'DELETE FROM agents WHERE id = ?'
-  ).bind(id).run();
-  
-  if (!result.success) {
-    throw new Error('删除客户端失败');
-  }
-  
-  return { success: true, message: '客户端已删除' };
-}
+export async function deleteAgent(id: number) {
+  // 先删除关联的指标数据
+  await db.delete(agentMetrics24h).where(eq(agentMetrics24h.agent_id, id));
 
-// 更新客户端令牌
-export async function updateAgentToken(db: Bindings['DB'], id: number, token: string) {
-  const now = new Date().toISOString();
-  
-  const result = await db.prepare(
-    'UPDATE agents SET token = ?, updated_at = ? WHERE id = ?'
-  ).bind(token, now, id).run();
-  
+  const result = await db.delete(agents).where(eq(agents.id, id));
+
   if (!result.success) {
-    throw new Error('更新客户端令牌失败');
+    throw new Error("删除客户端失败");
   }
-  
-  return { success: true, message: '客户端令牌已更新', token };
+
+  return { success: true, message: "客户端已删除" };
 }
 
 // 通过令牌获取客户端
-export async function getAgentByToken(db: Bindings['DB'], token: string) {
-  return await db.prepare(
-    'SELECT * FROM agents WHERE token = ?'
-  ).bind(token).first<Agent>();
-}
-
-// 获取管理员用户ID
-export async function getAdminUserId(db: Bindings['DB']) {
-  const adminUser = await db.prepare(
-    'SELECT id FROM users WHERE role = ?'
-  ).bind('admin').first<{id: number}>();
-  
-  if (!adminUser) {
-    throw new Error('无法找到管理员用户');
-  }
-  
-  return adminUser.id;
+export async function getAgentByToken(token: string) {
+  const agent = await db.select().from(agents).where(eq(agents.token, token));
+  return agent[0];
 }
 
 // 获取活跃状态的客户端
-export async function getActiveAgents(db: Bindings['DB']) {
-  return await db.prepare(
-    'SELECT id, name, updated_at FROM agents WHERE status = "active"'
-  ).all();
+export async function getActiveAgents() {
+  const activeAgents = await db
+   .select()
+   .from(agents)
+   .where(eq(agents.status, "active"));
+  return activeAgents;
 }
 
 // 设置客户端为离线状态
-export async function setAgentInactive(db: Bindings['DB'], id: number) {
+export async function setAgentInactive(id: number) {
   const now = new Date().toISOString();
-  
-  return await db.prepare(
-    'UPDATE agents SET status = "inactive", updated_at = ? WHERE id = ?'
-  ).bind(now, id).run();
-} 
+
+  return await db
+    .update(agents)
+    .set({ status: "inactive", updated_at: now })
+    .where(eq(agents.id, id));
+}
+
+// 插入客户端资源指标
+export async function insertAgentMetrics(metrics: Metrics[]) {
+  return await db.batch(metrics.map(metric => db.insert(agentMetrics24h).values(metric)));
+}
+
+// 获取指定客户端资源指标
+export async function getAgentMetrics(agentId: number) {
+  return await db
+    .select()
+    .from(agentMetrics24h)
+    .where(eq(agentMetrics24h.agent_id, agentId));
+}
+
+// 获取指定客户端的最新指标
+export async function getLatestAgentMetrics(agentId: number) {
+  const metrics = await db
+    .select()
+    .from(agentMetrics24h)
+    .where(eq(agentMetrics24h.agent_id, agentId))
+    .orderBy(desc(agentMetrics24h.timestamp))
+    .limit(1);
+  return metrics[0];
+}

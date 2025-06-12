@@ -19,7 +19,7 @@ XUGOU 是一个基于 CloudFlare 的轻量化系统监控平台，提供系统�
 - ✅ 数据可视化 - 实时数据展示与历史趋势
 - ✅ 状态页面 - 可定制的服务状态页面
 - ✅ 告警通知 - 异常事件通过多渠道通知（电子邮件、Telegram等）
-- ✅ 移动APP - 方便在手机查看监控状态
+- ❌ 移动APP - 方便在手机查看监控状态（维护不过来，后面打算将pwa实现好，就这样吧）
 
 ## ✨ 核心特性
 
@@ -47,7 +47,7 @@ XUGOU 是一个基于 CloudFlare 的轻量化系统监控平台，提供系统�
 XUGOU 采用现代化的系统架构，包含以下组件：
 
 - **Agent**: 轻量级系统监控客户端
-- **Backend**: 基于 Cloudflare Workers 的后端服务
+- **Backend**: 基于 Hono 开发的后端服务，支持部署在 Cloudflare Workers 上
 - **Frontend**: 基于 React + TypeScript 的现代化前端界面
 
 ## 🚀 快速开始
@@ -60,13 +60,7 @@ XUGOU 采用现代化的系统架构，包含以下组件：
 
 ### 视频教程
 
-还没录
-
-### 移动端
-
-安卓APP：[下载地址](https://dl.xugou.mdzz.uk/latest/xugou.apk)
-
-IOS：没交苹果保护费，所以没有 IOS 版本
+[![XUGOU 视频教程](https://img.youtube.com/vi/jisEpcqDego/0.jpg)](https://youtu.be/J7_xtsJIYiM)
 
 ## 常见问题
 
@@ -75,16 +69,31 @@ IOS：没交苹果保护费，所以没有 IOS 版本
 ## ⭐ 支持一下作者
 
 - 给项目点个 Star，分享给您的朋友
-- 通过微信赞赏支持我的持续开发
+- 请作者喝点
 
 <div align="center">
-  <img src="frontend/public/wechat-reward.png" alt="微信赞赏码" width="300">
+  <a href="https://buymeacoffee.com/real_zaunist" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200" height="51">
+  </a>
+      <a href="https://buymeacoke.realyourdad.workers.dev/" target="_blank">
+      <img src="https://img.shields.io/badge/Buy_Me_A_Coke-FF5E5B?style=for-the-badge&logo=coca-cola&logoColor=white" alt="Buy Me A Coke" width="200" height="51" style="border-radius: 8px;" />
+    </a>
 </div>
 
 ## 🤝 贡献
 
 欢迎所有形式的贡献，无论是新功能、bug 修复还是文档改进。
 
+## 🏢 赞助
+
+感谢以下赞助商支持 XUGOU 的开发：
+
+[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
+
 ## 📄 开源协议
 
 本项目采用 MIT 协议开源，详见 [LICENSE](./LICENSE) 文件。
+
+## 🔥 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=zaunist/xugou&type=Date)](https://www.star-history.com/#zaunist/xugou&Date)

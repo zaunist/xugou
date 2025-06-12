@@ -1,18 +1,32 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
-import '@radix-ui/themes/styles.css'
-import './styles/index.css'
-import './i18n/config'
-import App from './App.tsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
+import { AuthProvider } from "./providers/AuthProvider";
+import { LanguageProvider } from "./providers/LanguageProvider";
+import "@radix-ui/themes/styles.css";
+import "./styles/global.css";
+import "./i18n/config";
+import router from "./router";
 
-createRoot(document.getElementById('root')!).render(
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        console.log("Service Worker 注册成功:", registration);
+      })
+      .catch((registrationError) => {
+        console.log("Service Worker 注册失败:", registrationError);
+      });
+  });
+}
+
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>,
-)
+    <AuthProvider>
+      <LanguageProvider>
+        <RouterProvider router={router} />
+      </LanguageProvider>
+    </AuthProvider>
+  </StrictMode>
+);
