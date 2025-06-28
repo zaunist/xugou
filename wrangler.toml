@@ -1,4 +1,4 @@
-name = "xugou-app"
+name = "xugou-test"
 main = "backend/src/index.ts"
 compatibility_date = "2025-03-10"
 compatibility_flags = ["nodejs_compat"]
