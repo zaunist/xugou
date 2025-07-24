@@ -75,6 +75,7 @@ Default username: admin  Default password: admin123
 Sponsor me in any way you can:
 
 - Star the project and share it with your friends
+- Gitfish: [Gitfish Sponsor](https://www.gitfish.dev/repo/zaunist/xugou)
 - Buy me a coffee
 
 <div align="center">
