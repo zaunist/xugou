@@ -2,7 +2,7 @@
 export interface NotificationChannel {
   id: number;
   name: string;
-  type: string; // email, telegram
+  type: string; // telegram, resend, feishu, wecom
   config: string; // JSON字符串
   enabled: boolean;
   created_by: number;

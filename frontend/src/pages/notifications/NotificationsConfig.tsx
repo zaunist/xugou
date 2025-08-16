@@ -78,6 +78,8 @@ const NotificationsConfig = () => {
       apiKey: "",
       from: "",
       to: "",
+      // Feishu & Wecom configuration
+      webhookUrl: "",
     },
     enabled: true,
   });
@@ -88,6 +90,7 @@ const NotificationsConfig = () => {
     apiKey: "",
     from: "",
     to: "",
+    webhookUrl: "",
   });
 
   const { t } = useTranslation();
@@ -267,6 +270,7 @@ const NotificationsConfig = () => {
         apiKey: "",
         from: "",
         to: "",
+        webhookUrl: "",
       },
       enabled: true,
     });
@@ -277,6 +281,7 @@ const NotificationsConfig = () => {
       apiKey: "",
       from: "",
       to: "",
+      webhookUrl: "",
     });
     setIsAddChannelOpen(true);
   };
@@ -322,6 +327,7 @@ const NotificationsConfig = () => {
           apiKey: "",
           from: "",
           to: "",
+          webhookUrl: "",
         },
         enabled: channel.enabled,
       });
@@ -349,6 +355,7 @@ const NotificationsConfig = () => {
           apiKey: config.apiKey || "",
           from: config.from || "",
           to: config.to || "",
+          webhookUrl: "",
         },
         enabled: channel.enabled,
       });
@@ -380,6 +387,7 @@ const NotificationsConfig = () => {
           apiKey: config.apiKey || "",
           from: config.from || "",
           to: config.to || "",
+          webhookUrl: config.webhookUrl || "",
         },
         enabled: channel.enabled,
       });
@@ -392,6 +400,7 @@ const NotificationsConfig = () => {
       apiKey: "",
       from: "",
       to: "",
+      webhookUrl: "",
     });
     setIsEditChannelOpen(true);
   };
@@ -418,6 +427,7 @@ const NotificationsConfig = () => {
       apiKey: "",
       from: "",
       to: "",
+      webhookUrl: "",
     };
 
     let isValid = true;
@@ -465,6 +475,16 @@ const NotificationsConfig = () => {
       }
     }
 
+    // 验证 Feishu/WeCom 配置
+    if (channelForm.type === "feishu" || channelForm.type === "wecom") {
+      if (!channelForm.config.webhookUrl.trim()) {
+        errors.webhookUrl = t(
+          "notifications.channels.errors.webhookUrlRequired"
+        );
+        isValid = false;
+      }
+    }
+
     setChannelFormErrors(errors);
     return isValid;
   };
@@ -497,6 +517,11 @@ const NotificationsConfig = () => {
           apiKey: channelForm.config.apiKey,
           from: channelForm.config.from,
           to: channelForm.config.to,
+        };
+        channelData.config = JSON.stringify(configObj);
+      } else if (channelForm.type === "feishu" || channelForm.type === "wecom") {
+        const configObj = {
+          webhookUrl: channelForm.config.webhookUrl,
         };
         channelData.config = JSON.stringify(configObj);
       } else {
@@ -1496,28 +1521,38 @@ const NotificationsConfig = () => {
                       apiKey: "",
                       from: "",
                       to: "",
+                      webhookUrl: "",
                     });
 
-                    // 根据选择的类型设置默认的配置值
+                    const newConfig = {
+                      botToken: "",
+                      chatId: "",
+                      apiKey: "",
+                      from: "",
+                      to: "",
+                      webhookUrl: "",
+                    };
+
+                    switch (value) {
+                      case "telegram":
+                        newConfig.botToken = channelForm.config.botToken;
+                        newConfig.chatId = channelForm.config.chatId;
+                        break;
+                      case "resend":
+                        newConfig.apiKey = channelForm.config.apiKey;
+                        newConfig.from = channelForm.config.from;
+                        newConfig.to = channelForm.config.to;
+                        break;
+                      case "feishu":
+                      case "wecom":
+                        newConfig.webhookUrl = channelForm.config.webhookUrl;
+                        break;
+                    }
+
                     setChannelForm({
                       ...channelForm,
                       type: value,
-                      config:
-                        value === "telegram"
-                          ? {
-                              botToken: "",
-                              chatId: "",
-                              apiKey: "",
-                              from: "",
-                              to: "",
-                            }
-                          : {
-                              botToken: "",
-                              chatId: "",
-                              apiKey: "",
-                              from: "",
-                              to: "",
-                            },
+                      config: newConfig,
                     });
 
                     console.log(`[通知渠道] 选择类型: ${value}`); // 调试信息
@@ -1533,6 +1568,12 @@ const NotificationsConfig = () => {
                     <SelectItem value="resend">
                       {t("notifications.channels.type.resend")}
                     </SelectItem>
+                    <SelectItem value="feishu">
+                      {t("notifications.channels.type.feishu")}
+                    </SelectItem>
+                    <SelectItem value="wecom">
+                      {t("notifications.channels.type.wecom")}
+                    </SelectItem>
                     <SelectItem value="webhook" disabled>
                       {t("notifications.channels.type.webhook")} (Coming Soon)
                     </SelectItem>
@@ -1541,12 +1582,6 @@ const NotificationsConfig = () => {
                     </SelectItem>
                     <SelectItem value="dingtalk" disabled>
                       {t("notifications.channels.type.dingtalk")} (Coming Soon)
-                    </SelectItem>
-                    <SelectItem value="wecom" disabled>
-                      {t("notifications.channels.type.wecom")} (Coming Soon)
-                    </SelectItem>
-                    <SelectItem value="feishu" disabled>
-                      {t("notifications.channels.type.feishu")} (Coming Soon)
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -1687,6 +1722,33 @@ const NotificationsConfig = () => {
                   )}
                 </Box>
               </>
+            )}
+
+            {(channelForm.type === "feishu" ||
+              channelForm.type === "wecom") && (
+              <Box>
+                <Text as="label" size="2" mb="1" weight="medium">
+                  {t("notifications.channels.webhookUrl")}
+                </Text>
+                <TextField.Input
+                  placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/..."
+                  value={channelForm.config.webhookUrl}
+                  onChange={(e) =>
+                    setChannelForm({
+                      ...channelForm,
+                      config: {
+                        ...channelForm.config,
+                        webhookUrl: e.target.value,
+                      },
+                    })
+                  }
+                />
+                {channelFormErrors.webhookUrl && (
+                  <Text size="1" color="red" mt="1">
+                    {channelFormErrors.webhookUrl}
+                  </Text>
+                )}
+              </Box>
             )}
           </Flex>
 

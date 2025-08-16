@@ -201,6 +201,18 @@ interface ResendConfig {
   to: string;
 }
 
+// 飞书配置接口
+interface FeishuConfig {
+  webhookUrl: string;
+}
+
+// 企业微信配置接口
+interface WeComConfig {
+  webhookUrl: string;
+}
+
+
+
 /**
  * 解析通知渠道配置
  */
@@ -258,9 +270,11 @@ function parseChannelConfig<T>(channel: models.NotificationChannel): T {
   }
 }
 
-/**
- * 通过Resend API发送邮件通知
- */
+
+// =================================================================
+// Section: 各渠道发送器实现 (Sender Implementations)
+// =================================================================
+
 async function sendResendNotification(
   channel: models.NotificationChannel,
   subject: string,
@@ -427,8 +441,51 @@ async function sendTelegramNotification(
     };
   }
 }
+
+// =================================================================
+// Section: 新的通知发送器抽象层 (Refactored Sender Abstraction)
+// =================================================================
+
 /**
- * 根据渠道类型发送通知
+ * 定义了通知发送器的统一接口。
+ * 每种通知渠道（如邮件、Telegram）都必须实现这个接口。
+ * "Good code is all about making the data structures, so the code is obvious."
+ * 这个接口就是我们新的数据结构。
+ */
+interface NotificationSender {
+  (
+    channel: models.NotificationChannel,
+    subject: string,
+    content: string
+  ): Promise<{ success: boolean; error?: string }>;
+}
+
+/**
+ * 发送器注册表。
+ * 这是一个从渠道类型字符串到其发送器实现的映射。
+ * "Talk is cheap. Show me the code." 
+ * 这段代码取代了原来愚蠢的 if-else 链。
+ */
+const senderRegistry: Record<string, NotificationSender> = {};
+
+/**
+ * 注册一个新的通知发送器。
+ * @param type 渠道类型 (e.g., 'resend', 'telegram')
+ * @param sender 实现了 NotificationSender 接口的函数
+ */
+function registerSender(type: string, sender: NotificationSender) {
+  if (senderRegistry[type]) {
+    console.warn(`[通知注册] 覆盖已存在的发送器: ${type}`);
+  }
+  senderRegistry[type] = sender;
+  console.log(`[通知注册] 成功注册发送器: ${type}`);
+}
+
+
+/**
+ * 根据渠道类型发送通知 (重构后)
+ * 这个函数现在只负责查找和调用，不再关心具体实现。
+ * "The point of interfaces is that you don't have to care."
  */
 async function sendNotificationByChannel(
   channel: models.NotificationChannel,
@@ -444,23 +501,150 @@ async function sendNotificationByChannel(
     return { success: false, error: "通知渠道已禁用" };
   }
 
-  console.log(`[渠道分发] 渠道ID=${channel.id}的类型为${channel.type}`);
-
-  if (channel.type === "resend") {
-    console.log(`[渠道分发] 使用Resend邮件服务发送通知`);
-    return await sendResendNotification(channel, subject, content);
-  } else if (channel.type === "telegram") {
-    console.log(`[渠道分发] 使用Telegram发送通知`);
-    return await sendTelegramNotification(channel, subject, content);
+  const sender = senderRegistry[channel.type];
+  if (sender) {
+    console.log(`[渠道分发] 找到类型为 ${channel.type} 的发送器，开始执行`);
+    return await sender(channel, subject, content);
   } else {
     console.error(`[渠道分发] 不支持的通知渠道类型: ${channel.type}`);
     return { success: false, error: `不支持的通知渠道类型: ${channel.type}` };
   }
 }
 
+
+
 /**
- * 发送通知
+ * 发送飞书通知
  */
+async function sendFeishuNotification(
+  channel: models.NotificationChannel,
+  subject: string,
+  content: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const config = parseChannelConfig<FeishuConfig>(channel);
+    const webhookUrl = config.webhookUrl;
+
+    if (!webhookUrl) {
+      console.error("[飞书通知] Webhook URL 不能为空");
+      return { success: false, error: "飞书 Webhook URL 不能为空" };
+    }
+
+    const message = {
+      msg_type: "interactive",
+      card: {
+        header: {
+          title: {
+            content: subject,
+            tag: "plain_text",
+          },
+        },
+        elements: [
+          {
+            tag: "div",
+            text: {
+              content: content,
+              tag: "lark_md",
+            },
+          },
+        ],
+      },
+    };
+    
+    console.log("[飞书通知] 准备发送通知到:", webhookUrl);
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    });
+
+    const responseData = await response.json();
+
+    if (responseData.StatusCode === 0 || responseData.code === 0) {
+      console.log("[飞书通知] 发送成功");
+      return { success: true };
+    } else {
+      console.error("[飞书通知] 发送失败:", responseData);
+      return {
+        success: false,
+        error: responseData.StatusMessage || responseData.msg || "发送失败",
+      };
+    }
+  } catch (error) {
+    console.error("发送飞书通知异常:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+// 注册已有的发送器
+registerSender("resend", sendResendNotification);
+registerSender("telegram", sendTelegramNotification);
+registerSender("feishu", sendFeishuNotification);
+
+/**
+ * 发送企业微信通知
+ */
+async function sendWeComNotification(
+  channel: models.NotificationChannel,
+  subject: string,
+  content: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const config = parseChannelConfig<WeComConfig>(channel);
+    const webhookUrl = config.webhookUrl;
+
+    if (!webhookUrl) {
+      console.error("[企业微信通知] Webhook URL 不能为空");
+      return { success: false, error: "企业微信 Webhook URL 不能为空" };
+    }
+
+    // 企业微信的 Markdown 格式要求主题是加粗标题
+    const markdownContent = `**${subject}**\n\n${content}`;
+
+    const message = {
+      msgtype: "markdown",
+      markdown: {
+        content: markdownContent,
+      },
+    };
+
+    console.log("[企业微信通知] 准备发送通知到:", webhookUrl);
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    });
+
+    const responseData = await response.json();
+
+    if (responseData.errcode === 0) {
+      console.log("[企业微信通知] 发送成功");
+      return { success: true };
+    } else {
+      console.error("[企业微信通知] 发送失败:", responseData);
+      return {
+        success: false,
+        error: `错误码: ${responseData.errcode}, 错误信息: ${responseData.errmsg}`,
+      };
+    }
+  } catch (error) {
+    console.error("发送企业微信通知异常:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+registerSender("wecom", sendWeComNotification);
+
 export async function sendNotification(
   type: "monitor" | "agent" | "system",
   targetId: number | null,

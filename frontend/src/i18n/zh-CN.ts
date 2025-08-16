@@ -448,7 +448,9 @@ const zhCN = {
     "notifications.channels.errors.fromRequired": "发件人为必填项",
     "notifications.channels.errors.toRequired": "收件人为必填项",
     "notifications.channels.errors.invalidFromEmail": "发件人格式无效",
+    "notifications.channels.errors.webhookUrlRequired": "Webhook URL为必填项",
     "notifications.channels.apiKey": "Resend API密钥",
+    "notifications.channels.webhookUrl": "Webhook URL",
     "notifications.channels.getApiKey": "获取Resend API密钥",
     "notifications.channels.from": "发件人",
     "notifications.channels.fromHint":
