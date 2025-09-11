@@ -72,19 +72,14 @@ XUGOU 采用现代化的系统架构，包含以下组件：
 
 ## ⭐ 支持一下作者
 
-- 给项目点个 Star，分享给您的朋友
-- Gitfish: [Gitfish 赞助页面](https://www.gitfish.dev/repo/zaunist/xugou)
-- 请作者喝点
+- Youtube 频道：[阿杰鲁](https://www.youtube.com/@zaunist) 
+  - 球球你了！帮忙给频道点点关注点点赞，你要是不点，我下次还求！
+- Gitfish: [Gitfish 赞助](https://www.gitfish.dev/repo/zaunist/xugou)
 
 <div align="center">
   <a href="https://buymeacoffee.com/real_zaunist" target="_blank">
     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200" height="51">
   </a>
-      <a href="https://buymeacoke.realyourdad.workers.dev/" target="_blank">
-      <img src="https://img.shields.io/badge/Buy_Me_A_Coke-FF5E5B?style=for-the-badge&logo=coca-cola&logoColor=white" alt="Buy Me A Coke" width="200" height="51" style="border-radius: 8px;" />
-    </a>
-
-
 </div>
 
 ## 🤝 贡献
