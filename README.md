@@ -90,7 +90,7 @@ XUGOU 采用现代化的系统架构，包含以下组件：
 
 感谢以下赞助商支持 XUGOU 的开发：
 
-[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
+[Cloudflare](https://www.cloudflare.com/)
 
 ## 📄 开源协议
 
