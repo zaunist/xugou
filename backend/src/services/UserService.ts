@@ -130,8 +130,8 @@ export async function updateUserService(
       return { success: false, message: "无权修改用户角色", status: 403 };
     }
 
-    // 关于角色的严格校验
-    if (updateData.role) {
+    // 关于角色的严格校验 - 只有在角色字段被实际修改时才触发
+    if (updateData.role && updateData.role !== user.role) {
       // 1. 禁止将任何用户的角色设置为 'admin'
       if (updateData.role === "admin") {
         return {
@@ -190,7 +190,12 @@ export async function updateUserService(
 
     // 如果没有要更新的字段，则提前返回
     if (Object.keys(updates).length === 0) {
-      return { success: true, user: user, message: "没有需要更新的字段", status: 200 };
+      return {
+        success: true,
+        user: user,
+        message: "没有需要更新的字段",
+        status: 200,
+      };
     }
 
     // 执行更新
