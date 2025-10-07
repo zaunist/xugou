@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Flex, Heading, Text, TextField, Box } from "@radix-ui/themes";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "../../providers/AuthProvider";
-import { updateUser, changePassword } from "../../api/users";
+import { updateUser, changePassword, getUser } from "../../api/users";
 import { UpdateUserRequest, ChangePasswordRequest } from "../../types/users";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -22,8 +22,15 @@ const UserProfile = () => {
 
   useEffect(() => {
     if (user) {
-      setUsername(user.username);
-      setEmail(user.email || "");
+      // 获取完整的用户信息，包括电子邮件
+      const fetchUserData = async () => {
+        const response = await getUser(user.id);
+        if (response.success && response.user) {
+          setUsername(response.user.username);
+          setEmail(response.user.email || "");
+        }
+      };
+      fetchUserData();
     }
   }, [user]);
 
