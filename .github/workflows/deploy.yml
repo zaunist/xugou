@@ -1,0 +1,89 @@
+# 工作流的名称，会显示在 GitHub Actions 页面
+name: Deploy to Cloudflare
+
+# 'on' 关键字定义了触发此工作流的事件
+on:
+  # 当有代码推送到 'main' 分支时，自动触发此工作流
+  push:
+    branches:
+      - main
+  # 允许你在 GitHub Actions 页面手动点击按钮来触发此工作流
+  workflow_dispatch:
+
+# 'jobs' 关键字定义了工作流中要执行的一系列任务
+jobs:
+  # 定义一个名为 'deploy' 的任务
+  deploy:
+    # 指定此任务运行在最新版的 Ubuntu 虚拟环境中
+    runs-on: ubuntu-latest
+    # 此任务在 GitHub UI 中显示的名称
+    name: Deploy
+    # 'steps' 关键字定义了任务中要按顺序执行的一系列步骤
+    steps:
+      # 第一步：检出代码
+      # 使用官方的 'checkout' action 来获取你的仓库代码
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 第二步：设置 pnpm 包管理器
+      # 使用 pnpm 官方的 'action-setup' 来安装和配置 pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          # 指定要使用的 pnpm 版本
+          version: 8
+
+      # 第三步：设置 Node.js 环境
+      # 使用官方的 'setup-node' action 来安装指定版本的 Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          # 指定 Node.js 的版本
+          node-version: '20'
+          # 为 pnpm 配置依赖缓存，以加快后续运行速度
+          cache: 'pnpm'
+
+      # 第四步：安装项目依赖
+      # 执行 'pnpm install' 命令来安装所有在 'package.json' 和 'pnpm-lock.yaml' 中定义的依赖
+      - name: Install dependencies
+        run: pnpm install
+
+      # 第五步：手动安装 Wrangler
+      # 由于项目使用 pnpm workspace，我们需要手动安装 wrangler 并使用 '-w' 标志
+      # 这可以避免 wrangler-action 自动安装时可能出现的冲突
+      - name: Install Wrangler
+        run: pnpm add wrangler@4 -w
+
+      # 第六步：构建项目
+      # 执行在 'package.json' 中定义的 'build' 脚本，通常用于编译前端和后端代码
+      - name: Build
+        run: pnpm run build
+
+      # 第七步：配置 Wrangler 的 toml 文件
+      # 这是关键的一步，在部署前动态地将占位符替换为真实的 secrets 值
+      - name: Configure Wrangler
+        run: |
+          # 使用 sed 命令在 wrangler.toml 文件中查找并替换 D1 数据库 ID 的占位符
+          sed -i "s/\${D1_DATABASE_ID}/${D1_DATABASE_ID}/g" wrangler.toml
+          # 使用 sed 命令在 wrangler.toml 文件中查找并替换 D1 数据库名称的占位符
+          sed -i "s/\${D1_DATABASE_NAME}/${D1_DATABASE_NAME}/g" wrangler.toml
+        env:
+          # 从 GitHub Secrets 中读取 D1 数据库 ID 和名称，并将其作为环境变量注入到此步骤中
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          D1_DATABASE_NAME: ${{ secrets.D1_DATABASE_NAME }}
+
+      # 第八步：部署到 Cloudflare
+      # 使用 Cloudflare 官方的 'wrangler-action' 来执行部署
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          # 传入 API 令牌用于身份验证
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          # 传入 Cloudflare 账户 ID
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          # 明确指定要执行的命令是 'deploy'
+          command: deploy
+        env:
+          # wrangler 命令行工具也会自动读取这些标准的环境变量来进行身份验证
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
