@@ -71,10 +71,10 @@ export async function createUserService(
       return { success: false, message: "用户名已存在", status: 400 };
     }
 
-    // 检查角色是否有效
-    const validRoles = ["admin", "manager", "viewer"];
+    // 检查角色是否有效，只能创建 manager 或 user
+    const validRoles = ["manager", "user"];
     if (!validRoles.includes(userData.role)) {
-      return { success: false, message: "无效的角色", status: 400 };
+      return { success: false, message: "只能创建 manager 或 user 角色", status: 400 };
     }
 
     // 哈希密码
@@ -126,6 +126,11 @@ export async function updateUserService(
       updateData.role !== user.role
     ) {
       return { success: false, message: "无权修改用户角色", status: 403 };
+    }
+
+    // admin 角色不能被修改
+    if (user.role === 'admin' && updateData.role && updateData.role !== 'admin') {
+      return { success: false, message: "不能修改 admin 用户的角色", status: 403 };
     }
 
     // 准备更新数据
@@ -198,6 +203,12 @@ export async function deleteUserService(
     if (!user) {
       return { success: false, message: "用户不存在", status: 404 };
     }
+    
+    // admin 用户不能被删除
+    if (user.role === 'admin') {
+      return { success: false, message: "admin 用户不允许被删除", status: 403 };
+    }
+
 
     // 执行删除
     await repositories.deleteUser(id);
@@ -218,14 +229,14 @@ export async function changePasswordService(
 ) {
   try {
     if (!passwordData.newPassword) {
-      throw error("new password is required");
+      return { success: false, message: "新密码不能为空", status: 400 };
     }
 
     // 获取用户
     const user = await repositories.getFullUserById(id);
 
     if (!user) {
-      throw error("user not found");
+      return { success: false, message: "用户不存在", status: 404 };
     }
 
     // 非管理员需要验证当前密码
@@ -235,7 +246,7 @@ export async function changePasswordService(
         user.password
       );
       if (!isPasswordValid) {
-       throw error("current password is invalid");
+       return { success: false, message: "当前密码无效", status: 400 };
       }
     }
 
@@ -248,6 +259,6 @@ export async function changePasswordService(
     return { success: true, message: "密码已更新", status: 200 };
   } catch (error) {
     console.error("修改密码错误:", error);
-    return { success: false, message: error, status: 500 };
+    return { success: false, message: "修改密码失败", status: 500 };
   }
 }

@@ -112,34 +112,34 @@ const UsersList = () => {
                       <Button variant="secondary" onClick={() => navigate(`/users/${user.id}`)}>
                         {t("common.edit")}
                       </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger>
-                          {t("common.delete")}
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogTitle>
-                            {t("common.deleteConfirmation")}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t("users.deleteConfirm", {
-                              username: user.username,
-                            })}
-                          </AlertDialogDescription>
-                          <Flex gap="3" mt="4" justify="end">
-                            <AlertDialogCancel>
-                             
+                      {user.role !== 'admin' && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="secondary">{t("common.delete")}</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogTitle>
+                              {t("common.deleteConfirmation")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("users.deleteConfirm", {
+                                username: user.username,
+                              })}
+                            </AlertDialogDescription>
+                            <Flex gap="3" mt="4" justify="end">
+                              <AlertDialogCancel>
                                 {t("common.cancel")}
-                             
-                            </AlertDialogCancel>
-                            <AlertDialogAction onClick={() => {
-  setUserToDelete(user.id);
-  handleDelete();
-                            }}>
-                              {t("common.delete")}
-                            </AlertDialogAction>
-                          </Flex>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                              </AlertDialogCancel>
+                              <AlertDialogAction onClick={() => {
+                                setUserToDelete(user.id);
+                                handleDelete();
+                              }}>
+                                {t("common.delete")}
+                              </AlertDialogAction>
+                            </Flex>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </Flex>
                   </Table.Cell>
                 </Table.Row>

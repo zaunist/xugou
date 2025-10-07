@@ -36,6 +36,10 @@ const NotificationsConfig = lazy(
 const Login = lazy(() => import("../pages/auth/Login"));
 const Register = lazy(() => import("../pages/auth/Register"));
 
+// 用户管理页面组件
+const CreateUser = lazy(() => import("../pages/users/CreateUser"));
+const EditUser = lazy(() => import("../pages/users/EditUser"));
+
 // 用于包装Layout并提供children
 interface LayoutWrapperProps {
   children: ReactNode;
@@ -166,11 +170,32 @@ const protectedRoutes: RouteObject[] = [
   // 用户管理
   {
     path: "/users",
-    element: (
-      <Suspense fallback={<div>加载中...</div>}>
-        <UsersList />
-      </Suspense>
-    ),
+    children: [
+      {
+        path: "",
+        element: (
+          <Suspense fallback={<div>加载中...</div>}>
+            <UsersList />
+          </Suspense>
+        ),
+      },
+      {
+        path: "create",
+        element: (
+          <Suspense fallback={<div>加载中...</div>}>
+            <CreateUser />
+          </Suspense>
+        ),
+      },
+      {
+        path: ":id",
+        element: (
+          <Suspense fallback={<div>加载中...</div>}>
+            <EditUser />
+          </Suspense>
+        ),
+      },
+    ],
   },
 
   // 个人资料
