@@ -14,12 +14,12 @@ import { getAllUsers, deleteUser } from "../../api/users";
 import { User } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 const UsersList = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [userToDelete, setUserToDelete] = useState<number | null>(null);
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -36,27 +36,33 @@ const UsersList = () => {
         setUsers(response.users);
       } else {
         setError(response.message || t("users.error.fetch"));
+        toast.error(response.message || t("users.error.fetch"));
       }
     } catch (err: any) {
-      setError(err.message || t("users.error.fetch"));
+      const errorMessage = err.message || t("users.error.fetch");
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (userToDelete === null) return;
-
+  // 修复：直接将要删除的ID作为参数传入，避免状态更新延迟问题
+  const handleDelete = async (id: number) => {
     try {
-      const response = await deleteUser(userToDelete);
+      const response = await deleteUser(id);
       if (response.success) {
-        setUsers(users.filter((user) => user.id !== userToDelete));
-        setUserToDelete(null);
+        // 更新前端UI，直接移除被删除的用户
+        setUsers(users.filter((user) => user.id !== id));
+        toast.success(response.message || t("users.success.delete"));
       } else {
         setError(response.message || t("users.error.delete"));
+        toast.error(response.message || t("users.error.delete"));
       }
     } catch (err: any) {
-      setError(err.message || t("users.error.delete"));
+      const errorMessage = err.message || t("users.error.delete");
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -69,9 +75,10 @@ const UsersList = () => {
         </Button>
       </Flex>
 
+      {/* 错误信息现在通过 toast 显示，如果需要也可以保留这里的 Text 组件 */}
       {error && (
         <Text color="red" mb="4">
-          {error}
+          {`错误: ${error}`}
         </Text>
       )}
 
@@ -109,13 +116,18 @@ const UsersList = () => {
                   <Table.Cell>{user.role}</Table.Cell>
                   <Table.Cell>
                     <Flex gap="2">
-                      <Button variant="secondary" onClick={() => navigate(`/users/${user.id}`)}>
+                      <Button
+                        variant="secondary"
+                        onClick={() => navigate(`/users/${user.id}`)}
+                      >
                         {t("common.edit")}
                       </Button>
-                      {user.role !== 'admin' && (
+                      {user.role !== "admin" && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="secondary">{t("common.delete")}</Button>
+                            <Button variant="secondary">
+                              {t("common.delete")}
+                            </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogTitle>
@@ -130,10 +142,10 @@ const UsersList = () => {
                               <AlertDialogCancel>
                                 {t("common.cancel")}
                               </AlertDialogCancel>
-                              <AlertDialogAction onClick={() => {
-                                setUserToDelete(user.id);
-                                handleDelete();
-                              }}>
+                              {/* 修复：直接在 onClick 中调用 handleDelete 并传入 user.id */}
+                              <AlertDialogAction
+                                onClick={() => handleDelete(user.id)}
+                              >
                                 {t("common.delete")}
                               </AlertDialogAction>
                             </Flex>
