@@ -1,6 +1,5 @@
 import { compare, hash } from "bcryptjs";
 import * as repositories from "../repositories";
-import { error } from "console";
 
 export async function getAllUsersService(userRole: string) {
   try {
@@ -74,7 +73,11 @@ export async function createUserService(
     // 检查角色是否有效，只能创建 manager 或 user
     const validRoles = ["manager", "user"];
     if (!validRoles.includes(userData.role)) {
-      return { success: false, message: "只能创建 manager 或 user 角色", status: 400 };
+      return {
+        success: false,
+        message: "只能创建 manager 或 user 角色",
+        status: 400,
+      };
     }
 
     // 哈希密码
@@ -114,7 +117,6 @@ export async function updateUserService(
 
     // 检查用户是否存在
     const user = await repositories.getFullUserById(id);
-
     if (!user) {
       return { success: false, message: "用户不存在", status: 404 };
     }
@@ -128,27 +130,49 @@ export async function updateUserService(
       return { success: false, message: "无权修改用户角色", status: 403 };
     }
 
-    // admin 角色不能被修改
-    if (user.role === 'admin' && updateData.role && updateData.role !== 'admin') {
-      return { success: false, message: "不能修改 admin 用户的角色", status: 403 };
+    // 关于角色的严格校验
+    if (updateData.role) {
+      // 1. 禁止将任何用户的角色设置为 'admin'
+      if (updateData.role === "admin") {
+        return {
+          success: false,
+          message: "不允许将用户角色设置为 Admin",
+          status: 403,
+        };
+      }
+      // 2. 禁止修改 'admin' 用户自身的角色
+      if (user.role === "admin") {
+        return {
+          success: false,
+          message: "Admin 用户的角色不能被修改",
+          status: 403,
+        };
+      }
+      // 3. 校验角色是否合法
+      const validRoles = ["manager", "user"];
+      if (!validRoles.includes(updateData.role)) {
+        return { success: false, message: "无效的用户角色", status: 400 };
+      }
     }
 
     // 准备更新数据
-    const updates: any = {};
+    const updates: {
+      username?: string;
+      email?: string | null;
+      role?: string;
+      password?: string;
+    } = {};
 
     if (
       updateData.username !== undefined &&
       updateData.username !== user.username
     ) {
-      // 检查新用户名是否已存在
       const existingUser = await repositories.checkUserExists(
         updateData.username
       );
-
       if (existingUser) {
         return { success: false, message: "用户名已存在", status: 400 };
       }
-
       updates.username = updateData.username;
     }
 
@@ -156,25 +180,22 @@ export async function updateUserService(
       updates.email = updateData.email;
     }
 
-    if (updateData.role !== undefined) {
+    if (updateData.role !== undefined && updateData.role !== user.role) {
       updates.role = updateData.role;
     }
 
-    // 如果提供了新密码，则更新密码
     if (updateData.password) {
       updates.password = await hash(updateData.password, 10);
     }
 
-    // 执行更新
-    try {
-      const updatedUser = await repositories.updateUser(id, updates);
-      return { success: true, user: updatedUser, status: 200 };
-    } catch (err) {
-      if (err instanceof Error && err.message === "没有提供要更新的字段") {
-        return { success: false, message: "没有提供要更新的字段", status: 400 };
-      }
-      throw err;
+    // 如果没有要更新的字段，则提前返回
+    if (Object.keys(updates).length === 0) {
+      return { success: true, user: user, message: "没有需要更新的字段", status: 200 };
     }
+
+    // 执行更新
+    const updatedUser = await repositories.updateUser(id, updates);
+    return { success: true, user: updatedUser, status: 200 };
   } catch (error) {
     console.error("更新用户错误:", error);
     return { success: false, message: "更新用户失败", status: 500 };
@@ -199,16 +220,18 @@ export async function deleteUserService(
 
     // 检查用户是否存在
     const user = await repositories.getUserById(id);
-
     if (!user) {
       return { success: false, message: "用户不存在", status: 404 };
     }
-    
-    // admin 用户不能被删除
-    if (user.role === 'admin') {
-      return { success: false, message: "admin 用户不允许被删除", status: 403 };
-    }
 
+    // admin 用户不能被删除
+    if (user.role === "admin") {
+      return {
+        success: false,
+        message: "admin 用户不允许被删除",
+        status: 403,
+      };
+    }
 
     // 执行删除
     await repositories.deleteUser(id);
@@ -234,19 +257,18 @@ export async function changePasswordService(
 
     // 获取用户
     const user = await repositories.getFullUserById(id);
-
     if (!user) {
       return { success: false, message: "用户不存在", status: 404 };
     }
 
-    // 非管理员需要验证当前密码
+    // 如果提供了 currentPassword，则必须验证
     if (passwordData.currentPassword) {
       const isPasswordValid = await compare(
         passwordData.currentPassword,
         user.password
       );
       if (!isPasswordValid) {
-       return { success: false, message: "当前密码无效", status: 400 };
+        return { success: false, message: "当前密码无效", status: 400 };
       }
     }
 
