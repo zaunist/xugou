@@ -9,18 +9,32 @@ import { Agent } from "../models";
 export async function getStatusPageConfig(userId: number) {
   try {
     // 获取指定用户的状态页配置
-    const existingConfig = await repositories.getStatusPageConfigByUserId(userId);
+    let existingConfig = await repositories.getStatusPageConfigByUserId(userId);
 
+    // 如果用户没有配置，则为该用户创建一个新的默认配置
     if (!existingConfig) {
-      // 如果用户没有配置，可以返回一个默认的空配置
-      return {
-        title: "系统状态",
-        description: "实时监控系统运行状态",
-        logoUrl: "",
-        customCss: "",
-        monitors: [],
-        agents: [],
-      };
+      console.log(`用户 ${userId} 没有状态页配置，正在创建默认配置...`);
+      const newConfigId = await repositories.createStatusPageConfig(
+        userId,
+        "系统状态", // 默认标题
+        "实时监控系统运行状态", // 默认描述
+        "", // logoUrl
+        "" // customCss
+      );
+
+      if (!newConfigId) {
+        throw new Error("为新用户创建状态页配置失败");
+      }
+
+      // 重新获取刚刚创建的配置
+      existingConfig = await repositories.getStatusPageConfigById(newConfigId);
+
+      if (!existingConfig) {
+        throw new Error("获取新创建的状态页配置失败");
+      }
+      console.log(
+        `为用户 ${userId} 创建了新的状态页配置，ID: ${existingConfig.id}`
+      );
     }
 
     console.log("使用的状态页配置:", existingConfig);
@@ -34,9 +48,7 @@ export async function getStatusPageConfig(userId: number) {
     const allMonitors = await repositories.getAllMonitors(userId);
 
     // 获取被选中的客户端
-    const agentsResult = await repositories.getConfigAgents(
-      existingConfig.id
-    );
+    const agentsResult = await repositories.getConfigAgents(existingConfig.id);
 
     // 获取该用户的所有客户端
     const allAgents = await repositories.getAllAgents(userId);
@@ -71,7 +83,6 @@ export async function getStatusPageConfig(userId: number) {
   }
 }
 
-
 /**
  * 保存状态页配置
  * @param userId - 当前操作用户的ID
@@ -90,7 +101,9 @@ export async function saveStatusPageConfig(
   }
 ) {
   try {
-    const existingConfig = await repositories.getStatusPageConfigByUserId(userId);
+    const existingConfig = await repositories.getStatusPageConfigByUserId(
+      userId
+    );
 
     let configId: number;
 
@@ -181,14 +194,19 @@ export async function getStatusPagePublicData(userId: number) {
     const monitorIds = selectedMonitors.map((m: any) => m.monitor_id);
     if (monitorIds.length > 0) {
       for (const monitorId of monitorIds) {
-        const monitor = await repositories.getMonitorById(monitorId, userId, "user"); // use "user" role to avoid admin check
-        if (monitor) { // 确保监控项存在
-          const monitorDailyStats = await repositories.getMonitorDailyStatsById(
-            monitorId
-          );
-          const monitorHistory = await repositories.getMonitorStatusHistoryIn24h(
-            monitorId
-          );
+        // 此处权限检查逻辑需要确认，如果是公开页面，可能不需要检查所有者
+        // 暂时假设公开页面可以获取其创建者的任何监控项
+        const monitor = await repositories.getMonitorById(
+          monitorId,
+          userId,
+          "user"
+        );
+        if (monitor) {
+          // 确保监控项存在
+          const monitorDailyStats =
+            await repositories.getMonitorDailyStatsById(monitorId);
+          const monitorHistory =
+            await repositories.getMonitorStatusHistoryIn24h(monitorId);
           monitors.push({
             ...monitor,
             dailyStats: monitorDailyStats,
@@ -205,8 +223,10 @@ export async function getStatusPagePublicData(userId: number) {
     const agentIds = selectedAgents.map((a: any) => a.agent_id);
     if (agentIds.length > 0) {
       const agentsResult = await repositories.getAgentsByIds(agentIds);
-      if (agentsResult) {
-        agents = agentsResult as Agent[];
+      // @ts-ignore
+      if (agentsResult && agentsResult.results) {
+        // @ts-ignore
+        agents = agentsResult.results as Agent[];
       }
     }
   }

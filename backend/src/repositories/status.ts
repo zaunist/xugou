@@ -26,12 +26,8 @@ export async function getStatusPageConfigByUserId(userId: number) {
   return config[0];
 }
 
-
 // 获取配置的监控项
-export async function getConfigMonitors(
-  configId: number,
-) {
-
+export async function getConfigMonitors(configId: number) {
   return await db
     .select()
     .from(statusPageMonitors)
@@ -39,11 +35,11 @@ export async function getConfigMonitors(
 }
 
 // 获取配置的客户端
-export async function getConfigAgents(
-
-  configId: number,
-) {
-  return await db.select().from(statusPageAgents).where(eq(statusPageAgents.config_id, configId));
+export async function getConfigAgents(configId: number) {
+  return await db
+    .select()
+    .from(statusPageAgents)
+    .where(eq(statusPageAgents.config_id, configId));
 }
 
 // 获取状态页配置
@@ -82,20 +78,23 @@ export async function createStatusPageConfig(
   logoUrl: string,
   customCss: string
 ) {
-  const result = await db.insert(statusPageConfig).values({
-    user_id: userId,
-    title: title,
-    description: description,
-    logo_url: logoUrl,
-    custom_css: customCss,
-  });
+  const result = await db
+    .insert(statusPageConfig)
+    .values({
+      user_id: userId,
+      title: title,
+      description: description,
+      logo_url: logoUrl,
+      custom_css: customCss,
+    })
+    .returning({ id: statusPageConfig.id }); // D1/SQLite 需要这样获取ID
 
-  if (!result.success) {
+  if (!result || result.length === 0) {
     throw new Error("创建状态页配置失败");
   }
 
   // 获取新插入的ID
-  return result.meta.last_row_id;
+  return result[0].id;
 }
 
 // 清除配置的监控项关联
