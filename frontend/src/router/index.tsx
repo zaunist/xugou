@@ -46,7 +46,7 @@ interface LayoutWrapperProps {
 }
 const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
   // 检查当前路径是否为状态页面，如果是则不使用Layout包裹
-  const isStatusPage = window.location.pathname === "/status";
+  const isStatusPage = window.location.pathname.startsWith("/status/public");
   return isStatusPage ? <>{children}</> : <Layout>{children}</Layout>;
 };
 
@@ -103,7 +103,7 @@ const protectedRoutes: RouteObject[] = [
     path: "/status",
     children: [
       {
-        path: "",
+        path: "public/:userId",
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <StatusPage />

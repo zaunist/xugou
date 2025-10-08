@@ -3,21 +3,25 @@ import { Agent } from "../models";
 
 /**
  * 获取状态页配置
- * @param userId - 当前用户的ID（修复后此参数被忽略，以获取全局配置）
+ * @param userId - 当前用户的ID
  * @returns 状态页配置对象
  */
 export async function getStatusPageConfig(userId: number) {
   try {
-    // 修复：状态页配置是全局的，不应按用户ID查找。获取所有配置并使用第一个。
-    const allConfigs = await repositories.getAllStatusPageConfigs();
+    // 获取指定用户的状态页配置
+    const existingConfig = await repositories.getStatusPageConfigByUserId(userId);
 
-    if (!allConfigs || allConfigs.length === 0) {
-      // 备注：如果系统中没有任何配置，将抛出错误。首次使用时，管理员需要先保存一次配置。
-      throw new Error("状态页配置不存在");
+    if (!existingConfig) {
+      // 如果用户没有配置，可以返回一个默认的空配置
+      return {
+        title: "系统状态",
+        description: "实时监控系统运行状态",
+        logoUrl: "",
+        customCss: "",
+        monitors: [],
+        agents: [],
+      };
     }
-
-    // 将第一个配置视为全局配置
-    const existingConfig = allConfigs[0];
 
     console.log("使用的状态页配置:", existingConfig);
 
@@ -26,16 +30,16 @@ export async function getStatusPageConfig(userId: number) {
       existingConfig.id
     );
 
-    // 获取所有监控项
-    const allMonitors = await repositories.getAllMonitors();
+    // 获取该用户的所有监控项
+    const allMonitors = await repositories.getAllMonitors(userId);
 
     // 获取被选中的客户端
     const agentsResult = await repositories.getConfigAgents(
       existingConfig.id
     );
 
-    // 获取所有客户端
-    const allAgents = await repositories.getAllAgents();
+    // 获取该用户的所有客户端
+    const allAgents = await repositories.getAllAgents(userId);
 
     // 构建返回的监控列表，标记哪些监控项被选中
     const monitors = allMonitors.map((monitor: any) => {
@@ -67,6 +71,7 @@ export async function getStatusPageConfig(userId: number) {
   }
 }
 
+
 /**
  * 保存状态页配置
  * @param userId - 当前操作用户的ID
@@ -85,9 +90,7 @@ export async function saveStatusPageConfig(
   }
 ) {
   try {
-    // 修复：同样，保存时也应操作全局的第一个配置
-    const allConfigs = await repositories.getAllStatusPageConfigs();
-    const existingConfig = (allConfigs && allConfigs.length > 0) ? allConfigs[0] : null;
+    const existingConfig = await repositories.getStatusPageConfigByUserId(userId);
 
     let configId: number;
 
@@ -143,14 +146,15 @@ export async function saveStatusPageConfig(
 
 /**
  * 获取公共状态页所需的数据
+ * @param userId - 用户ID
  * @returns 公共状态页数据
  */
-export async function getStatusPagePublicData() {
-  // 获取所有配置
-  const configsResult = await repositories.getAllStatusPageConfigs();
+export async function getStatusPagePublicData(userId: number) {
+  // 获取用户的配置
+  const config = await repositories.getStatusPageConfigByUserId(userId);
 
-  if (!configsResult || configsResult.length === 0) {
-    console.log("没有找到任何状态页配置");
+  if (!config) {
+    console.log(`用户 ${userId} 没有找到状态页配置`);
     return {
       title: "系统状态",
       description: "当前没有可用的状态页配置。",
@@ -160,9 +164,6 @@ export async function getStatusPagePublicData() {
       agents: [],
     };
   }
-
-  // 使用第一个配置作为全局配置
-  const config = configsResult[0];
 
   // 获取选中的监控项ID
   const selectedMonitors = await repositories.getSelectedMonitors(
@@ -180,7 +181,7 @@ export async function getStatusPagePublicData() {
     const monitorIds = selectedMonitors.map((m: any) => m.monitor_id);
     if (monitorIds.length > 0) {
       for (const monitorId of monitorIds) {
-        const monitor = await repositories.getMonitorById(monitorId);
+        const monitor = await repositories.getMonitorById(monitorId, userId, "user"); // use "user" role to avoid admin check
         if (monitor) { // 确保监控项存在
           const monitorDailyStats = await repositories.getMonitorDailyStatsById(
             monitorId

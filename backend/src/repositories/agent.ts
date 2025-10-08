@@ -7,8 +7,8 @@ import { desc, eq, inArray } from "drizzle-orm";
  */
 
 // 获取所有客户端
-export async function getAllAgents() {
-  return await db.select().from(agents).orderBy(desc(agents.created_at));
+export async function getAllAgents(userId: number) {
+  return await db.select().from(agents).where(eq(agents.created_by, userId)).orderBy(desc(agents.created_at));
 }
 
 // 批量获取客户端详情

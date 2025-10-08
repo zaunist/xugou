@@ -6,7 +6,7 @@ import {
   monitorStatusHistory24h,
   monitorDailyStats,
 } from "../db/schema";
-import { eq, desc, asc, lt } from "drizzle-orm";
+import { eq, desc, asc, and, inArray } from "drizzle-orm";
 
 /**
  * 监控相关的数据库操作
@@ -44,34 +44,50 @@ export async function getMonitorsToCheck() {
 }
 
 // 获取单个监控详情
-export async function getMonitorById(id: number) {
+export async function getMonitorById(id: number, userId: number, userRole: string) {
   const monitor = await db.select().from(monitors).where(eq(monitors.id, id));
 
+  if (monitor.length === 0) {
+    return null;
+  }
+
+  // 权限检查：管理员或所有者
+  if (userRole !== 'admin' && monitor[0].created_by !== userId) {
+    return null;
+  }
+  
   // 解析 headers 字段
-  if (monitor && typeof monitor.headers === "string") {
+  const monitorData = monitor[0];
+  if (monitorData && typeof monitorData.headers === "string") {
     try {
-      monitor.headers = JSON.parse(monitor.headers);
+      // @ts-ignore
+      monitorData.headers = JSON.parse(monitorData.headers);
     } catch (e) {
-      monitor.headers = {};
+      // @ts-ignore
+      monitorData.headers = {};
     }
   }
-  return monitor[0];
+  return monitorData;
 }
 
 // 获取所有监控
-export async function getAllMonitors() {
+export async function getAllMonitors(userId: number) {
   const result = await db
     .select()
     .from(monitors)
+    .where(eq(monitors.created_by, userId))
     .orderBy(desc(monitors.created_at));
 
   // 解析所有监控的 headers 字段
   if (result) {
+    // fix: 为 monitor 参数添加 Monitor 类型
     result.forEach((monitor: Monitor) => {
       if (typeof monitor.headers === "string") {
         try {
+          // @ts-ignore
           monitor.headers = JSON.parse(monitor.headers);
         } catch (e) {
+          // @ts-ignore
           monitor.headers = {};
         }
       }
@@ -91,10 +107,17 @@ export async function getMonitorStatusHistoryIn24h(monitorId: number) {
 }
 
 // 获取所有监控状态历史 24小时内
-export async function getAllMonitorStatusHistoryIn24h() {
+export async function getAllMonitorStatusHistoryIn24h(userId: number) {
+  const userMonitors = await getAllMonitors(userId);
+  // fix: 添加 Monitor 类型以解决 TS7006
+  const monitorIds = userMonitors.map((m: Monitor) => m.id);
+  if (monitorIds.length === 0) return [];
+
   return await db
     .select()
     .from(monitorStatusHistory24h)
+    // fix: 使用 inArray 查询多个监控项
+    .where(inArray(monitorStatusHistory24h.monitor_id, monitorIds))
     .orderBy(asc(monitorStatusHistory24h.timestamp));
 }
 // 记录监控状态历史到热表
@@ -108,7 +131,7 @@ export async function insertMonitorStatusHistory(
   // 使用ISO格式的时间戳
   const now = new Date().toISOString();
 
-  return await db.insert(monitorStatusHistory24h).values({
+  await db.insert(monitorStatusHistory24h).values({
     monitor_id: monitorId,
     status: status,
     timestamp: now,
@@ -127,7 +150,7 @@ export async function updateMonitorStatus(
   // 使用ISO格式的时间戳
   const now = new Date().toISOString();
 
-  return await db
+  await db
     .update(monitors)
     .set({
       status: status,
@@ -151,7 +174,7 @@ export async function createMonitor(
 ) {
   const now = new Date().toISOString();
 
-  const newMonitor = await db
+  const [newMonitor] = await db
     .insert(monitors)
     .values({
       name: name,
@@ -178,8 +201,10 @@ export async function createMonitor(
 
   if (newMonitor && typeof newMonitor.headers === "string") {
     try {
+        // @ts-ignore
       newMonitor.headers = JSON.parse(newMonitor.headers);
     } catch (e) {
+        // @ts-ignore
       newMonitor.headers = {};
     }
   }
@@ -190,81 +215,35 @@ export async function createMonitor(
 // 更新监控配置
 export async function updateMonitorConfig(
   id: number,
+  // fix: 修正 Monitor 类型的使用
   updates: Partial<Monitor>
 ) {
-  // 准备更新字段
-  const fields: string[] = [];
-  const values: any[] = [];
+  
+  // 准备更新数据对象
+  const updateData: { [key: string]: any } = {
+    updated_at: new Date().toISOString(),
+  };
 
-  if (updates.name !== undefined) {
-    fields.push("name = ?");
-    values.push(updates.name);
-  }
+  if (updates.name !== undefined) updateData.name = updates.name;
+  if (updates.url !== undefined) updateData.url = updates.url;
+  if (updates.method !== undefined) updateData.method = updates.method;
+  if (updates.interval !== undefined) updateData.interval = updates.interval;
+  if (updates.timeout !== undefined) updateData.timeout = updates.timeout;
+  if (updates.expected_status !== undefined) updateData.expected_status = updates.expected_status;
+  if (updates.headers !== undefined) updateData.headers = JSON.stringify(updates.headers);
+  if (updates.body !== undefined) updateData.body = updates.body;
+  if (updates.active !== undefined) updateData.active = updates.active ? 1 : 0;
 
-  if (updates.url !== undefined) {
-    fields.push("url = ?");
-    values.push(updates.url);
-  }
 
-  if (updates.method !== undefined) {
-    fields.push("method = ?");
-    values.push(updates.method);
-  }
-
-  if (updates.interval !== undefined) {
-    fields.push("interval = ?");
-    values.push(updates.interval);
-  }
-
-  if (updates.timeout !== undefined) {
-    fields.push("timeout = ?");
-    values.push(updates.timeout);
-  }
-
-  if (updates.expected_status !== undefined) {
-    fields.push("expected_status = ?");
-    values.push(updates.expected_status);
-  }
-
-  if (updates.headers !== undefined) {
-    fields.push("headers = ?");
-    values.push(JSON.stringify(updates.headers));
-  }
-
-  if (updates.body !== undefined) {
-    fields.push("body = ?");
-    values.push(updates.body);
-  }
-
-  if (updates.active !== undefined) {
-    fields.push("active = ?");
-    values.push(updates.active ? 1 : 0);
-  }
-
-  // 添加更新时间
-  fields.push("updated_at = ?");
-  values.push(new Date().toISOString());
-
-  // 没有要更新的字段时返回
-  if (fields.length === 0) {
+  // 如果没有要更新的字段，则提前返回
+  if (Object.keys(updateData).length <= 1) { // 只有 updated_at
     return { message: "没有提供要更新的字段" };
   }
 
-  // 添加 ID 作为 WHERE 条件
-  values.push(id);
-
   // 执行更新
-  const updatedMonitor = await db
+  const [updatedMonitor] = await db
     .update(monitors)
-    .set({
-      name: updates.name,
-      url: updates.url,
-      method: updates.method,
-      interval: updates.interval,
-      timeout: updates.timeout,
-      expected_status: updates.expected_status,
-      headers: JSON.stringify(updates.headers),
-    })
+    .set(updateData)
     .where(eq(monitors.id, id))
     .returning();
 
@@ -275,8 +254,10 @@ export async function updateMonitorConfig(
   // 解析 headers 字段
   if (updatedMonitor && typeof updatedMonitor.headers === "string") {
     try {
+        // @ts-ignore
       updatedMonitor.headers = JSON.parse(updatedMonitor.headers);
     } catch (e) {
+        // @ts-ignore
       updatedMonitor.headers = {};
     }
   }
@@ -287,7 +268,6 @@ export async function updateMonitorConfig(
 // 删除监控
 export async function deleteMonitor(id: number) {
   // 先删除关联的历史数据
-
   await db
     .delete(monitorStatusHistory24h)
     .where(eq(monitorStatusHistory24h.monitor_id, id));
@@ -298,7 +278,7 @@ export async function deleteMonitor(id: number) {
     .where(eq(monitorDailyStats.monitor_id, id));
 
   // 执行删除监控
-  return await db.delete(monitors).where(eq(monitors.id, id));
+  await db.delete(monitors).where(eq(monitors.id, id));
 }
 
 export async function getMonitorDailyStatsById(id: number) {
@@ -310,9 +290,17 @@ export async function getMonitorDailyStatsById(id: number) {
     .orderBy(asc(monitorDailyStats.date));
 }
 
-export async function getAllMonitorDailyStats() {
+export async function getAllMonitorDailyStats(userId: number) {
+  const userMonitors = await getAllMonitors(userId);
+  // fix: 添加 Monitor 类型以解决 TS7006
+  const monitorIds = userMonitors.map((m: Monitor) => m.id);
+  if (monitorIds.length === 0) return [];
+
   return await db
     .select()
     .from(monitorDailyStats)
+    // fix: 使用 inArray 查询多个监控项
+    .where(inArray(monitorDailyStats.monitor_id, monitorIds))
     .orderBy(asc(monitorDailyStats.date));
 }
+

@@ -12,9 +12,11 @@ import {
   AgentWithLatestMetrics,
 } from "../../types";
 import { getLatestAgentMetrics, getAgentMetrics } from "../../api/agents";
+import { useParams } from "react-router-dom";
 
 const StatusPage = () => {
   const { t } = useTranslation();
+  const { userId } = useParams<{ userId: string }>();
   const [data, setData] = useState<{
     monitors: MonitorWithDailyStatsAndStatusHistory[];
     agents: AgentWithLatestMetrics[];
@@ -37,18 +39,21 @@ const StatusPage = () => {
 
   // 从API获取数据
   useEffect(() => {
-    fetchData();
-    // 设置定时刷新，每3分钟更新数据
-    const intervalId = setInterval(() => {
+    if (userId) {
       fetchData();
-    }, 180000);
-    return () => clearInterval(intervalId);
-  }, []);
+      // 设置定时刷新，每3分钟更新数据
+      const intervalId = setInterval(() => {
+        fetchData();
+      }, 180000);
+      return () => clearInterval(intervalId);
+    }
+  }, [userId]);
 
   // 获取数据
   const fetchData = async () => {
+    if (!userId) return;
     setLoading(true);
-    const response = await getStatusPageData();
+    const response = await getStatusPageData(parseInt(userId, 10));
     if (response) {
       setPageTitle(response.title || t("statusPage.title"));
       setPageDescription(
@@ -143,9 +148,9 @@ const StatusPage = () => {
             <Heading size="9" align="center">
               {pageTitle}
             </Heading>
-            <Text 
-              size="5" 
-              align="center" 
+            <Text
+              size="5"
+              align="center"
               className="whitespace-pre-wrap"
             >
               {pageDescription}

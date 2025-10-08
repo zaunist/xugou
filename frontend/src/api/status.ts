@@ -26,7 +26,7 @@ export const saveStatusPageConfig = async (
 };
 
 // 获取状态页数据
-export const getStatusPageData = async (): Promise<StatusPageData> => {
-  const response = await api.get<StatusPageData>("/api/status/data");
+export const getStatusPageData = async (userId: number): Promise<StatusPageData> => {
+  const response = await api.get<StatusPageData>(`/api/status/public/${userId}/data`);
   return response.data;
 };

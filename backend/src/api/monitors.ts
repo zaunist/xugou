@@ -9,7 +9,7 @@ monitors.get("/", async (c) => {
   const payload = c.get("jwtPayload");
 
   // 调用服务层获取监控列表
-  const result = await MonitorService.getAllMonitors();
+  const result = await MonitorService.getAllMonitors(payload.id);
 
   return c.json(
     {
@@ -22,8 +22,9 @@ monitors.get("/", async (c) => {
 
 // 获取所有监控的每日统计数据
 monitors.get("/daily", async (c) => {
+  const payload = c.get("jwtPayload");
   // 调用服务层获取所有监控的每日统计数据
-  const result = await MonitorService.getAllMonitorDailyStats();
+  const result = await MonitorService.getAllMonitorDailyStats(payload.id);
 
   return c.json({
     success: result.success,
@@ -52,8 +53,9 @@ monitors.post("/", async (c) => {
 
 // 获取所有监控状态历史
 monitors.get("/history", async (c) => {
+  const payload = c.get("jwtPayload");
   // 调用服务层获取监控历史
-  const result = await MonitorService.getAllMonitorStatusHistory();
+  const result = await MonitorService.getAllMonitorStatusHistory(payload.id);
 
   return c.json(
     {
@@ -70,7 +72,7 @@ monitors.get("/:id", async (c) => {
   const payload = c.get("jwtPayload");
 
   // 调用服务层获取监控详情
-  const result = await MonitorService.getMonitorById(id);
+  const result = await MonitorService.getMonitorById(id, payload.id, payload.role);
 
   return c.json(
     {
@@ -86,9 +88,10 @@ monitors.get("/:id", async (c) => {
 monitors.put("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
   const data = await c.req.json();
+  const payload = c.get("jwtPayload"); // 获取用户信息
 
-  // 调用服务层更新监控
-  const result = await MonitorService.updateMonitor(id, data);
+  // 调用服务层更新监控，并传入用户信息以进行权限验证
+  const result = await MonitorService.updateMonitor(id, data, payload.id, payload.role);
 
   return c.json(
     {
@@ -105,8 +108,8 @@ monitors.delete("/:id", async (c) => {
   const id = parseInt(c.req.param("id"));
   const payload = c.get("jwtPayload");
 
-  // 调用服务层删除监控
-  const result = await MonitorService.deleteMonitor(id);
+  // 调用服务层删除监控，并传入用户信息以进行权限验证
+  const result = await MonitorService.deleteMonitor(id, payload.id, payload.role);
 
   return c.json(
     {
@@ -142,9 +145,10 @@ monitors.get("/:id/history", async (c) => {
 // 获取单个监控的每日统计数据
 monitors.get("/:id/daily", async (c) => {
   const id = parseInt(c.req.param("id"));
+  const payload = c.get("jwtPayload");
 
   // 调用服务层获取每日统计数据
-  const result = await MonitorService.getMonitorDailyStats(id);
+  const result = await MonitorService.getMonitorDailyStats(id, payload.id, payload.role);
 
   return c.json({
     success: result.success,
@@ -156,9 +160,10 @@ monitors.get("/:id/daily", async (c) => {
 // 手动检查单个监控
 monitors.post("/:id/check", async (c) => {
   const id = parseInt(c.req.param("id"));
+  const payload = c.get("jwtPayload");
 
-  // 调用服务层手动检查监控
-  const result = await MonitorService.manualCheckMonitor(id);
+  // 调用服务层手动检查监控，并传入用户信息以进行权限验证
+  const result = await MonitorService.manualCheckMonitor(id, payload.id, payload.role);
 
   return c.json(
     {

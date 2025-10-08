@@ -16,6 +16,17 @@ export async function getAllStatusPageConfigs() {
   return await db.select().from(statusPageConfig);
 }
 
+// 新增：根据用户ID获取状态页配置
+export async function getStatusPageConfigByUserId(userId: number) {
+  const config = await db
+    .select()
+    .from(statusPageConfig)
+    .where(eq(statusPageConfig.user_id, userId))
+    .limit(1);
+  return config[0];
+}
+
+
 // 获取配置的监控项
 export async function getConfigMonitors(
   configId: number,

@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { getStatusPageConfig, saveStatusPageConfig } from "../../api/status";
 import { StatusPageConfig as StatusConfig } from "../../types/status";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../providers/AuthProvider";
 
 // 监控项带选择状态
 interface MonitorWithSelection {
@@ -49,6 +50,7 @@ interface StatusConfigWithDetails {
 }
 
 const StatusPageConfig = () => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -60,10 +62,19 @@ const StatusPageConfig = () => {
     description: t("statusPage.allOperational"),
     logoUrl: "",
     customCss: "",
-    publicUrl: window.location.origin + "/status",
+    publicUrl: "",
     monitors: [],
     agents: [],
   });
+  
+  useEffect(() => {
+    if (user) {
+      setConfig(prev => ({
+        ...prev,
+        publicUrl: `${window.location.origin}/status/public/${user.id}`
+      }));
+    }
+  }, [user]);
 
   // 从API获取数据
   useEffect(() => {
@@ -170,7 +181,9 @@ const StatusPageConfig = () => {
   // 预览状态页
   const handlePreview = () => {
     // 在新标签页中打开状态页
-    window.open("/status", "_blank");
+    if (user) {
+      window.open(`/status/public/${user.id}`, "_blank");
+    }
   };
 
   if (loading) {
