@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"; // 导入 useEffect
 import { useNavigate, Link } from "react-router-dom";
 import { Flex, Heading, Text } from "@radix-ui/themes";
-import { Button, Card } from "@/components/ui";
+import { Button, Card, Input } from "@/components/ui"; // 导入 Input 组件
 import { useAuth } from "../../providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import { getAllowNewUserRegistration } from "../../api/settings"; // 导入 API
@@ -86,48 +86,36 @@ const Register = () => {
 
             <form onSubmit={handleSubmit}>
               <Flex direction="column" gap="3">
-                <div className="input-wrapper">
-                  <input
-                    placeholder={t("register.username")}
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    className="text-input"
-                  />
-                </div>
+                <Input
+                  placeholder={t("register.username")}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
 
-                <div className="input-wrapper">
-                  <input
-                    placeholder={t("register.email")}
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="text-input"
-                  />
-                </div>
+                <Input
+                  placeholder={t("register.email")}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
 
-                <div className="input-wrapper">
-                  <input
-                    placeholder={t("register.password")}
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="text-input"
-                  />
-                </div>
+                <Input
+                  placeholder={t("register.password")}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
 
-                <div className="input-wrapper">
-                  <input
-                    placeholder={t("register.confirmPassword")}
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    className="text-input"
-                  />
-                </div>
+                <Input
+                  placeholder={t("register.confirmPassword")}
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
 
                 <Button type="submit" disabled={isLoading}>
                   {isLoading ? t("common.loading") : t("register.button")}
