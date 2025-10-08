@@ -226,5 +226,12 @@ CREATE INDEX IF NOT EXISTS \`monitor_status_history_24h_monitor_timestamp_idx\` 
   {
     name: "0003_reflective_random.sql",
     sql: `CREATE INDEX IF NOT EXISTS \`monitor_status_history_24h_timestamp_idx\` ON \`monitor_status_history_24h\` (\`timestamp\`);`
+  },
+  {
+    name: "0004_lame_mercenary.sql",
+    sql: `CREATE TABLE IF NOT EXISTS \`settings\` (
+	\`key\` text PRIMARY KEY NOT NULL,
+	\`value\` text
+);`
   }
 ];
