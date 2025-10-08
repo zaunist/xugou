@@ -119,7 +119,7 @@ export const statusPageMonitors = sqliteTable("status_page_monitors", {
   config_id: int("config_id").notNull().references(() => statusPageConfig.id, { onDelete: "cascade" }),
   monitor_id: int("monitor_id").notNull().references(() => monitors.id, { onDelete: "cascade" }),
 }, (table) => ({
-  pk: primaryKey(table.config_id, table.monitor_id)
+  pk: primaryKey({ columns: [table.config_id, table.monitor_id] })
 }));
 
 // 状态页客户端关联表
@@ -127,7 +127,7 @@ export const statusPageAgents = sqliteTable("status_page_agents", {
   config_id: int("config_id").notNull().references(() => statusPageConfig.id, { onDelete: "cascade" }),
   agent_id: int("agent_id").notNull().references(() => agents.id, { onDelete: "cascade" }),
 }, (table) => ({
-  pk: primaryKey(table.config_id, table.agent_id)
+  pk: primaryKey({ columns: [table.config_id, table.agent_id] })
 }));
 
 // 通知渠道表
@@ -187,4 +187,10 @@ export const notificationHistory = sqliteTable("notification_history", {
   content: text("content").notNull(),
   error: text("error"),
   sent_at: text("sent_at").default("CURRENT_TIMESTAMP")
+});
+
+// 新增：应用设置表
+export const settings = sqliteTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value"),
 });
