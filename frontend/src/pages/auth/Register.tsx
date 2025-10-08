@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // 导入 useEffect
 import { useNavigate, Link } from "react-router-dom";
 import { Flex, Heading, Text } from "@radix-ui/themes";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "../../providers/AuthProvider";
 import { useTranslation } from "react-i18next";
+import { getAllowNewUserRegistration } from "../../api/settings"; // 导入 API
+import { toast } from "sonner"; // 导入 toast
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -16,6 +18,24 @@ const Register = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  // 新增：检查注册是否开启
+  useEffect(() => {
+    const checkRegistrationStatus = async () => {
+      try {
+        const response = await getAllowNewUserRegistration();
+        if (!response.success || !response.allow) {
+          toast.error(t('register.disabled'));
+          navigate("/login");
+        }
+      } catch (e) {
+        toast.error(t('register.disabled'));
+        navigate("/login");
+      }
+    };
+    checkRegistrationStatus();
+  }, [navigate, t]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

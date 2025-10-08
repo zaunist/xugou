@@ -6,3 +6,4 @@ export * from "./monitors";
 export * from "./notifications";
 export * from "./status";
 export * from "./users";
+export * from "./settings";
