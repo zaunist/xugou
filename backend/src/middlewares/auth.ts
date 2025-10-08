@@ -22,6 +22,11 @@ export const jwtMiddleware = async (c: Context, next: Next) => {
     return next();
   }
 
+  // 新增：跳过获取新用户注册设置的公共接口
+  if (c.req.path === "/api/settings/allow_new_user_registration" && c.req.method === "GET") {
+    return next();
+  }
+
   if (c.req.path.endsWith("/data") && c.req.method === "GET") {
     return next();
   }

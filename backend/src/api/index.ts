@@ -5,3 +5,4 @@ export * from "./users";
 export * from "./status";
 export * from "./notifications";
 export * from "./dashboard";
+export * from "./settings";

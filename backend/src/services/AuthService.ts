@@ -8,6 +8,7 @@ import * as jsonwebtoken from "jsonwebtoken";
 import * as repositories from "../repositories";
 import { getJwtSecret } from "../utils/jwt";
 import { Bindings } from "../models/db";
+import * as SettingsService from "./SettingsService";
 
 /**
  * 用户登录
@@ -109,17 +110,21 @@ export async function loginUser(
  * @param username 用户名
  * @param password 密码(明文)
  * @param email 电子邮箱
- * @param role 用户角色
  * @returns 注册结果
  */
 export async function registerUser(
   env: { DB: Bindings["DB"] } & any,
   username: string,
   password: string,
-  email: string | null = null,
-  role: string = "user"
+  email: string | null = null
 ): Promise<{ success: boolean; message: string; user?: any }> {
   try {
+    // 新增：检查是否允许新用户注册
+    const isRegistrationAllowed = await SettingsService.getAllowNewUserRegistration();
+    if (!isRegistrationAllowed) {
+      return { success: false, message: "新用户注册功能已关闭" };
+    }
+
     // 检查用户名是否已存在
     const existingUser = await repositories.getUserByUsername(username);
     if (existingUser) {
@@ -130,12 +135,12 @@ export async function registerUser(
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 创建用户
+    // 创建用户, 默认角色为 'user'
     const newUser = await repositories.createUser(
       username,
       hashedPassword,
       email,
-      role
+      "user"
     );
 
     return {

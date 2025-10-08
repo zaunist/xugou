@@ -29,6 +29,7 @@ app.route("/api/users", api.users);
 app.route("/api/status", api.status);
 app.route("/api/notifications", api.notifications);
 app.route("/api/dashboard", api.dashboard);
+app.route("/api/settings", api.settings);
 
 // 静态文件路由 - 处理所有非 API 请求，返回前端应用
 app.get("*", async (c) => {
