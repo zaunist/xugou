@@ -281,6 +281,25 @@ export async function deleteMonitor(id: number) {
   await db.delete(monitors).where(eq(monitors.id, id));
 }
 
+// 新增：根据用户ID删除监控
+export async function deleteMonitorsByUserId(userId: number) {
+  const userMonitors = await getAllMonitors(userId);
+  // fix: 为参数 'm' 明确添加 Monitor 类型
+  const monitorIds = userMonitors.map((m: Monitor) => m.id);
+
+  if (monitorIds.length === 0) {
+    return;
+  }
+
+  // 批量删除关联的历史数据和每日统计数据
+  await db.delete(monitorStatusHistory24h).where(inArray(monitorStatusHistory24h.monitor_id, monitorIds));
+  await db.delete(monitorDailyStats).where(inArray(monitorDailyStats.monitor_id, monitorIds));
+
+  // 批量删除监控
+  await db.delete(monitors).where(inArray(monitors.id, monitorIds));
+}
+
+
 export async function getMonitorDailyStatsById(id: number) {
   // 查询每日统计数据
   return await db

@@ -142,3 +142,8 @@ export async function getSelectedAgents(configId: number) {
     .from(statusPageAgents)
     .where(eq(statusPageAgents.config_id, configId));
 }
+
+// 新增：根据用户ID删除状态页配置
+export async function deleteStatusPageConfigByUserId(userId: number) {
+  await db.delete(statusPageConfig).where(eq(statusPageConfig.user_id, userId));
+}

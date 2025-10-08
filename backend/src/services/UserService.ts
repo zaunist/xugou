@@ -238,6 +238,21 @@ export async function deleteUserService(
       };
     }
 
+    // 在删除用户之前，先删除所有关联数据
+    // 删除关联的监控项目
+    await repositories.deleteMonitorsByUserId(id);
+    // 删除关联的客户端
+    await repositories.deleteAgentsByUserId(id);
+    // 删除关联的通知设置
+    await repositories.deleteNotificationSettingsByUserId(id);
+    // 删除关联的通知模板
+    await repositories.deleteNotificationTemplatesByUserId(id);
+    // 删除关联的通知渠道
+    await repositories.deleteNotificationChannelsByUserId(id);
+    // 删除关联的状态页配置
+    await repositories.deleteStatusPageConfigByUserId(id);
+
+
     // 执行删除
     await repositories.deleteUser(id);
 

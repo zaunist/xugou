@@ -12,7 +12,7 @@ import {
   notificationSettings,
   notificationHistory,
 } from "../db/schema";
-import { eq, desc, asc, and, count, isNull } from "drizzle-orm";
+import { eq, desc, asc, and, count, isNull, inArray } from "drizzle-orm";
 
 // 获取所有通知渠道
 export const getNotificationChannels = async (): Promise<
@@ -546,4 +546,33 @@ export const deleteNotificationSettings = async (
   }
 
   return true;
+};
+
+// 新增：根据用户ID删除通知设置
+export const deleteNotificationSettingsByUserId = async (
+  userId: number
+): Promise<void> => {
+  await db.delete(notificationSettings).where(eq(notificationSettings.user_id, userId));
+};
+
+// 新增：根据用户ID删除通知模板
+export const deleteNotificationTemplatesByUserId = async (
+  userId: number
+): Promise<void> => {
+  await db.delete(notificationTemplates).where(eq(notificationTemplates.created_by, userId));
+};
+
+// 新增：根据用户ID删除通知渠道
+export const deleteNotificationChannelsByUserId = async (
+  userId: number
+): Promise<void> => {
+  const userChannels = await db.select({id: notificationChannels.id}).from(notificationChannels).where(eq(notificationChannels.created_by, userId));
+  if (userChannels.length > 0) {
+    // 修复：为 map 回调中的参数 c 显式指定类型
+    const channelIds = userChannels.map((c: { id: number }) => c.id);
+    // 删除关联的通知历史
+    await db.delete(notificationHistory).where(inArray(notificationHistory.channel_id, channelIds));
+    // 删除通知渠道
+    await db.delete(notificationChannels).where(inArray(notificationChannels.id, channelIds));
+  }
 };
