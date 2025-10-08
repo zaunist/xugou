@@ -1,16 +1,25 @@
 import * as repositories from "../repositories";
 import { Agent } from "../models";
 
+/**
+ * 获取状态页配置
+ * @param userId - 当前用户的ID（修复后此参数被忽略，以获取全局配置）
+ * @returns 状态页配置对象
+ */
 export async function getStatusPageConfig(userId: number) {
   try {
-    // 检查是否已存在配置
-    const existingConfig = await repositories.getStatusPageConfigById(userId);
+    // 修复：状态页配置是全局的，不应按用户ID查找。获取所有配置并使用第一个。
+    const allConfigs = await repositories.getAllStatusPageConfigs();
 
-    if (!existingConfig) {
+    if (!allConfigs || allConfigs.length === 0) {
+      // 备注：如果系统中没有任何配置，将抛出错误。首次使用时，管理员需要先保存一次配置。
       throw new Error("状态页配置不存在");
     }
 
-    console.log("existingConfig", existingConfig);
+    // 将第一个配置视为全局配置
+    const existingConfig = allConfigs[0];
+
+    console.log("使用的状态页配置:", existingConfig);
 
     // 获取被选中的监控项
     const monitorsResult = await repositories.getConfigMonitors(
@@ -19,7 +28,6 @@ export async function getStatusPageConfig(userId: number) {
 
     // 获取所有监控项
     const allMonitors = await repositories.getAllMonitors();
-    console.log("monitorsResult", monitorsResult);
 
     // 获取被选中的客户端
     const agentsResult = await repositories.getConfigAgents(
@@ -29,9 +37,7 @@ export async function getStatusPageConfig(userId: number) {
     // 获取所有客户端
     const allAgents = await repositories.getAllAgents();
 
-    console.log("agentsResult", agentsResult);
-
-    // 构建返回的监控列表，将 allMonitors 和 monitorsResult 去重，同时 monitorsResult 中存在的需要标记为选中
+    // 构建返回的监控列表，标记哪些监控项被选中
     const monitors = allMonitors.map((monitor: any) => {
       const isSelected = monitorsResult.some(
         (m: any) => m.monitor_id === monitor.id
@@ -39,7 +45,7 @@ export async function getStatusPageConfig(userId: number) {
       return { ...monitor, selected: isSelected };
     });
 
-    // 构建返回的客户端列表，将 allAgents 和 agentsResult 去重，同时 agentsResult 中存在的需要标记为选中
+    // 构建返回的客户端列表，标记哪些客户端被选中
     const agents = allAgents.map((agent: any) => {
       const isSelected = agentsResult.some(
         (a: any) => a.agent_id === agent.id
@@ -61,6 +67,12 @@ export async function getStatusPageConfig(userId: number) {
   }
 }
 
+/**
+ * 保存状态页配置
+ * @param userId - 当前操作用户的ID
+ * @param data - 要保存的配置数据
+ * @returns 保存结果
+ */
 export async function saveStatusPageConfig(
   userId: number,
   data: {
@@ -73,8 +85,9 @@ export async function saveStatusPageConfig(
   }
 ) {
   try {
-    // 检查是否已存在配置
-    const existingConfig = await repositories.getStatusPageConfigById(userId);
+    // 修复：同样，保存时也应操作全局的第一个配置
+    const allConfigs = await repositories.getAllStatusPageConfigs();
+    const existingConfig = (allConfigs && allConfigs.length > 0) ? allConfigs[0] : null;
 
     let configId: number;
 
@@ -87,11 +100,10 @@ export async function saveStatusPageConfig(
         data.logoUrl,
         data.customCss
       );
-
       configId = existingConfig.id;
     } else {
-      // 创建新配置
-      const insertResult = await repositories.createStatusPageConfig(
+      // 如果不存在，则为当前用户创建一个新的全局配置
+      const newConfigId = await repositories.createStatusPageConfig(
         userId,
         data.title,
         data.description,
@@ -99,50 +111,49 @@ export async function saveStatusPageConfig(
         data.customCss
       );
 
-      if (!insertResult || typeof insertResult.id !== "number") {
+      if (!newConfigId) {
         throw new Error("创建状态页配置失败");
       }
-
-      configId = insertResult.id;
+      configId = newConfigId;
     }
 
-    // 清除现有的监控项关联
+    // 清除并重新关联选定的监控项
     await repositories.clearConfigMonitorLinks(configId);
-
-    // 清除现有的客户端关联
-    await repositories.clearConfigAgentLinks(configId);
-
-    // 添加选定的监控项
     if (data.monitors && data.monitors.length > 0) {
       for (const monitorId of data.monitors) {
         await repositories.addMonitorToConfig(configId, monitorId);
       }
     }
 
-    // 添加选定的客户端
+    // 清除并重新关联选定的客户端
+    await repositories.clearConfigAgentLinks(configId);
     if (data.agents && data.agents.length > 0) {
       for (const agentId of data.agents) {
         await repositories.addAgentToConfig(configId, agentId);
       }
     }
 
-    return existingConfig;
+    // 返回成功信息
+    return { success: true, message: "配置已保存" };
   } catch (error) {
     console.error("保存状态页配置失败:", error);
     throw new Error("保存状态页配置失败");
   }
 }
 
+/**
+ * 获取公共状态页所需的数据
+ * @returns 公共状态页数据
+ */
 export async function getStatusPagePublicData() {
   // 获取所有配置
   const configsResult = await repositories.getAllStatusPageConfigs();
 
   if (!configsResult || configsResult.length === 0) {
-    console.log("没有找到任何配置");
-
+    console.log("没有找到任何状态页配置");
     return {
-      title: "故障状态",
-      description: "没有找到任何数据，请检查",
+      title: "系统状态",
+      description: "当前没有可用的状态页配置。",
       logoUrl: "",
       customCss: "",
       monitors: [],
@@ -150,51 +161,49 @@ export async function getStatusPagePublicData() {
     };
   }
 
-  // 简单处理：获取第一个配置
+  // 使用第一个配置作为全局配置
   const config = configsResult[0];
 
-  // 获取选中的监控项
+  // 获取选中的监控项ID
   const selectedMonitors = await repositories.getSelectedMonitors(
     config.id as number
   );
 
-
-  // 获取选中的客户端
+  // 获取选中的客户端ID
   const selectedAgents = await repositories.getSelectedAgents(
     config.id as number
   );
 
-  // 获取监控项详细信息
+  // 获取监控项的详细信息
   let monitors: any[] = [];
   if (selectedMonitors && selectedMonitors.length > 0) {
     const monitorIds = selectedMonitors.map((m: any) => m.monitor_id);
     if (monitorIds.length > 0) {
       for (const monitorId of monitorIds) {
         const monitor = await repositories.getMonitorById(monitorId);
-        const monitorDailyStats = await repositories.getMonitorDailyStatsById(
-          monitorId
-        );
-        const monitorHistory = await repositories.getMonitorStatusHistoryIn24h(
-          monitorId
-        );
-        monitors.push({
-          ...monitor,
-          dailyStats: monitorDailyStats,
-          history: monitorHistory,
-        });
+        if (monitor) { // 确保监控项存在
+          const monitorDailyStats = await repositories.getMonitorDailyStatsById(
+            monitorId
+          );
+          const monitorHistory = await repositories.getMonitorStatusHistoryIn24h(
+            monitorId
+          );
+          monitors.push({
+            ...monitor,
+            dailyStats: monitorDailyStats,
+            history: monitorHistory,
+          });
+        }
       }
     }
   }
 
+  // 获取客户端的详细信息
   let agents: Agent[] = [];
-
-  // 获取客户端基本信息
   if (selectedAgents && selectedAgents.length > 0) {
     const agentIds = selectedAgents.map((a: any) => a.agent_id);
-
     if (agentIds.length > 0) {
       const agentsResult = await repositories.getAgentsByIds(agentIds);
-
       if (agentsResult) {
         agents = agentsResult as Agent[];
       }
