@@ -516,6 +516,21 @@ const enUS = {
     "notifications.save.error": "Failed to save notification settings",
     "notifications.globalSettings.description": "Configure global notification settings, including notification channels, monitor settings, and message templates. These settings will apply to all monitors and agents unless overridden by specific configurations.",
 
+    // Notification Variables
+    "notifications.variables.name": "Name",
+    "notifications.variables.status": "Status",
+    "notifications.variables.previous_status": "Previous Status",
+    "notifications.variables.time": "Time",
+    "notifications.variables.url": "URL",
+    "notifications.variables.response_time": "Response Time",
+    "notifications.variables.status_code": "Status Code",
+    "notifications.variables.expected_status": "Expected Status",
+    "notifications.variables.error": "Error",
+    "notifications.variables.details": "Details",
+    "notifications.variables.hostname": "Hostname",
+    "notifications.variables.ip_addresses": "IP Addresses",
+    "notifications.variables.os": "Operating System",
+
     // Notification Event Types
     "notifications.events.onDownOnly": "Send notification only when service goes down",
     "notifications.events.onRecovery": "Send notification when service recovers",

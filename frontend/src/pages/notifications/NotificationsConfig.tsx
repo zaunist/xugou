@@ -113,19 +113,19 @@ const NotificationsConfig = () => {
 
     // 模板变量
     const templateVariables = [
-        "${name}",
-        "${status}",
-        "${previous_status}",
-        "${time}",
-        "${url}",
-        "${response_time}",
-        "${status_code}",
-        "${expected_status}",
-        "${error}",
-        "${details}",
-        "${hostname}",
-        "${ip_addresses}",
-        "${os}",
+        { value: "${name}", key: "name" },
+        { value: "${status}", key: "status" },
+        { value: "${previous_status}", key: "previous_status" },
+        { value: "${time}", key: "time" },
+        { value: "${url}", key: "url" },
+        { value: "${response_time}", key: "response_time" },
+        { value: "${status_code}", key: "status_code" },
+        { value: "${expected_status}", key: "expected_status" },
+        { value: "${error}", key: "error" },
+        { value: "${details}", key: "details" },
+        { value: "${hostname}", key: "hostname" },
+        { value: "${ip_addresses}", key: "ip_addresses" },
+        { value: "${os}", key: "os" },
     ];
 
     useEffect(() => {
@@ -1515,12 +1515,12 @@ const NotificationsConfig = () => {
                             <Flex wrap="wrap" gap="2">
                                 {templateVariables.map((variable) => (
                                     <Button
-                                        key={variable}
+                                        key={variable.value}
                                         size="sm"
                                         variant="secondary"
-                                        onClick={() => insertVariable(variable)}
+                                        onClick={() => insertVariable(variable.value)}
                                     >
-                                        {variable}
+                                        {t(`notifications.variables.${variable.key}`)}
                                     </Button>
                                 ))}
                             </Flex>
