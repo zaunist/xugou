@@ -8,18 +8,8 @@ import "./styles/global.css";
 import "./i18n/config";
 import router from "./router";
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/sw.js")
-      .then((registration) => {
-        console.log("Service Worker 注册成功:", registration);
-      })
-      .catch((registrationError) => {
-        console.log("Service Worker 注册失败:", registrationError);
-      });
-  });
-}
+// 删除了手动的 Service Worker 注册代码
+// vite-plugin-pwa 会自动处理
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
