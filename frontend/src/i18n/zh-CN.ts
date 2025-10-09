@@ -12,6 +12,7 @@ const zhCN = {
     "navbar.logout": "退出登录",
     "navbar.login": "登录",
     "navbar.loggedInAs": "已登录为",
+    "navbar.register": "注册",
 
     // 通用按钮和提示
     "common.loading": "加载中...",
@@ -19,18 +20,25 @@ const zhCN = {
     "common.cancel": "取消",
     "common.delete": "删除",
     "common.edit": "编辑",
-
+    "common.create": "创建",
     "common.back": "返回",
-
+    "common.search": "搜索",
+    "common.filter": "筛选",
     "common.actions": "操作",
     "common.status": "状态",
-
+    "common.name": "名称",
+    "common.description": "描述",
     "common.type": "类型",
-
+    "common.url": "URL",
+    "common.created": "创建时间",
+    "common.updated": "更新时间",
+    "common.yes": "是",
     "common.no": "否",
-
+    "common.confirm": "确认",
+    "common.success": "成功",
     "common.error": "错误",
-
+    "common.warning": "警告",
+    "common.info": "信息",
     "common.retry": "重试",
     "common.refresh": "刷新",
     "common.deleting": "删除中...",
@@ -39,22 +47,25 @@ const zhCN = {
     "common.loadingError": "加载出错",
     "common.notFound": "未找到",
     "common.backToList": "返回列表",
-
+    "common.success.deleted": "删除成功",
+    "common.success.updated": "更新成功",
     "common.error.delete": "删除失败，请重试",
-
+    "common.error.update": "更新失败",
     "common.error.fetch": "获取数据失败",
-
+    "common.required": "必填",
+    "common.optional": "可选",
     "common.copy": "复制",
     "common.copied": "已复制",
     "common.deleteConfirmation": "确认删除",
     "common.deleteConfirmMessage": "您确定要删除吗？此操作无法撤销。",
     "common.second": "秒",
     "common.seconds": "秒",
-
+    "common.minute": "分钟",
+    "common.minutes": "分钟",
     "common.date": "日期",
     "common.close": "关闭",
     "common.unknown": "未知",
-
+    "common.comingSoon": "即将推出",
     "common.default": "默认",
 
     // 语言选择
@@ -82,6 +93,7 @@ const zhCN = {
     "login.password": "密码",
     "login.button": "登录",
     "login.error": "用户名或密码错误",
+    "login.registerLink": "还没有账户？",
 
     // 注册页面
     "register.title": "注册",
@@ -95,12 +107,14 @@ const zhCN = {
     "register.error.usernameExists": "用户名已存在",
     "register.error.emailExists": "邮箱已存在",
     "register.success.message": "注册成功，请登录",
+    "register.disabled": "新用户注册功能当前已关闭。",
 
     // 仪表盘
     "dashboard.title": "仪表盘",
     "dashboard.summary": "概览",
     "dashboard.totalMonitors": "监控总数",
     "dashboard.activeMonitors": "活动监控",
+    "dashboard.refresh": "刷新",
 
     // 监控列表
     "monitors.title": "监控列表",
@@ -131,6 +145,7 @@ const zhCN = {
     "monitor.edit": "编辑监控",
     "monitor.delete": "删除监控",
     "monitor.history": "历史记录",
+    "monitor.uptime": "可用率",
     "monitor.responseTime": "响应时间",
     "monitor.oneDayHistory": "24小时记录",
     "monitor.MonthsHistory": "30天记录",
@@ -332,6 +347,8 @@ const zhCN = {
     "users.error.fetch": "获取用户列表失败",
     "users.error.delete": "删除用户失败",
     "users.deleteConfirm": '您确定要删除用户 "{username}" 吗？此操作无法撤销。',
+    "users.allowRegistration": "允许新用户注册",
+    "users.allowRegistrationHelp": "开启后，登录页面将显示注册按钮。",
     "user.username": "用户名",
     "user.email": "电子邮箱",
     "user.role": "角色",
@@ -359,6 +376,8 @@ const zhCN = {
     // 状态页
     "statusPage.title": "系统状态",
     "statusPage.allOperational": "所有系统正常运行",
+    "statusPage.lastUpdated": "上次更新",
+    "statusPage.justNow": "刚刚",
     "statusPage.apiServices": "API服务状态",
     "statusPage.agentStatus": "客户端监控状态",
 

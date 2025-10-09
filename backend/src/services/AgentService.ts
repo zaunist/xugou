@@ -8,9 +8,9 @@ import { handleAgentThresholdNotification } from "../jobs/agent-task";
  * @param db 数据库连接
  * @returns 客户端列表
  */
-export async function getAgents() {
+export async function getAgents(userId: number) {
   try {
-    const result = await AgentRepository.getAllAgents();
+    const result = await AgentRepository.getAllAgents(userId);
     return {
       success: true,
       agents: result || [],

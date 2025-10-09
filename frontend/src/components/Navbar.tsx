@@ -5,6 +5,7 @@ import {
   Button,
   Avatar,
   AvatarImage,
+  AvatarFallback,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -23,7 +24,7 @@ import {
   PieChartIcon,
   BellIcon,
   HamburgerMenuIcon,
-  DownloadIcon
+  DownloadIcon,
 } from "@radix-ui/react-icons";
 import { useAuth } from "../providers/AuthProvider";
 import { useState, useEffect } from "react";
@@ -66,17 +67,13 @@ const Navbar = () => {
 
   return (
     <Box className={`navbar-wrapper ${isScrolled ? "scrolled" : ""}`}>
-      <Box >
+      <Box>
         <Container size="4">
-          <Flex
-            justify="between"
-            align="center"
-            py="2"
-          >
+          <Flex justify="between" align="center" py="2">
             <Flex gap="2" align="center">
               {/* 移动端屏幕菜单栏 */}
-              { isAuthenticated ? (
-                <>  
+              {isAuthenticated ? (
+                <>
                   <Box className="lg:hidden">
                     <DropdownMenu>
                       <DropdownMenuTrigger>
@@ -85,10 +82,14 @@ const Navbar = () => {
                         </Flex>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                        <DropdownMenuItem
+                          onClick={() => navigate("/dashboard")}
+                        >
                           <Flex gap="2" align="center">
                             <DashboardIcon width="14" height="14" />
-                            <Text className="pl-2" size="2">{t("navbar.dashboard")}</Text>
+                            <Text className="pl-2" size="2">
+                              {t("navbar.dashboard")}
+                            </Text>
                           </Flex>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate("/monitors")}>
@@ -107,13 +108,19 @@ const Navbar = () => {
                             </Text>
                           </Flex>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate("/status/config")}>
+                        <DropdownMenuItem
+                          onClick={() => navigate("/status/config")}
+                        >
                           <Flex gap="2" align="center">
                             <PieChartIcon width="14" height="14" />
-                            <Text className="pl-2" size="2">{t("navbar.statusPage")}</Text>
+                            <Text className="pl-2" size="2">
+                              {t("navbar.statusPage")}
+                            </Text>
                           </Flex>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate("/notifications")}>
+                        <DropdownMenuItem
+                          onClick={() => navigate("/notifications")}
+                        >
                           <Flex gap="2" align="center">
                             <BellIcon width="14" height="14" />
                             <Text className="pl-2" size="2">
@@ -133,16 +140,18 @@ const Navbar = () => {
                     </DropdownMenu>
                   </Box>
 
-                  <Separator orientation="vertical" className="!h-6 lg:hidden" />
+                  <Separator
+                    orientation="vertical"
+                    className="!h-6 lg:hidden"
+                  />
                 </>
-              ) : null }
-
+              ) : null}
 
               {/* Logo 部分 */}
               <Flex align="center" className="ml-3">
-                <Link to="/" >
+                <Link to="/">
                   <Flex align="center" gap="2">
-                    <Box >
+                    <Box>
                       <PieChartIcon width="20" height="20" />
                     </Box>
                     <Text size="4" weight="bold">
@@ -239,7 +248,10 @@ const Navbar = () => {
                     </Button>
                   </Flex>
 
-                  <Separator orientation="vertical" className="!h-6 hidden lg:block" />
+                  <Separator
+                    orientation="vertical"
+                    className="!h-6 hidden lg:block"
+                  />
 
                   {/* 语言选择器 */}
                   <LanguageSelector />
@@ -255,10 +267,18 @@ const Navbar = () => {
                       >
                         <Avatar className="border">
                           <AvatarImage
+                            src=""
                             alt={user?.username}
                             width="32"
                             height="32"
                           />
+                          <AvatarFallback>
+                            {user?.username ? (
+                              user.username.charAt(0).toUpperCase()
+                            ) : (
+                              <PersonIcon />
+                            )}
+                          </AvatarFallback>
                         </Avatar>
                         <Box display={{ initial: "none", sm: "block" }}>
                           <Text size="2">{user?.username}</Text>

@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // 导入 useEffect
 import { useNavigate, Link } from "react-router-dom";
 import { Flex, Heading, Text } from "@radix-ui/themes";
-import { Button, Card } from "@/components/ui";
+import { Button, Card, Input } from "@/components/ui"; // 导入 Input 组件
 import { useAuth } from "../../providers/AuthProvider";
 import { useTranslation } from "react-i18next";
+import { getAllowNewUserRegistration } from "../../api/settings"; // 导入 API
+import { toast } from "sonner"; // 导入 toast
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -16,6 +18,24 @@ const Register = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  // 新增：检查注册是否开启
+  useEffect(() => {
+    const checkRegistrationStatus = async () => {
+      try {
+        const response = await getAllowNewUserRegistration();
+        if (!response.success || !response.allow) {
+          toast.error(t('register.disabled'));
+          navigate("/login");
+        }
+      } catch (e) {
+        toast.error(t('register.disabled'));
+        navigate("/login");
+      }
+    };
+    checkRegistrationStatus();
+  }, [navigate, t]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,48 +86,36 @@ const Register = () => {
 
             <form onSubmit={handleSubmit}>
               <Flex direction="column" gap="3">
-                <div className="input-wrapper">
-                  <input
-                    placeholder={t("register.username")}
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    className="text-input"
-                  />
-                </div>
+                <Input
+                  placeholder={t("register.username")}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
 
-                <div className="input-wrapper">
-                  <input
-                    placeholder={t("register.email")}
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="text-input"
-                  />
-                </div>
+                <Input
+                  placeholder={t("register.email")}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
 
-                <div className="input-wrapper">
-                  <input
-                    placeholder={t("register.password")}
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="text-input"
-                  />
-                </div>
+                <Input
+                  placeholder={t("register.password")}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
 
-                <div className="input-wrapper">
-                  <input
-                    placeholder={t("register.confirmPassword")}
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    className="text-input"
-                  />
-                </div>
+                <Input
+                  placeholder={t("register.confirmPassword")}
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
 
                 <Button type="submit" disabled={isLoading}>
                   {isLoading ? t("common.loading") : t("register.button")}

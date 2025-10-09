@@ -20,7 +20,8 @@ const agents = new Hono<{
 
 // 获取所有客户端
 agents.get("/", async (c) => {
-  const result = await getAgents();
+  const payload = c.get("jwtPayload");
+  const result = await getAgents(payload.id);
 
   return c.json(
     {

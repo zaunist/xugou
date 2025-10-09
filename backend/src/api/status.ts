@@ -55,8 +55,12 @@ status.post("/config", async (c) => {
   }
 });
 
-status.get("/data", async (c) => {
-  const result = await getStatusPagePublicData();
+status.get("/public/:userId/data", async (c) => {
+  const userId = parseInt(c.req.param("userId"));
+  if (isNaN(userId)) {
+    return c.json({ error: "无效的用户ID" }, 400);
+  }
+  const result = await getStatusPagePublicData(userId);
   return c.json(result);
 });
 

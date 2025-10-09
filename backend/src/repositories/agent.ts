@@ -7,8 +7,8 @@ import { desc, eq, inArray } from "drizzle-orm";
  */
 
 // 获取所有客户端
-export async function getAllAgents() {
-  return await db.select().from(agents).orderBy(desc(agents.created_at));
+export async function getAllAgents(userId: number) {
+  return await db.select().from(agents).where(eq(agents.created_by, userId)).orderBy(desc(agents.created_at));
 }
 
 // 批量获取客户端详情
@@ -115,6 +115,24 @@ export async function deleteAgent(id: number) {
 
   return { success: true, message: "客户端已删除" };
 }
+
+// 新增：根据用户ID删除客户端
+export async function deleteAgentsByUserId(userId: number) {
+  const userAgents = await getAllAgents(userId);
+  // fix: 为参数 'a' 明确添加 Agent 类型
+  const agentIds = userAgents.map((a: Agent) => a.id);
+
+  if (agentIds.length === 0) {
+    return;
+  }
+
+  // 批量删除关联的指标数据
+  await db.delete(agentMetrics24h).where(inArray(agentMetrics24h.agent_id, agentIds));
+
+  // 批量删除客户端
+  await db.delete(agents).where(inArray(agents.id, agentIds));
+}
+
 
 // 通过令牌获取客户端
 export async function getAgentByToken(token: string) {

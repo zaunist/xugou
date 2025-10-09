@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { Flex, Heading, Text, TextField, Box } from "@radix-ui/themes";
 import { Button, Card } from "@/components/ui";
 import { useAuth } from "../../providers/AuthProvider";
-import { updateUser, changePassword } from "../../api/users";
+import { updateUser, changePassword, getUser } from "../../api/users";
 import { UpdateUserRequest, ChangePasswordRequest } from "../../types/users";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 const UserProfile = () => {
   const { user } = useAuth();
@@ -16,29 +17,29 @@ const UserProfile = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [profileError, setProfileError] = useState("");
-  const [profileSuccess, setProfileSuccess] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
-
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
-      setUsername(user.username);
-      setEmail(user.email || "");
+      // 获取完整的用户信息，包括电子邮件
+      const fetchUserData = async () => {
+        const response = await getUser(user.id);
+        if (response.success && response.user) {
+          setUsername(response.user.username);
+          setEmail(response.user.email || "");
+        }
+      };
+      fetchUserData();
     }
   }, [user]);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setProfileError("");
-    setProfileSuccess("");
     setIsProfileLoading(true);
 
     if (!user) {
-      setProfileError(t("profile.error.notLoggedIn"));
+      toast.error(t("profile.error.notLoggedIn"));
       setIsProfileLoading(false);
       return;
     }
@@ -51,12 +52,12 @@ const UserProfile = () => {
     try {
       const response = await updateUser(user.id, data);
       if (response.success) {
-        setProfileSuccess(t("profile.success.updated"));
+        toast.success(t("profile.success.updated"));
       } else {
-        setProfileError(response.message || t("profile.error.update"));
+        toast.error(response.message || t("profile.error.update"));
       }
     } catch (err: any) {
-      setProfileError(err.message || t("profile.error.update"));
+      toast.error(err.message || t("profile.error.update"));
     } finally {
       setIsProfileLoading(false);
     }
@@ -64,16 +65,14 @@ const UserProfile = () => {
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPasswordError("");
-    setPasswordSuccess("");
 
     if (!user) {
-      setPasswordError(t("profile.error.notLoggedIn"));
+      toast.error(t("profile.error.notLoggedIn"));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setPasswordError(t("profile.error.passwordMismatch"));
+      toast.error(t("profile.error.passwordMismatch"));
       return;
     }
 
@@ -87,15 +86,15 @@ const UserProfile = () => {
     try {
       const response = await changePassword(user.id, data);
       if (response.success) {
-        setPasswordSuccess(t("profile.success.passwordChanged"));
+        toast.success(t("profile.success.passwordChanged"));
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
       } else {
-        setPasswordError(response.message || t("profile.error.passwordChange"));
+        toast.error(response.message || t("profile.error.passwordChange"));
       }
     } catch (err: any) {
-      setPasswordError(err.message || t("profile.error.passwordChange"));
+      toast.error(err.message || t("profile.error.passwordChange"));
     } finally {
       setIsPasswordLoading(false);
     }
@@ -116,17 +115,6 @@ const UserProfile = () => {
           <Heading size="4" mb="4" className="ml-4">
             {t("profile.basicInfo")}
           </Heading>
-
-          {profileError && (
-            <Text color="red" mb="3">
-              {profileError}
-            </Text>
-          )}
-          {profileSuccess && (
-            <Text color="green" mb="3">
-              {profileSuccess}
-            </Text>
-          )}
 
           <form onSubmit={handleProfileUpdate}>
             <Flex direction="column" gap="3" className="ml-4">
@@ -169,17 +157,6 @@ const UserProfile = () => {
           <Heading size="4" mb="4">
             {t("profile.changePassword")}
           </Heading>
-
-          {passwordError && (
-            <Text color="red" mb="3">
-              {passwordError}
-            </Text>
-          )}
-          {passwordSuccess && (
-            <Text color="green" mb="3">
-              {passwordSuccess}
-            </Text>
-          )}
 
           <form onSubmit={handlePasswordChange}>
             <Flex direction="column" gap="3" className="ml-4">

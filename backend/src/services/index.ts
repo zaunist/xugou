@@ -3,4 +3,5 @@ export * from './AgentService';
 export * from './AuthService';
 export * from './NotificationService';
 export * from './StatusService';
-export * from './UserService'; 
+export * from './UserService';
+export * from './SettingsService';

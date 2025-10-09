@@ -126,8 +126,8 @@ export async function checkMonitor(monitor: models.Monitor) {
   }
 }
 
-export async function getAllMonitors() {
-  const result = await repositories.getAllMonitors();
+export async function getAllMonitors(userId: number) {
+  const result = await repositories.getAllMonitors(userId);
 
   return {
     success: true,
@@ -136,11 +136,11 @@ export async function getAllMonitors() {
   };
 }
 
-export async function getMonitorById(id: number) {
-  const monitor = await repositories.getMonitorById(id);
+export async function getMonitorById(id: number, userId: number, userRole: string) {
+  const monitor = await repositories.getMonitorById(id, userId, userRole);
 
   if (!monitor) {
-    return { success: false, message: "监控不存在", status: 404 };
+    return { success: false, message: "监控不存在或无权访问", status: 404 };
   }
 
   // 获取历史状态数据
@@ -197,13 +197,13 @@ export async function createMonitor(data: any, userId: number) {
   }
 }
 
-export async function updateMonitor(id: number, data: any) {
+export async function updateMonitor(id: number, data: any, userId: number, userRole: string) {
   try {
-    // 检查监控是否存在
-    const monitor = await repositories.getMonitorById(id);
+    // 检查监控是否存在并验证权限
+    const monitor = await repositories.getMonitorById(id, userId, userRole);
 
     if (!monitor) {
-      return { success: false, message: "监控不存在", status: 404 };
+      return { success: false, message: "监控不存在或无权访问", status: 404 };
     }
 
     // 准备更新数据
@@ -256,13 +256,13 @@ export async function updateMonitor(id: number, data: any) {
   }
 }
 
-export async function deleteMonitor(id: number) {
+export async function deleteMonitor(id: number, userId: number, userRole: string) {
   try {
-    // 检查监控是否存在
-    const monitor = await repositories.getMonitorById(id);
+    // 检查监控是否存在并验证权限
+    const monitor = await repositories.getMonitorById(id, userId, userRole);
 
     if (!monitor) {
-      return { success: false, message: "监控不存在", status: 404 };
+      return { success: false, message: "监控不存在或无权访问", status: 404 };
     }
 
     // 执行通知设置删除
@@ -276,11 +276,7 @@ export async function deleteMonitor(id: number) {
     }
 
     // 执行monitor删除
-    const result = await repositories.deleteMonitor(id);
-
-    if (!result.success) {
-      throw new Error("删除监控失败");
-    }
+    await repositories.deleteMonitor(id);
 
     return {
       success: true,
@@ -304,16 +300,11 @@ export async function getMonitorStatusHistoryById(
   userRole: string
 ) {
   try {
-    // 检查监控是否存在
-    const monitor = await repositories.getMonitorById(id);
+    // 检查监控是否存在并验证权限
+    const monitor = await repositories.getMonitorById(id, userId, userRole);
 
     if (!monitor) {
-      return { success: false, message: "监控不存在", status: 404 };
-    }
-
-    // 检查权限
-    if (userRole !== "admin" && monitor.created_by !== userId) {
-      return { success: false, message: "无权访问此监控历史", status: 403 };
+      return { success: false, message: "监控不存在或无权访问", status: 404 };
     }
 
     // 获取历史状态
@@ -335,8 +326,8 @@ export async function getMonitorStatusHistoryById(
   }
 }
 
-export async function getAllMonitorStatusHistory() {
-  const result = await repositories.getAllMonitorStatusHistoryIn24h();
+export async function getAllMonitorStatusHistory(userId: number) {
+  const result = await repositories.getAllMonitorStatusHistoryIn24h(userId);
   return {
     success: true,
     history: result,
@@ -344,13 +335,13 @@ export async function getAllMonitorStatusHistory() {
   };
 }
 
-export async function manualCheckMonitor(id: number) {
+export async function manualCheckMonitor(id: number, userId: number, userRole: string) {
   try {
-    // 检查监控是否存在
-    const monitor = await repositories.getMonitorById(id);
+    // 检查监控是否存在并验证权限
+    const monitor = await repositories.getMonitorById(id, userId, userRole);
 
     if (!monitor) {
-      return { success: false, message: "监控不存在", status: 404 };
+      return { success: false, message: "监控不存在或无权访问", status: 404 };
     }
 
     // 使用抽象出来的通用检查监控函数进行检查
@@ -469,7 +460,18 @@ function getExpectedStatusDisplay(expectedStatus: number): string {
   return String(expectedStatus);
 }
 
-export async function getMonitorDailyStats(id: number) {
+export async function getMonitorDailyStats(id: number, userId: number, userRole: string) {
+  // 权限检查
+  const monitor = await repositories.getMonitorById(id, userId, userRole);
+  if (!monitor) {
+    return { 
+      success: false, 
+      message: "监控不存在或无权访问", 
+      status: 404,
+      dailyStats: []
+    };
+  }
+
   const result = await repositories.getMonitorDailyStatsById(id);
 
   return {
@@ -480,9 +482,9 @@ export async function getMonitorDailyStats(id: number) {
   };
 }
 
-export async function getAllMonitorDailyStats() {
+export async function getAllMonitorDailyStats(userId: number) {
   // 获取所有监控
-  const result = await repositories.getAllMonitorDailyStats();
+  const result = await repositories.getAllMonitorDailyStats(userId);
   return {
     success: true,
     dailyStats: result,

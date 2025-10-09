@@ -19,6 +19,7 @@ Currently implemented features:
 - ✅ Data Visualization - Real-time data display and historical trend analysis
 - ✅ Status Page - Customizable service status page
 - ✅ Alert Notifications - Anomaly event notifications through multiple channels (Email, Telegram, etc.)
+- ✅ User Management - Supports user registration, multi-user management, and assignable permissions
 - ❌ Mobile APP - Convenient monitoring status check on mobile devices
 
 ## ✨ Core Features
@@ -41,6 +42,11 @@ Currently implemented features:
   - Customizable status page
   - Support for multiple monitoring items
   - Responsive design
+
+- 👥 **User Management**
+  - Supports new user registration
+  - Supports multi-user management
+  - Assignable permissions
 
 ## 🏗️ System Architecture
 

@@ -74,23 +74,21 @@ export async function createUser(
 ) {
   const now = new Date().toISOString();
 
-  const result = await db
-    .insert(users)
-    .values({
-      username: username,
-      password: hashedPassword,
-      email: email,
-      role: role,
-      created_at: now,
-      updated_at: now,
-    })
-    .returning();
+  await db.insert(users).values({
+    username: username,
+    password: hashedPassword,
+    email: email,
+    role: role,
+    created_at: now,
+    updated_at: now,
+  });
 
-  if (!result.success) {
-    throw new Error("创建用户失败");
+  // 由于 D1 不支持 returning()，我们在插入后根据用户名重新查询以获取完整的用户信息
+  const newUser = await getUserByUsername(username);
+  if (!newUser) {
+    throw new Error("创建用户失败：无法找到新创建的用户。");
   }
-
-  return result[0];
+  return newUser;
 }
 
 // 更新用户信息
@@ -105,96 +103,53 @@ export async function updateUser(
 ) {
   const now = new Date().toISOString();
 
-  // 准备更新数据
-  const fieldsToUpdate = [];
-  const values = [];
+  // Drizzle的set方法会自动忽略undefined的值，所以我们可以安全地传递updates对象
+  const updatePayload = {
+    ...updates,
+    updated_at: now,
+  };
 
-  if (updates.username !== undefined) {
-    fieldsToUpdate.push("username = ?");
-    values.push(updates.username);
+  if (Object.keys(updates).length === 0) {
+    // 如果没有提供任何要更新的字段，直接返回当前用户信息
+    return await getFullUserById(id);
   }
 
-  if (updates.email !== undefined) {
-    fieldsToUpdate.push("email = ?");
-    values.push(updates.email);
+  await db.update(users).set(updatePayload).where(eq(users.id, id));
+
+  // 由于 D1 不支持 returning()，我们在更新后重新查询以获取最新的用户信息
+  const updatedUser = await getFullUserById(id);
+  if (!updatedUser) {
+    throw new Error("更新用户失败：无法找到更新后的用户。");
   }
-
-  if (updates.role !== undefined) {
-    fieldsToUpdate.push("role = ?");
-    values.push(updates.role);
-  }
-
-  if (updates.password !== undefined) {
-    fieldsToUpdate.push("password = ?");
-    values.push(updates.password);
-  }
-
-  fieldsToUpdate.push("updated_at = ?");
-  values.push(now);
-
-  // 添加ID作为条件
-  values.push(id);
-
-  // 如果没有要更新的字段，返回错误
-  if (fieldsToUpdate.length <= 1) {
-    throw new Error("没有提供要更新的字段");
-  }
-
-  // 执行更新
-  const result = await db
-    .update(users)
-    .set({
-      username: updates.username,
-      email: updates.email,
-      role: updates.role,
-      password: updates.password,
-      updated_at: now,
-    })
-    .where(eq(users.id, id))
-    .returning();
-
-  if (!result.success) {
-    throw new Error("更新用户失败");
-  }
-
-  return result[0];
+  return updatedUser;
 }
 
 // 更新用户密码
 export async function updateUserPassword(id: number, hashedPassword: string) {
   const now = new Date().toISOString();
 
-  const result = await db
+  await db
     .update(users)
     .set({
       password: hashedPassword,
       updated_at: now,
     })
-    .where(eq(users.id, id))
-    .returning();
-
-  if (!result) {
-    throw new Error("更新密码失败");
-  }
+    .where(eq(users.id, id));
 
   return { success: true, message: "密码已更新" };
 }
 
 // 删除用户
 export async function deleteUser(id: number) {
-  const result = await db.delete(users).where(eq(users.id, id)).returning();
+  const result = await db.delete(users).where(eq(users.id, id));
 
-  if (!result.success) {
-    throw new Error("删除用户失败");
-  }
-
+  // 在D1中，删除操作成功但没有返回任何行时，result可能不是我们期望的格式
+  // 我们假设如果没有抛出错误，操作就是成功的
   return { success: true, message: "用户已删除" };
 }
 
 // 根据用户名获取用户
-export async function getUserByUsername(
-  username: string
-): Promise<User | null> {
+export async function getUserByUsername(username: string): Promise<User | null> {
   return await db
     .select()
     .from(users)
@@ -210,7 +165,7 @@ export async function getAdminUserId() {
     .from(users)
     .where(eq(users.username, "admin"));
 
-  if (!adminId) {
+  if (!adminId || adminId.length === 0) {
     throw new Error("无法找到管理员用户");
   }
 

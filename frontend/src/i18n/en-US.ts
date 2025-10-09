@@ -12,6 +12,7 @@ const enUS = {
     "navbar.logout": "Logout",
     "navbar.login": "Login",
     "navbar.loggedInAs": "Logged in as",
+    "navbar.register": "Register",
 
     // Common buttons and prompts
     "common.loading": "Loading...",
@@ -92,6 +93,7 @@ const enUS = {
     "login.password": "Password",
     "login.button": "Login",
     "login.error": "Incorrect username or password",
+    "login.registerLink": "Don't have an account?",
 
     // Register page
     "register.title": "Register",
@@ -105,6 +107,7 @@ const enUS = {
     "register.error.usernameExists": "Username already exists",
     "register.error.emailExists": "Email already exists",
     "register.success.message": "Registration successful, please login",
+    "register.disabled": "New user registration is currently disabled.",
 
     // Dashboard
     "dashboard.title": "Dashboard",
@@ -338,6 +341,8 @@ const enUS = {
     "users.error.fetch": "Failed to fetch user list",
     "users.error.delete": "Failed to delete user",
     "users.deleteConfirm": 'Are you sure you want to delete user "{username}"? This action cannot be undone.',
+    "users.allowRegistration": "Allow new user registration",
+    "users.allowRegistrationHelp": "If enabled, the login page will show a registration button.",
     "user.username": "Username",
     "user.email": "Email",
     "user.role": "Role",

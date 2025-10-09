@@ -10,6 +10,7 @@ import {
   register as apiRegister,
   getCurrentUser,
 } from "../api/auth";
+import { getAllowNewUserRegistration } from "../api/settings"; // 新增
 import {
   User,
   LoginRequest,
@@ -89,6 +90,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const register = async (data: RegisterRequest) => {
     try {
+      // 客户端再次检查是否允许注册
+      const allowResponse = await getAllowNewUserRegistration();
+      if (!allowResponse.success || !allowResponse.allow) {
+          return { success: false, message: t('register.disabled') };
+      }
       const response = await apiRegister(data);
       return { success: response.success, message: response.message };
     } catch (error) {

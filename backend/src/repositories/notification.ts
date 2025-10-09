@@ -12,7 +12,7 @@ import {
   notificationSettings,
   notificationHistory,
 } from "../db/schema";
-import { eq, desc, asc, and, count, isNull } from "drizzle-orm";
+import { eq, desc, asc, and, count, isNull, inArray } from "drizzle-orm";
 
 // 获取所有通知渠道
 export const getNotificationChannels = async (): Promise<
@@ -79,44 +79,49 @@ export const updateNotificationChannel = async (
 export const deleteNotificationChannel = async (
   id: number
 ): Promise<boolean> => {
-  // 先删除通知历史记录表中的关联记录
-  await db
-    .delete(notificationHistory)
-    .where(eq(notificationHistory.channel_id, id));
+  try {
+    // 先删除通知历史记录表中的关联记录
+    await db
+      .delete(notificationHistory)
+      .where(eq(notificationHistory.channel_id, id));
 
-  // 再检查并更新通知设置中的channels列表
-  const allSettings = await db.select().from(notificationSettings);
+    // 再检查并更新通知设置中的channels列表
+    const allSettings = await db.select().from(notificationSettings);
 
-  // 遍历所有设置，从channels列表中移除要删除的渠道ID
-  if (allSettings && allSettings.length > 0) {
-    for (const setting of allSettings) {
-      try {
-        const channelsList = JSON.parse(setting.channels || "[]");
-        const newChannelsList = channelsList.filter(
-          (channelId: number) => channelId !== id
-        );
+    // 遍历所有设置，从channels列表中移除要删除的渠道ID
+    if (allSettings && allSettings.length > 0) {
+      for (const setting of allSettings) {
+        try {
+          const channelsList = JSON.parse(setting.channels || "[]");
+          const newChannelsList = channelsList.filter(
+            (channelId: number) => channelId !== id
+          );
 
-        // 如果列表变化了，更新数据库
-        if (JSON.stringify(channelsList) !== JSON.stringify(newChannelsList)) {
-          await db
-            .update(notificationSettings)
-            .set({
-              channels: JSON.stringify(newChannelsList),
-            })
-            .where(eq(notificationSettings.id, setting.id));
+          // 如果列表变化了，更新数据库
+          if (JSON.stringify(channelsList) !== JSON.stringify(newChannelsList)) {
+            await db
+              .update(notificationSettings)
+              .set({
+                channels: JSON.stringify(newChannelsList),
+              })
+              .where(eq(notificationSettings.id, setting.id));
+          }
+        } catch (error) {
+          console.error("解析通知设置渠道列表出错:", error);
         }
-      } catch (error) {
-        console.error("解析通知设置渠道列表出错:", error);
       }
     }
+
+    // 最后删除通知渠道本身
+    await db
+      .delete(notificationChannels)
+      .where(eq(notificationChannels.id, id));
+
+    return true; // 假设没有错误就是成功
+  } catch (error) {
+    console.error("删除通知渠道失败:", error);
+    return false;
   }
-
-  // 最后删除通知渠道本身
-  const result = await db
-    .delete(notificationChannels)
-    .where(eq(notificationChannels.id, id));
-
-  return result.length > 0;
 };
 
 // 获取所有通知模板
@@ -541,4 +546,33 @@ export const deleteNotificationSettings = async (
   }
 
   return true;
+};
+
+// 新增：根据用户ID删除通知设置
+export const deleteNotificationSettingsByUserId = async (
+  userId: number
+): Promise<void> => {
+  await db.delete(notificationSettings).where(eq(notificationSettings.user_id, userId));
+};
+
+// 新增：根据用户ID删除通知模板
+export const deleteNotificationTemplatesByUserId = async (
+  userId: number
+): Promise<void> => {
+  await db.delete(notificationTemplates).where(eq(notificationTemplates.created_by, userId));
+};
+
+// 新增：根据用户ID删除通知渠道
+export const deleteNotificationChannelsByUserId = async (
+  userId: number
+): Promise<void> => {
+  const userChannels = await db.select({id: notificationChannels.id}).from(notificationChannels).where(eq(notificationChannels.created_by, userId));
+  if (userChannels.length > 0) {
+    // 修复：为 map 回调中的参数 c 显式指定类型
+    const channelIds = userChannels.map((c: { id: number }) => c.id);
+    // 删除关联的通知历史
+    await db.delete(notificationHistory).where(inArray(notificationHistory.channel_id, channelIds));
+    // 删除通知渠道
+    await db.delete(notificationChannels).where(inArray(notificationChannels.id, channelIds));
+  }
 };

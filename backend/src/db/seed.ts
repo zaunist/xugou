@@ -11,6 +11,7 @@ import {
   statusPageAgents,
   monitors,
   agents,
+  settings, // 导入 settings
 } from "./schema";
 import { db } from "../config";
 import { eq, desc } from "drizzle-orm";
@@ -34,6 +35,7 @@ export async function checkAndInitializeDatabase(d1: Bindings["DB"]): Promise<{
     await createNotificationTemplates();
     await createNotificationChannelsAndSettings();
     await createDefaultStatusPage();
+    await createDefaultSettings(); // 新增
 
     return {
       initialized: true,
@@ -78,7 +80,7 @@ export async function createAdminUser(): Promise<void> {
 export async function createNotificationTemplates(): Promise<void> {
   // 检查是否已有通知模板
 
-  const existingTemplates = await db.select().from(notificationTemplates).all();
+  const existingTemplates = await db.select().from(notificationTemplates);
 
   if (existingTemplates.length === 0) {
     console.log("添加默认通知模板...");
@@ -116,7 +118,7 @@ export async function createNotificationTemplates(): Promise<void> {
 // 添加通知渠道和设置初始化函数
 export async function createNotificationChannelsAndSettings(): Promise<void> {
   // 检查是否已有通知渠道
-  const existingChannels = await db.select().from(notificationChannels).all();
+  const existingChannels = await db.select().from(notificationChannels);
 
   if (existingChannels.length === 0) {
     console.log("添加默认通知渠道...");
@@ -137,7 +139,7 @@ export async function createNotificationChannelsAndSettings(): Promise<void> {
   }
 
   // 检查是否已有通知设置
-  const existingSettings = await db.select().from(notificationSettings).all();
+  const existingSettings = await db.select().from(notificationSettings);
 
   if (existingSettings.length === 0) {
     console.log("添加默认通知设置...");
@@ -179,7 +181,7 @@ export async function createNotificationChannelsAndSettings(): Promise<void> {
 // 创建默认状态页配置
 export async function createDefaultStatusPage(): Promise<void> {
   // 检查是否已有状态页配置
-  const existingConfig = await db.select().from(statusPageConfig).all();
+  const existingConfig = await db.select().from(statusPageConfig);
 
   if (existingConfig.length === 0) {
     console.log("创建默认状态页配置...");
@@ -208,7 +210,7 @@ export async function createDefaultStatusPage(): Promise<void> {
 
     if (configId) {
       // 关联所有监控项
-      const allmonitors = await db.select().from(monitors).all();
+      const allmonitors = await db.select().from(monitors);
 
       if (allmonitors) {
         for (const monitor of allmonitors) {
@@ -219,7 +221,7 @@ export async function createDefaultStatusPage(): Promise<void> {
         }
 
         // 关联所有客户端
-        const allAgents = await db.select().from(agents).all();
+        const allAgents = await db.select().from(agents);
 
         if (allAgents) {
           for (const agent of allAgents) {
@@ -231,6 +233,23 @@ export async function createDefaultStatusPage(): Promise<void> {
         }
       }
     }
+  }
+}
+
+// 新增：创建默认的应用设置
+export async function createDefaultSettings(): Promise<void> {
+  console.log("检查默认的应用设置...");
+  const registrationSetting = await db
+    .select()
+    .from(settings)
+    .where(eq(settings.key, "allow_new_user_registration"));
+
+  if (registrationSetting.length === 0) {
+    console.log("创建默认的新用户注册设置...");
+    await db.insert(settings).values({
+      key: "allow_new_user_registration",
+      value: "false", // 默认不允许新用户注册
+    });
   }
 }
 
