@@ -3,12 +3,13 @@ import { z } from "zod";
 import { Bindings } from "../models/db";
 import * as NotificationService from "../services/NotificationService";
 
-const notifications = new Hono<{ Bindings: Bindings }>();
+const notifications = new Hono<{ Bindings: Bindings; Variables: { jwtPayload: any } }>();
 
 // 获取通知配置
 notifications.get("/", async (c) => {
   try {
-    const config = await NotificationService.getNotificationConfig();
+    const userId = c.get("jwtPayload").id;
+    const config = await NotificationService.getNotificationConfig(userId);
 
     return c.json({
       success: true,
@@ -30,7 +31,8 @@ notifications.get("/", async (c) => {
 // 获取通知渠道列表
 notifications.get("/channels", async (c) => {
   try {
-    const channels = await NotificationService.getNotificationChannels();
+    const userId = c.get("jwtPayload").id;
+    const channels = await NotificationService.getNotificationChannels(userId);
 
     return c.json({
       success: true,
@@ -53,6 +55,7 @@ notifications.get("/channels", async (c) => {
 notifications.get("/channels/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
+    const userId = c.get("jwtPayload").id;
 
     if (isNaN(id)) {
       return c.json(
@@ -64,7 +67,7 @@ notifications.get("/channels/:id", async (c) => {
       );
     }
 
-    const channel = await NotificationService.getNotificationChannelById(id);
+    const channel = await NotificationService.getNotificationChannelById(id, userId);
 
     if (!channel) {
       return c.json(
@@ -96,7 +99,6 @@ notifications.get("/channels/:id", async (c) => {
 // 创建通知渠道
 notifications.post("/channels", async (c) => {
   try {
-    const db = c.env.DB;
     const userId = c.get("jwtPayload").id;
     const body = await c.req.json();
 
@@ -104,7 +106,7 @@ notifications.post("/channels", async (c) => {
     const schema = z.object({
       name: z.string().min(1, "名称不能为空"),
       type: z.string().min(1, "类型不能为空"),
-      config: z.string().min(1, "配置不能为空"),
+      config: z.any(),
       enabled: z.boolean().optional(),
     });
 
@@ -114,7 +116,7 @@ notifications.post("/channels", async (c) => {
     const result = await NotificationService.createNotificationChannel({
       name: validatedData.name,
       type: validatedData.type,
-      config: validatedData.config,
+      config: JSON.stringify(validatedData.config),
       enabled:
         validatedData.enabled !== undefined ? validatedData.enabled : true,
       created_by: userId,
@@ -153,10 +155,12 @@ notifications.post("/channels", async (c) => {
   }
 });
 
+
 // 更新通知渠道
 notifications.put("/channels/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
+    const userId = c.get("jwtPayload").id;
 
     if (isNaN(id)) {
       return c.json(
@@ -174,15 +178,19 @@ notifications.put("/channels/:id", async (c) => {
     const schema = z.object({
       name: z.string().min(1, "名称不能为空").optional(),
       type: z.string().min(1, "类型不能为空").optional(),
-      config: z.string().min(1, "配置不能为空").optional(),
+      config: z.any().optional(),
       enabled: z.boolean().optional(),
     });
 
     const validatedData = schema.parse(body);
+    if (validatedData.config) {
+        validatedData.config = JSON.stringify(validatedData.config)
+    }
 
     // 更新渠道
     const result = await NotificationService.updateNotificationChannel(
       id,
+      userId,
       validatedData
     );
 
@@ -217,6 +225,7 @@ notifications.put("/channels/:id", async (c) => {
 notifications.delete("/channels/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
+    const userId = c.get("jwtPayload").id;
 
     if (isNaN(id)) {
       return c.json(
@@ -228,7 +237,7 @@ notifications.delete("/channels/:id", async (c) => {
       );
     }
 
-    const result = await NotificationService.deleteNotificationChannel(id);
+    const result = await NotificationService.deleteNotificationChannel(id, userId);
 
     if (!result.success) {
       return c.json(
@@ -257,10 +266,12 @@ notifications.delete("/channels/:id", async (c) => {
   }
 });
 
+
 // 获取通知模板列表
 notifications.get("/templates", async (c) => {
   try {
-    const templates = await NotificationService.getNotificationTemplates();
+    const userId = c.get("jwtPayload").id;
+    const templates = await NotificationService.getNotificationTemplates(userId);
 
     return c.json({
       success: true,
@@ -283,6 +294,7 @@ notifications.get("/templates", async (c) => {
 notifications.get("/templates/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
+    const userId = c.get("jwtPayload").id; // 获取 userId
 
     if (isNaN(id)) {
       return c.json(
@@ -294,7 +306,7 @@ notifications.get("/templates/:id", async (c) => {
       );
     }
 
-    const template = await NotificationService.getNotificationTemplateById(id);
+    const template = await NotificationService.getNotificationTemplateById(id, userId); // 传入 userId
 
     if (!template) {
       return c.json(
@@ -390,6 +402,7 @@ notifications.post("/templates", async (c) => {
 notifications.put("/templates/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
+    const userId = c.get("jwtPayload").id; // 获取 userId
 
     if (isNaN(id)) {
       return c.json(
@@ -417,6 +430,7 @@ notifications.put("/templates/:id", async (c) => {
     // 更新模板
     const result = await NotificationService.updateNotificationTemplate(
       id,
+      userId, // 传入 userId
       validatedData
     );
 
@@ -451,6 +465,7 @@ notifications.put("/templates/:id", async (c) => {
 notifications.delete("/templates/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
+    const userId = c.get("jwtPayload").id; // 获取 userId
 
     if (isNaN(id)) {
       return c.json(
@@ -462,7 +477,7 @@ notifications.delete("/templates/:id", async (c) => {
       );
     }
 
-    const result = await NotificationService.deleteNotificationTemplate(id);
+    const result = await NotificationService.deleteNotificationTemplate(id, userId); // 传入 userId
 
     if (!result.success) {
       return c.json(
@@ -490,6 +505,7 @@ notifications.delete("/templates/:id", async (c) => {
     );
   }
 });
+
 
 // 保存通知设置
 notifications.post("/settings", async (c) => {

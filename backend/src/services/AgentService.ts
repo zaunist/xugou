@@ -116,11 +116,11 @@ export async function updateAgentService(
 
 /**
  * 删除客户端
- * @param db 数据库连接
  * @param agentId 客户端ID
+ * @param userId 用户ID
  * @returns 删除结果
  */
-export async function deleteAgentService(agentId: number) {
+export async function deleteAgentService(agentId: number, userId: number) {
   try {
     // 获取客户端信息
     const agent = await AgentRepository.getAgentById(agentId);
@@ -129,7 +129,7 @@ export async function deleteAgentService(agentId: number) {
     }
 
     // 删除客户端通知设置
-    await AgentRepository.deleteNotificationSettings("agent", agent.id);
+    await AgentRepository.deleteNotificationSettings("agent", agent.id, userId);
 
     // 执行删除客户端
     await AgentRepository.deleteAgent(agent.id);
@@ -140,6 +140,7 @@ export async function deleteAgentService(agentId: number) {
     throw error;
   }
 }
+
 
 /**
  * 生成客户端注册令牌
