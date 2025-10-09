@@ -72,9 +72,21 @@ jobs:
           D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
           D1_DATABASE_NAME: ${{ secrets.D1_DATABASE_NAME }}
 
+      # 新增步骤：检查 Cloudflare 密钥是否存在
+      - name: Check for Cloudflare credentials
+        id: cf_creds
+        run: |
+          if [ -z "${{ secrets.CF_API_TOKEN }}" ] || [ -z "${{ secrets.CF_ACCOUNT_ID }}" ]; then
+            echo "Cloudflare credentials not found, skipping deployment."
+            echo "has_creds=false" >> $GITHUB_ENV
+          else
+            echo "has_creds=true" >> $GITHUB_ENV
+          fi
+
       # 第八步：部署到 Cloudflare
-      # 使用 Cloudflare 官方的 'wrangler-action' 来执行部署
+      # 仅在检测到密钥存在时执行
       - name: Deploy to Cloudflare
+        if: env.has_creds == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           # 传入 API 令牌用于身份验证
