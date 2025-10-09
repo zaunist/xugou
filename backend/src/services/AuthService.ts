@@ -9,6 +9,7 @@ import * as repositories from "../repositories";
 import { getJwtSecret } from "../utils/jwt";
 import { Bindings } from "../models/db";
 import * as SettingsService from "./SettingsService";
+import * as NotificationService from "./NotificationService";
 
 /**
  * 用户登录
@@ -142,6 +143,11 @@ export async function registerUser(
       email,
       "user"
     );
+
+    // 为新用户创建默认的通知设置
+    if (newUser && newUser.id) {
+      await NotificationService.createDefaultNotificationSettingsForUser(newUser.id);
+    }
 
     return {
       success: true,

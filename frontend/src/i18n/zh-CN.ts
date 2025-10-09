@@ -513,6 +513,21 @@ const zhCN = {
     "notifications.globalSettings.description":
       "配置全局通知设置，包括通知渠道、监控设置和消息模板。这些设置将应用于所有监控和客户端，除非被特定的配置覆盖。",
 
+    // 通知变量
+    "notifications.variables.name": "名称",
+    "notifications.variables.status": "状态",
+    "notifications.variables.previous_status": "先前状态",
+    "notifications.variables.time": "时间",
+    "notifications.variables.url": "URL地址",
+    "notifications.variables.response_time": "响应时间",
+    "notifications.variables.status_code": "状态码",
+    "notifications.variables.expected_status": "预期状态码",
+    "notifications.variables.error": "错误信息",
+    "notifications.variables.details": "详情",
+    "notifications.variables.hostname": "主机名",
+    "notifications.variables.ip_addresses": "IP地址",
+    "notifications.variables.os": "操作系统",
+
     // 通知事件类型
     "notifications.events.onDownOnly": "仅服务故障时发送通知",
     "notifications.events.onRecovery": "服务恢复时发送通知",
@@ -562,6 +577,14 @@ const zhCN = {
 
     // StatusSummaryCard 组件
     "statusSummary.title": "状态摘要",
+    
+    //补全
+    "notifications.fetch.error": "获取通知配置失败。",
+    "notifications.templates.createSuccess": "模板创建成功。",
+    "notifications.templates.updateSuccess": "模板更新成功。",
+    "notifications.templates.deleteConfirmTitle": "确认删除",
+    "notifications.templates.deleteConfirmMessage": "你确定要删除这个模板吗？",
+    "notifications.templates.deleteSuccess": "模板删除成功。"
   },
 };
 

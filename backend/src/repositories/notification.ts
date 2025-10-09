@@ -182,41 +182,6 @@ export const updateNotificationTemplate = async (
     Omit<NotificationTemplate, "id" | "created_at" | "updated_at">
   >
 ): Promise<boolean> => {
-  const sets: string[] = [];
-  const values: any[] = [];
-
-  if (template.name !== undefined) {
-    sets.push("name = ?");
-    values.push(template.name);
-  }
-
-  if (template.type !== undefined) {
-    sets.push("type = ?");
-    values.push(template.type);
-  }
-
-  if (template.subject !== undefined) {
-    sets.push("subject = ?");
-    values.push(template.subject);
-  }
-
-  if (template.content !== undefined) {
-    sets.push("content = ?");
-    values.push(template.content);
-  }
-
-  if (template.is_default !== undefined) {
-    sets.push("is_default = ?");
-    values.push(template.is_default ? 1 : 0);
-  }
-
-  if (sets.length === 0) {
-    return false;
-  }
-
-  sets.push("updated_at = CURRENT_TIMESTAMP");
-  values.push(id);
-
   const result = await db
     .update(notificationTemplates)
     .set({
@@ -228,7 +193,7 @@ export const updateNotificationTemplate = async (
     })
     .where(and(eq(notificationTemplates.id, id), eq(notificationTemplates.created_by, userId)));
 
-  return result.length > 0;
+  return result.success; // fix: 返回 success 布尔值
 };
 
 // 删除通知模板
@@ -240,7 +205,7 @@ export const deleteNotificationTemplate = async (
     .delete(notificationTemplates)
     .where(and(eq(notificationTemplates.id, id), eq(notificationTemplates.created_by, userId)));
 
-  return result.length > 0;
+  return result.success; // fix: 返回 success 布尔值
 };
 
 
