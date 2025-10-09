@@ -268,7 +268,8 @@ export async function deleteMonitor(id: number, userId: number, userRole: string
     // 执行通知设置删除
     const notificationResult = await NotificationService.deleteNotificationSettings(
       "monitor",
-      id
+      id,
+      userId // 修复: 传入 userId
     );
     if (!notificationResult.success) {
       console.error("删除监控通知设置失败:", notificationResult.message);
@@ -359,6 +360,7 @@ export async function manualCheckMonitor(id: number, userId: number, userRole: s
         console.log(`检查通知设置...`);
         const notificationCheck =
           await NotificationService.shouldSendNotification(
+            userId, // 修复: 传入 userId
             "monitor",
             monitor.id,
             result.previous_status,
@@ -407,7 +409,8 @@ export async function manualCheckMonitor(id: number, userId: number, userRole: s
             "monitor",
             monitor.id,
             variables,
-            notificationCheck.channels
+            notificationCheck.channels,
+            userId // 修复: 传入 userId
           );
 
           console.log(`通知发送结果: ${JSON.stringify(notificationResult)}`);

@@ -2,22 +2,24 @@ import * as models from "../models";
 import * as repositories from "../repositories";
 
 // 通知渠道相关服务
-export async function getNotificationChannels(): Promise<
+export async function getNotificationChannels(userId: number): Promise<
   models.NotificationChannel[]
 > {
-  return await repositories.getNotificationChannels();
+  return await repositories.getNotificationChannels(userId);
 }
 
 export async function getNotificationChannelById(
-  id: number
+  id: number,
+  userId: number
 ): Promise<models.NotificationChannel | null> {
-  return await repositories.getNotificationChannelById(id);
+  return await repositories.getNotificationChannelById(id, userId);
 }
 
 export async function createNotificationChannel(
   channel: Omit<models.NotificationChannel, "id" | "created_at" | "updated_at">
 ): Promise<{ success: boolean; id?: number; message?: string }> {
   try {
+    // @ts-ignore
     const id = await repositories.createNotificationChannel(channel);
     return { success: true, id };
   } catch (error) {
@@ -31,12 +33,13 @@ export async function createNotificationChannel(
 
 export async function updateNotificationChannel(
   id: number,
+  userId: number,
   channel: Partial<
     Omit<models.NotificationChannel, "id" | "created_at" | "updated_at">
   >
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    const result = await repositories.updateNotificationChannel(id, channel);
+    const result = await repositories.updateNotificationChannel(id, userId, channel);
     return {
       success: result,
       message: result ? "通知渠道更新成功" : "通知渠道不存在或未做任何更改",
@@ -51,10 +54,11 @@ export async function updateNotificationChannel(
 }
 
 export async function deleteNotificationChannel(
-  id: number
+  id: number,
+  userId: number,
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    const result = await repositories.deleteNotificationChannel(id);
+    const result = await repositories.deleteNotificationChannel(id, userId);
     return {
       success: result,
       message: result ? "通知渠道删除成功" : "通知渠道不存在",
@@ -72,16 +76,17 @@ export async function deleteNotificationChannel(
 }
 
 // 通知模板相关服务
-export async function getNotificationTemplates(): Promise<
+export async function getNotificationTemplates(userId: number): Promise<
   models.NotificationTemplate[]
 > {
-  return await repositories.getNotificationTemplates();
+  return await repositories.getNotificationTemplates(userId);
 }
 
 export async function getNotificationTemplateById(
-  id: number
+  id: number,
+  userId: number,
 ): Promise<models.NotificationTemplate | null> {
-  return await repositories.getNotificationTemplateById(id);
+  return await repositories.getNotificationTemplateById(id, userId);
 }
 
 export async function createNotificationTemplate(
@@ -104,12 +109,13 @@ export async function createNotificationTemplate(
 
 export async function updateNotificationTemplate(
   id: number,
+  userId: number,
   template: Partial<
     Omit<models.NotificationTemplate, "id" | "created_at" | "updated_at">
   >
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    const result = await repositories.updateNotificationTemplate(id, template);
+    const result = await repositories.updateNotificationTemplate(id, userId, template);
     return {
       success: result,
       message: result ? "通知模板更新成功" : "通知模板不存在或未做任何更改",
@@ -124,10 +130,11 @@ export async function updateNotificationTemplate(
 }
 
 export async function deleteNotificationTemplate(
-  id: number
+  id: number,
+  userId: number,
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    const result = await repositories.deleteNotificationTemplate(id);
+    const result = await repositories.deleteNotificationTemplate(id, userId);
     return {
       success: result,
       message: result ? "通知模板删除成功" : "通知模板不存在",
@@ -142,8 +149,8 @@ export async function deleteNotificationTemplate(
 }
 
 // 通知设置相关服务,获取所有的通知设置
-export async function getNotificationConfig(): Promise<models.NotificationConfig> {
-  return await repositories.getNotificationConfig();
+export async function getNotificationConfig(userId: number): Promise<models.NotificationConfig> {
+  return await repositories.getNotificationConfig(userId);
 }
 
 export async function createOrUpdateSettings(
@@ -649,7 +656,8 @@ export async function sendNotification(
   type: "monitor" | "agent" | "system",
   targetId: number | null,
   variables: Record<string, string>,
-  channelIds: number[]
+  channelIds: number[],
+  userId: number
 ): Promise<{
   success: boolean;
   results: Array<{ channelId: number; success: boolean; error?: string }>;
@@ -666,7 +674,7 @@ export async function sendNotification(
     }
 
     // 获取默认的通知模板
-    const templates = await repositories.getNotificationTemplates();
+    const templates = await repositories.getNotificationTemplates(userId);
     console.log(`[发送通知] 获取到${templates.length}个通知模板`);
 
     const defaultTemplate = templates.find(
@@ -689,7 +697,7 @@ export async function sendNotification(
     // 获取所有通知渠道
     console.log(`[发送通知] 开始获取${channelIds.length}个通知渠道的详细信息`);
     const channels = await Promise.all(
-      channelIds.map((id) => repositories.getNotificationChannelById(id))
+      channelIds.map((id) => repositories.getNotificationChannelById(id, userId))
     );
 
     // 过滤掉不存在的渠道
@@ -815,6 +823,7 @@ export async function sendNotification(
  * 判断是否应该发送通知
  */
 export async function shouldSendNotification(
+  userId: number,
   type: "monitor" | "agent",
   id: number,
   prevStatus: string,
@@ -834,7 +843,7 @@ export async function shouldSendNotification(
   }
 
   // 获取此对象的特定设置
-  const specificSettings = await repositories.getSpecificSettings(type, id);
+  const specificSettings = await repositories.getSpecificSettings(userId, type, id);
 
   console.log(
     `[通知触发检查] 获取到特定设置数量: ${
@@ -847,7 +856,7 @@ export async function shouldSendNotification(
   );
   // 如果没有特定设置，使用全局设置
   if (targetSettings.length === 0) {
-    const globalSettings = await repositories.getGlobalSettings();
+    const globalSettings = await repositories.getGlobalSettings(userId);
     console.log(
       `[通知触发检查] 获取全局设置，是否存在监控设置: ${!!globalSettings.monitorSettings}，是否存在代理设置: ${!!globalSettings.agentSettings}`
     );
@@ -966,15 +975,17 @@ export async function shouldSendNotification(
  * 删除通知设置
  * @param type 通知类型
  * @param id 通知设置ID
+ * @param userId 用户ID
  */
 export async function deleteNotificationSettings(
   type: "monitor" | "agent",
-  id: number
+  id: number,
+  userId: number
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    console.log(`[删除通知设置] 开始删除${type}通知设置，ID=${id}`);
+    console.log(`[删除通知设置] 开始删除${type}通知设置，ID=${id}，用户ID=${userId}`);
     // 执行删除操作
-    await repositories.deleteNotificationSettings(type, id);
+    await repositories.deleteNotificationSettings(type, id, userId);
   } catch (error) {
     console.error("[删除通知设置] 删除通知设置失败:", error);
     return {

@@ -55,8 +55,9 @@ agents.put("/:id", async (c) => {
 agents.delete("/:id", async (c) => {
   try {
     const agentId = Number(c.req.param("id"));
+    const payload = c.get("jwtPayload"); // 获取用户信息
 
-    await deleteAgentService(agentId);
+    await deleteAgentService(agentId, payload.id); // 传入 userId
 
     return c.json(
       {
@@ -75,6 +76,7 @@ agents.delete("/:id", async (c) => {
     );
   }
 });
+
 
 // 生成客户端Token
 agents.post("/token/generate", async (c) => {

@@ -14,29 +14,31 @@ import {
 } from "../db/schema";
 import { eq, desc, asc, and, count, isNull, inArray } from "drizzle-orm";
 
-// 获取所有通知渠道
-export const getNotificationChannels = async (): Promise<
+// 获取指定用户的所有通知渠道
+export const getNotificationChannels = async (userId: number): Promise<
   NotificationChannel[]
 > => {
   const result = await db
     .select()
     .from(notificationChannels)
+    .where(eq(notificationChannels.created_by, userId)) // 根据用户ID过滤
     .orderBy(asc(notificationChannels.id));
   return result || [];
 };
 
-// 根据ID获取通知渠道
+// 根据ID和用户ID获取通知渠道
 export const getNotificationChannelById = async (
-  id: number
+  id: number,
+  userId: number
 ): Promise<NotificationChannel | null> => {
   const result = await db
     .select()
     .from(notificationChannels)
-    .where(eq(notificationChannels.id, id));
+    .where(and(eq(notificationChannels.id, id), eq(notificationChannels.created_by, userId))); // 增加用户ID校验
   return result[0];
 };
 
-// 创建通知渠道
+// 创建通知渠道 (保留不变, created_by 已包含用户信息)
 export const createNotificationChannel = async (
   channel: Omit<NotificationChannel, "id" | "created_at" | "updated_at">
 ): Promise<number> => {
@@ -57,6 +59,7 @@ export const createNotificationChannel = async (
 // 更新通知渠道
 export const updateNotificationChannel = async (
   id: number,
+  userId: number,
   channel: Partial<
     Omit<NotificationChannel, "id" | "created_at" | "updated_at">
   >
@@ -70,14 +73,15 @@ export const updateNotificationChannel = async (
       enabled: channel.enabled ? 1 : 0,
       updated_at: new Date().toISOString(),
     })
-    .where(eq(notificationChannels.id, id));
+    .where(and(eq(notificationChannels.id, id), eq(notificationChannels.created_by, userId))); // 增加用户ID校验
 
   return result.success;
 };
 
 // 删除通知渠道
 export const deleteNotificationChannel = async (
-  id: number
+  id: number,
+  userId: number
 ): Promise<boolean> => {
   try {
     // 先删除通知历史记录表中的关联记录
@@ -85,8 +89,8 @@ export const deleteNotificationChannel = async (
       .delete(notificationHistory)
       .where(eq(notificationHistory.channel_id, id));
 
-    // 再检查并更新通知设置中的channels列表
-    const allSettings = await db.select().from(notificationSettings);
+    // 再检查并更新属于该用户的通知设置中的channels列表
+    const allSettings = await db.select().from(notificationSettings).where(eq(notificationSettings.user_id, userId));
 
     // 遍历所有设置，从channels列表中移除要删除的渠道ID
     if (allSettings && allSettings.length > 0) {
@@ -115,7 +119,7 @@ export const deleteNotificationChannel = async (
     // 最后删除通知渠道本身
     await db
       .delete(notificationChannels)
-      .where(eq(notificationChannels.id, id));
+      .where(and(eq(notificationChannels.id, id), eq(notificationChannels.created_by, userId))); // 增加用户ID校验
 
     return true; // 假设没有错误就是成功
   } catch (error) {
@@ -124,13 +128,14 @@ export const deleteNotificationChannel = async (
   }
 };
 
-// 获取所有通知模板
-export const getNotificationTemplates = async (): Promise<
+// 获取指定用户的所有通知模板
+export const getNotificationTemplates = async (userId: number): Promise<
   NotificationTemplate[]
 > => {
   const result = await db
     .select()
     .from(notificationTemplates)
+    .where(eq(notificationTemplates.created_by, userId)) // 根据用户ID过滤
     .orderBy(
       desc(notificationTemplates.is_default),
       asc(notificationTemplates.id)
@@ -138,18 +143,19 @@ export const getNotificationTemplates = async (): Promise<
   return result || [];
 };
 
-// 根据ID获取通知模板
+// 根据ID和用户ID获取通知模板
 export const getNotificationTemplateById = async (
-  id: number
+  id: number,
+  userId: number
 ): Promise<NotificationTemplate | null> => {
   const result = await db
     .select()
     .from(notificationTemplates)
-    .where(eq(notificationTemplates.id, id));
-  return result;
+    .where(and(eq(notificationTemplates.id, id), eq(notificationTemplates.created_by, userId)));
+  return result[0];
 };
 
-// 创建通知模板
+// 创建通知模板 (保留不变, created_by 已包含用户信息)
 export const createNotificationTemplate = async (
   template: Omit<NotificationTemplate, "id" | "created_at" | "updated_at">
 ): Promise<number> => {
@@ -171,6 +177,7 @@ export const createNotificationTemplate = async (
 // 更新通知模板
 export const updateNotificationTemplate = async (
   id: number,
+  userId: number,
   template: Partial<
     Omit<NotificationTemplate, "id" | "created_at" | "updated_at">
   >
@@ -219,36 +226,38 @@ export const updateNotificationTemplate = async (
       content: template.content,
       is_default: template.is_default ? 1 : 0,
     })
-    .where(eq(notificationTemplates.id, id));
+    .where(and(eq(notificationTemplates.id, id), eq(notificationTemplates.created_by, userId)));
 
   return result.length > 0;
 };
 
 // 删除通知模板
 export const deleteNotificationTemplate = async (
-  id: number
+  id: number,
+  userId: number
 ): Promise<boolean> => {
   const result = await db
     .delete(notificationTemplates)
-    .where(eq(notificationTemplates.id, id));
+    .where(and(eq(notificationTemplates.id, id), eq(notificationTemplates.created_by, userId)));
 
   return result.length > 0;
 };
 
-// 获取全局通知设置
-export const getGlobalSettings = async (): Promise<{
+
+// 获取指定用户的全局通知设置
+export const getGlobalSettings = async (userId: number): Promise<{
   monitorSettings: NotificationSettings | null;
   agentSettings: NotificationSettings | null;
 }> => {
   const monitorSettings = await db
     .select()
     .from(notificationSettings)
-    .where(eq(notificationSettings.target_type, "global-monitor"));
+    .where(and(eq(notificationSettings.target_type, "global-monitor"), eq(notificationSettings.user_id, userId)));
 
   const agentSettings = await db
     .select()
     .from(notificationSettings)
-    .where(eq(notificationSettings.target_type, "global-agent"));
+    .where(and(eq(notificationSettings.target_type, "global-agent"), eq(notificationSettings.user_id, userId)));
 
   return {
     monitorSettings: monitorSettings[0],
@@ -256,8 +265,9 @@ export const getGlobalSettings = async (): Promise<{
   };
 };
 
-// 获取特定对象的通知设置
+// 获取指定用户的特定对象的通知设置
 export const getSpecificSettings = async (
+  userId: number,
   targetType: "monitor" | "agent",
   targetId?: number
 ): Promise<NotificationSettings[]> => {
@@ -268,15 +278,17 @@ export const getSpecificSettings = async (
       .where(
         and(
           eq(notificationSettings.target_type, targetType),
-          eq(notificationSettings.target_id, targetId)
+          eq(notificationSettings.target_id, targetId),
+          eq(notificationSettings.user_id, userId)
         )
       );
   }
   return await db
     .select()
     .from(notificationSettings)
-    .where(eq(notificationSettings.target_type, targetType));
+    .where(and(eq(notificationSettings.target_type, targetType), eq(notificationSettings.user_id, userId)));
 };
+
 
 // 创建或更新通知设置
 export const createOrUpdateSettings = async (
@@ -292,7 +304,7 @@ export const createOrUpdateSettings = async (
     .select()
     .from(notificationSettings)
     .where(
-      and(eq(notificationSettings.target_type, settings.target_type), condition)
+      and(eq(notificationSettings.target_type, settings.target_type), eq(notificationSettings.user_id, settings.user_id), condition)
     );
 
   if (existingSettings.length > 0) {
@@ -344,7 +356,8 @@ export const createOrUpdateSettings = async (
   }
 };
 
-// 记录通知历史
+
+// 记录通知历史 (保留不变)
 export const createNotificationHistory = async (
   history: Omit<NotificationHistory, "id" | "sent_at">
 ): Promise<number> => {
@@ -364,7 +377,7 @@ export const createNotificationHistory = async (
   return result[0].id;
 };
 
-// 获取通知历史记录
+// 获取通知历史记录 (这个可以考虑是否也需要用户隔离)
 export const getNotificationHistory = async (filter: {
   type?: string | undefined;
   targetId?: number | undefined;
@@ -417,22 +430,22 @@ export const getNotificationHistory = async (filter: {
   };
 };
 
-// 获取完整的通知配置
-export const getNotificationConfig = async (): Promise<NotificationConfig> => {
+// 获取指定用户的完整通知配置
+export const getNotificationConfig = async (userId: number): Promise<NotificationConfig> => {
   // 获取所有渠道
-  const channels = await getNotificationChannels();
+  const channels = await getNotificationChannels(userId);
 
   // 获取所有模板
-  const templates = await getNotificationTemplates();
+  const templates = await getNotificationTemplates(userId);
 
   // 获取全局设置
-  const globalSettings = await getGlobalSettings();
+  const globalSettings = await getGlobalSettings(userId);
 
   // 获取特定监控项设置
-  const monitorSettings = await getSpecificSettings("monitor");
+  const monitorSettings = await getSpecificSettings(userId, "monitor");
 
   // 获取特定客户端设置
-  const agentSettings = await getSpecificSettings("agent");
+  const agentSettings = await getSpecificSettings(userId, "agent");
 
   // 构建通知配置
   const config: NotificationConfig = {
@@ -528,7 +541,8 @@ export const getNotificationConfig = async (): Promise<NotificationConfig> => {
  */
 export const deleteNotificationSettings = async (
   type: "monitor" | "agent",
-  id: number
+  id: number,
+  userId: number,
 ): Promise<boolean> => {
   // 执行删除操作
   try {
@@ -537,7 +551,8 @@ export const deleteNotificationSettings = async (
       .where(
         and(
           eq(notificationSettings.target_type, type),
-          eq(notificationSettings.target_id, id)
+          eq(notificationSettings.target_id, id),
+          eq(notificationSettings.user_id, userId)
         )
       );
   } catch (error) {

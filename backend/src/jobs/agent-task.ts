@@ -19,6 +19,7 @@ interface AgentResult {
   status: string;
   updated_at: string;
   keepalive: string;
+  created_by: number; // 添加 created_by 以便获取 userId
 }
 
 export const checkAgentsStatus = async (c: any) => {
@@ -53,7 +54,7 @@ export const checkAgentsStatus = async (c: any) => {
         await setAgentInactive(agent.id);
 
         // 处理通知
-        await handleAgentOfflineNotification(c.env, agent.id, agent.name);
+        await handleAgentOfflineNotification(c.env, agent.id, agent.name, agent.created_by);
       }
     }
   } catch (error) {
@@ -66,15 +67,18 @@ export const checkAgentsStatus = async (c: any) => {
  * @param env 环境变量
  * @param agentId 客户端ID
  * @param agentName 客户端名称
+ * @param userId 用户ID
  */
 async function handleAgentOfflineNotification(
   env: any,
   agentId: number,
-  agentName: string
+  agentName: string,
+  userId: number
 ) {
   try {
     // 检查是否需要发送通知
     const notificationCheck = await shouldSendNotification(
+      userId, // 修复: 传入 userId
       "agent",
       agentId,
       "online", // 上一个状态
@@ -125,7 +129,8 @@ async function handleAgentOfflineNotification(
       "agent",
       agentId,
       variables,
-      notificationCheck.channels
+      notificationCheck.channels,
+      userId // 修复: 传入 userId
     );
 
     if (notificationResult.success) {
@@ -158,6 +163,9 @@ export async function handleAgentThresholdNotification(
       console.error(`找不到客户端 (ID: ${agentId})`);
       throw new Error(`找不到客户端 (ID: ${agentId})`);
     }
+    
+    // @ts-ignore
+    const userId = agent.created_by; // 获取 userId
 
     // 根据具体的指标类型
     let metricName = "";
@@ -172,7 +180,8 @@ export async function handleAgentThresholdNotification(
         and(
           eq(notificationSettings.enabled, 1),
           eq(notificationSettings.target_id, agentId),
-          eq(notificationSettings.target_type, "agent")
+          eq(notificationSettings.target_type, "agent"),
+          eq(notificationSettings.user_id, userId) // 增加 userId 过滤
         )
       );
 
@@ -184,7 +193,8 @@ export async function handleAgentThresholdNotification(
           .where(
             and(
               eq(notificationSettings.enabled, 1),
-              eq(notificationSettings.target_type, "global-agent")
+              eq(notificationSettings.target_type, "global-agent"),
+              eq(notificationSettings.user_id, userId) // 增加 userId 过滤
             )
           )
       : null;
@@ -272,7 +282,8 @@ export async function handleAgentThresholdNotification(
       "agent",
       agentId,
       variables,
-      channels
+      channels,
+      userId // 修复: 传入 userId
     );
 
     if (notificationResult.success) {

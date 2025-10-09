@@ -77,6 +77,7 @@ async function handleMonitorNotification(
     // 检查是否需要发送通知
     console.log(`检查通知设置...`);
     const notificationCheck = await shouldSendNotification(
+      monitor.created_by, // 修复: 传入 userId
       "monitor",
       monitor.id,
       checkResult.previous_status,
@@ -132,7 +133,8 @@ async function handleMonitorNotification(
       "monitor",
       monitor.id,
       variables,
-      notificationCheck.channels
+      notificationCheck.channels,
+      monitor.created_by // 修复: 传入 userId
     );
 
     console.log(`通知发送结果: ${JSON.stringify(notificationResult)}`);
