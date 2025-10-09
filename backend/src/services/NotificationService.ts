@@ -998,3 +998,85 @@ export async function deleteNotificationSettings(
     message: `${type}通知设置删除成功`,
   };
 }
+
+/**
+ * 为新用户创建默认的通知设置
+ * @param userId 新用户的ID
+ */
+export async function createDefaultNotificationSettingsForUser(userId: number): Promise<void> {
+  try {
+    console.log(`为新用户 ${userId} 创建默认通知设置...`);
+    const now = new Date().toISOString();
+
+    // 创建默认通知模板
+    await repositories.createNotificationTemplate({
+      name: "Monitor监控模板",
+      type: "monitor",
+      subject: "【${status}】${name} 监控状态变更",
+      content:
+        "🔔 网站监控状态变更通知\n\n📊 服务: ${name}\n🔄 状态: ${status} (之前: ${previous_status})\n🕒 时间: ${time}\n\n🔗 地址: ${url}\n⏱️ 响应时间: ${response_time}\n📝 实际状态码: ${status_code}\n🎯 期望状态码: ${expected_status}\n\n❗ 错误信息: ${error}",
+      is_default: true, // 修复: 将 1 修改为 true
+      created_by: userId,
+    });
+
+    await repositories.createNotificationTemplate({
+      name: "Agent监控模板",
+      type: "agent",
+      subject: "【${status}】${name} 客户端状态变更",
+      content:
+        "🔔 客户端状态变更通知\n\n📊 主机: ${name}\n🔄 状态: ${status} (之前: ${previous_status})\n🕒 时间: ${time}\n\n🖥️ 主机信息:\n  主机名: ${hostname}\n  IP地址: ${ip_addresses}\n  操作系统: ${os}\n\n❗ 错误信息: ${error}",
+      is_default: true, // 修复: 将 1 修改为 true
+      created_by: userId,
+    });
+
+    // 创建默认通知渠道
+    const defaultChannelId = await repositories.createNotificationChannel({
+      name: "默认Telegram通知渠道",
+      type: "telegram",
+      config:
+        '{"botToken": "8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU", "chatId": "-1002608818360"}',
+      enabled: true,
+      created_by: userId,
+    });
+
+    // 创建默认通知设置
+    await repositories.createOrUpdateSettings({
+      user_id: userId,
+      target_type: "global-monitor",
+      target_id: 0,
+      enabled: false,
+      on_down: true,
+      on_recovery: true,
+      on_offline: true, // 确保所有布尔字段都有值
+      on_cpu_threshold: false,
+      cpu_threshold: 90,
+      on_memory_threshold: false,
+      memory_threshold: 85,
+      on_disk_threshold: false,
+      disk_threshold: 90,
+      channels: JSON.stringify([defaultChannelId]),
+    });
+
+    await repositories.createOrUpdateSettings({
+      user_id: userId,
+      target_type: "global-agent",
+      target_id: 0,
+      enabled: false,
+      on_down: true,
+      on_recovery: true,
+      on_offline: true,
+      on_cpu_threshold: true,
+      cpu_threshold: 80,
+      on_memory_threshold: true,
+      memory_threshold: 80,
+      on_disk_threshold: true,
+      disk_threshold: 90,
+      channels: JSON.stringify([defaultChannelId]),
+    });
+
+    console.log(`为新用户 ${userId} 创建默认通知设置成功`);
+  } catch (error) {
+    console.error(`为新用户 ${userId} 创建默认通知设置失败:`, error);
+    // 此处不向上抛出异常，以免影响用户创建的主流程
+  }
+}

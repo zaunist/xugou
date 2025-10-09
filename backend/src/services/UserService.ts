@@ -1,5 +1,6 @@
 import { compare, hash } from "bcryptjs";
 import * as repositories from "../repositories";
+import * as NotificationService from "./NotificationService"; // 导入通知服务
 
 export async function getAllUsersService(userRole: string) {
   try {
@@ -90,6 +91,11 @@ export async function createUserService(
       userData.email || null,
       userData.role
     );
+
+    // 为新用户创建默认的通知设置
+    if (newUser && newUser.id) {
+      await NotificationService.createDefaultNotificationSettingsForUser(newUser.id);
+    }
 
     return { success: true, user: newUser, status: 201 };
   } catch (error) {
