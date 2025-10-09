@@ -20,7 +20,6 @@ Currently implemented features:
 - ✅ Status Page - Customizable service status page
 - ✅ Alert Notifications - Anomaly event notifications through multiple channels (Email, Telegram, etc.)
 - ✅ User Management - Supports user registration, multi-user management, and assignable permissions
-- ❌ Mobile APP - Convenient monitoring status check on mobile devices
 
 ## ✨ Core Features
 
@@ -64,13 +63,9 @@ Default username: admin  Default password: admin123
 
 [XUGOU wiki Deployment Guide](https://github.com/zaunist/xugou/wiki)
 
-### Video Tutorial
-
-[![XUGOU Video Tutorial](https://img.youtube.com/vi/jisEpcqDego/0.jpg)](https://youtu.be/w2by-7jDCM0)
-
 ### Workers Optimization Domain Video Tutorial
 
-[![workers 优选教程](https://img.youtube.com/vi/pF05vhNe_5A/0.jpg)](https://youtu.be/pF05vhNe_5A?si=FoLk94K2V5Wpg3jr)
+[workers optimization](https://youtu.be/aY_K43I7Flk?si=eqJXVIlcDnWw1dN6)
 
 ## FAQ
 

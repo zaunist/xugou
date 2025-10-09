@@ -6,7 +6,7 @@ XUGOU 是一个基于 CloudFlare 的轻量化系统监控平台，采用现代�
 - **Frontend**: React + TypeScript + Vite + TailwindCSS + Radix UI
 - **Backend**: Hono + TypeScript + CloudFlare Workers + D1 Database
 - **Agent**: Go + Cobra CLI + gopsutil
-- **部署**: CloudFlare Workers + D1 + Pages
+- **部署**: CloudFlare Workers + D1
 
 ## 代码规范
 
