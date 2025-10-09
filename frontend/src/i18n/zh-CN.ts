@@ -562,6 +562,14 @@ const zhCN = {
 
     // StatusSummaryCard 组件
     "statusSummary.title": "状态摘要",
+    
+    //补全
+    "notifications.fetch.error": "获取通知配置失败。",
+    "notifications.templates.createSuccess": "模板创建成功。",
+    "notifications.templates.updateSuccess": "模板更新成功。",
+    "notifications.templates.deleteConfirmTitle": "确认删除",
+    "notifications.templates.deleteConfirmMessage": "你确定要删除这个模板吗？",
+    "notifications.templates.deleteSuccess": "模板删除成功。"
   },
 };
 

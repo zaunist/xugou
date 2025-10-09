@@ -565,6 +565,14 @@ const enUS = {
 
     // StatusSummaryCard Component
     "statusSummary.title": "Status Summary",
+    
+    //补全
+    "notifications.fetch.error": "Failed to fetch notification configuration.",
+    "notifications.templates.createSuccess": "Template created successfully.",
+    "notifications.templates.updateSuccess": "Template updated successfully.",
+    "notifications.templates.deleteConfirmTitle": "Confirm Delete",
+    "notifications.templates.deleteConfirmMessage": "Are you sure you want to delete this template?",
+    "notifications.templates.deleteSuccess": "Template deleted successfully."
   },
 };
 
