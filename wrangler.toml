@@ -1,4 +1,5 @@
-name = "xugou-app"
+# wrangler.toml
+name = 'xugou-backend'
 main = "backend/src/index.ts"
 compatibility_date = "2025-03-10"
 compatibility_flags = ["nodejs_compat"]
