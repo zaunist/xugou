@@ -16,19 +16,17 @@ const CreateAgent = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
-  // 获取当前浏览器访问的地址作为服务端地址
-  const serverUrl = ENV_API_BASE_URL;
+  // 获取服务端地址。优先从环境变量获取，如果没有则使用当前窗口的源(origin)
+  const serverUrl = ENV_API_BASE_URL || window.location.origin;
   const { t } = useTranslation();
 
-  // State for copy buttons
+  // 复制按钮的状态
   const [serverUrlCopied, setServerUrlCopied] = useState(false);
   const [tokenCopied, setTokenCopied] = useState(false);
   const [installCommandCopied, setInstallCommandCopied] = useState(false);
 
   // 生成服务端验证的 token
   useEffect(() => {
-    // 获取当前访问的URL
-
     const fetchToken = async () => {
       setLoading(true);
       try {
