@@ -63,18 +63,12 @@ XUGOU 采用现代化的系统架构，包含以下组件：
 
 [XUGOU wiki 部署指南](https://github.com/zaunist/xugou/wiki)
 
-### workers 优选教程
-
-[cloudflare workers 优选原理解析，特殊情况时可以救活 worker ](https://youtu.be/aY_K43I7Flk?si=eqJXVIlcDnWw1dN6)
-
 ## 常见问题
 
 [XUGOU wiki 常见问题](https://github.com/zaunist/xugou/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)
 
 ## ⭐ 支持一下作者
 
-- Youtube 频道：[阿杰鲁](https://www.youtube.com/@zaunist) 
-  - 球球你了！帮忙给频道点点关注点点赞，你要是不点，我下次还求！
 - Gitfish: [Gitfish 赞助](https://www.gitfish.dev/repo/zaunist/xugou)
 
 <div align="center">
