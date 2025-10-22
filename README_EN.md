@@ -63,10 +63,6 @@ Default username: admin  Default password: admin123
 
 [XUGOU wiki Deployment Guide](https://github.com/zaunist/xugou/wiki)
 
-### Workers Optimization Domain Video Tutorial
-
-[workers optimization](https://youtu.be/aY_K43I7Flk?si=eqJXVIlcDnWw1dN6)
-
 ## FAQ
 
 [XUGOU wiki FAQ](https://github.com/zaunist/xugou/wiki)
