@@ -1,11 +1,11 @@
-import api from "./client";
+import api from './client';
 import {
   User,
   UserResponse,
   CreateUserRequest,
   UpdateUserRequest,
   ChangePasswordRequest,
-} from "../types/users";
+} from '../types/users';
 
 // 获取所有用户
 export const getAllUsers = async (): Promise<{
@@ -13,7 +13,7 @@ export const getAllUsers = async (): Promise<{
   message?: string;
   users?: User[];
 }> => {
-  const response = await api.get("/api/users");
+  const response = await api.get('/api/users');
   return response.data;
 };
 
@@ -27,7 +27,7 @@ export const getUser = async (id: number): Promise<UserResponse> => {
 export const createUser = async (
   data: CreateUserRequest
 ): Promise<UserResponse> => {
-  const response = await api.post("/api/users", data);
+  const response = await api.post('/api/users', data);
   return response.data;
 };
 

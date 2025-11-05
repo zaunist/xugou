@@ -8,12 +8,12 @@ export interface Agent {
   hostname?: string;
   ip_addresses?: string;
   status:
-    | "active"
-    | "inactive"
-    | "connecting"
-    | "unknown"
-    | "online"
-    | "offline";
+    | 'active'
+    | 'inactive'
+    | 'connecting'
+    | 'unknown'
+    | 'online'
+    | 'offline';
   version?: string;
   os?: string;
   created_at: string;
@@ -27,12 +27,12 @@ export interface AgentWithLatestMetrics {
   hostname?: string;
   ip_addresses?: string;
   status:
-    | "active"
-    | "inactive"
-    | "connecting"
-    | "unknown"
-    | "online"
-    | "offline";
+    | 'active'
+    | 'inactive'
+    | 'connecting'
+    | 'unknown'
+    | 'online'
+    | 'offline';
   version?: string;
   os?: string;
   created_at: string;
@@ -70,4 +70,4 @@ export interface MetricHistory {
 }
 
 // 指标类型定义
-export type MetricType = "cpu" | "memory" | "disk" | "network" | "load";
+export type MetricType = 'cpu' | 'memory' | 'disk' | 'network' | 'load';

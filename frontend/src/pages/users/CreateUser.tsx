@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Box, Flex, Heading, Text, TextField } from "@radix-ui/themes";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Box, Flex, Heading, Text, TextField } from '@radix-ui/themes';
 import {
   Button,
   Card,
@@ -9,33 +9,33 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import { createUser } from "../../api/users";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+} from '@/components/ui';
+import { ArrowLeftIcon } from '@radix-ui/react-icons';
+import { createUser } from '../../api/users';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 const CreateUser = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-    email: "",
-    role: "user",
+    username: '',
+    password: '',
+    email: '',
+    role: 'user',
   });
   const { t } = useTranslation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
   };
 
   const handleRoleChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, role: value }));
+    setFormData(prev => ({ ...prev, role: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,13 +46,13 @@ const CreateUser = () => {
       const response = await createUser(formData);
 
       if (response.success) {
-        toast.success("用户创建成功");
-        navigate("/users");
+        toast.success('用户创建成功');
+        navigate('/users');
       } else {
-        toast.error(response.message || "创建用户失败");
+        toast.error(response.message || '创建用户失败');
       }
     } catch (error) {
-      toast.error("创建用户失败");
+      toast.error('创建用户失败');
     } finally {
       setLoading(false);
     }
@@ -62,10 +62,10 @@ const CreateUser = () => {
     <Box className="sm:px-6 lg:px-[8%]">
       <Flex justify="between" align="center">
         <Flex align="center" gap="2">
-          <Button variant="secondary" onClick={() => navigate("/users")}>
+          <Button variant="secondary" onClick={() => navigate('/users')}>
             <ArrowLeftIcon />
           </Button>
-          <Heading size="6">{t("users.create")}</Heading>
+          <Heading size="6">{t('users.create')}</Heading>
         </Flex>
       </Flex>
       <Card className="my-4 pr-4">
@@ -74,13 +74,13 @@ const CreateUser = () => {
             <Flex direction="column" gap="3" className="ml-4">
               <Box>
                 <Text as="label" size="2">
-                  {t("user.username")} *
+                  {t('user.username')} *
                 </Text>
                 <TextField.Input
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  placeholder={t("user.username")}
+                  placeholder={t('user.username')}
                   required
                 />
               </Box>
@@ -101,20 +101,20 @@ const CreateUser = () => {
 
               <Box>
                 <Text as="label" size="2">
-                  {t("user.email")}
+                  {t('user.email')}
                 </Text>
                 <TextField.Input
                   name="email"
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder={t("user.email")}
+                  placeholder={t('user.email')}
                 />
               </Box>
 
               <Box>
                 <Text as="label" size="2">
-                  {t("user.role")} *
+                  {t('user.role')} *
                 </Text>
                 <Select value={formData.role} onValueChange={handleRoleChange}>
                   <SelectTrigger>
@@ -128,11 +128,11 @@ const CreateUser = () => {
               </Box>
 
               <Flex justify="end" mt="4" gap="2">
-                <Button variant="secondary" onClick={() => navigate("/users")}>
-                  {t("common.cancel")}
+                <Button variant="secondary" onClick={() => navigate('/users')}>
+                  {t('common.cancel')}
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? "创建中..." : t("users.create")}
+                  {loading ? '创建中...' : t('users.create')}
                 </Button>
               </Flex>
             </Flex>

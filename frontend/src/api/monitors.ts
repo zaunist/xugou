@@ -1,4 +1,4 @@
-import api from "./client";
+import api from './client';
 import {
   MonitorResponse,
   MonitorsResponse,
@@ -6,23 +6,27 @@ import {
   UpdateMonitorRequest,
   MonitorStatusHistoryResponse,
   DailyStatsResponse,
-} from "../types/monitors";
+} from '../types/monitors';
 
 // 获取所有监控
 export const getAllMonitors = async (): Promise<MonitorsResponse> => {
-  const response = await api.get<MonitorsResponse>("/api/monitors");
+  const response = await api.get<MonitorsResponse>('/api/monitors');
   return response.data;
 };
 
 // 获取所有每日统计
 export const getAllDailyStats = async (): Promise<DailyStatsResponse> => {
-  const response = await api.get<DailyStatsResponse>("/api/monitors/daily");
+  const response = await api.get<DailyStatsResponse>('/api/monitors/daily');
   return response.data;
 };
 
 // 获取单个监控每日统计
-export const getMonitorDailyStats = async (id: number): Promise<DailyStatsResponse> => {
-  const response = await api.get<DailyStatsResponse>(`/api/monitors/${id}/daily`);
+export const getMonitorDailyStats = async (
+  id: number
+): Promise<DailyStatsResponse> => {
+  const response = await api.get<DailyStatsResponse>(
+    `/api/monitors/${id}/daily`
+  );
   return response.data;
 };
 
@@ -36,7 +40,7 @@ export const getMonitor = async (id: number): Promise<MonitorResponse> => {
 export const createMonitor = async (
   data: CreateMonitorRequest
 ): Promise<MonitorResponse> => {
-  const response = await api.post<MonitorResponse>("/api/monitors", data);
+  const response = await api.post<MonitorResponse>('/api/monitors', data);
   return response.data;
 };
 

@@ -1,11 +1,11 @@
-import { StatusPageConfig, Agent, Bindings } from "../models";
-import { db } from "../config";
+import { StatusPageConfig, Agent, Bindings } from '../models';
+import { db } from '../config';
 import {
   statusPageConfig,
   statusPageMonitors,
   statusPageAgents,
-} from "../db/schema";
-import { eq, desc, asc, and, count, sql } from "drizzle-orm";
+} from '../db/schema';
+import { eq, desc, asc, and, count, sql } from 'drizzle-orm';
 
 /**
  * 状态页相关的数据库操作
@@ -90,7 +90,7 @@ export async function createStatusPageConfig(
     .returning({ id: statusPageConfig.id }); // D1/SQLite 需要这样获取ID
 
   if (!result || result.length === 0) {
-    throw new Error("创建状态页配置失败");
+    throw new Error('创建状态页配置失败');
   }
 
   // 获取新插入的ID

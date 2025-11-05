@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Box, Flex, Heading, Text, Grid, Container } from "@radix-ui/themes";
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Box, Flex, Heading, Text, Grid, Container } from '@radix-ui/themes';
 
-import { Button, Card, Badge } from "@/components/ui";
+import { Button, Card, Badge } from '@/components/ui';
 
 import {
   ArrowLeftIcon,
@@ -16,19 +16,19 @@ import {
   GlobeIcon,
   Link2Icon,
   PersonIcon,
-} from "@radix-ui/react-icons";
-import { getAgent, deleteAgent, getAgentMetrics } from "../../api/agents";
-import { Agent } from "../../types/agents";
-import { useTranslation } from "react-i18next";
-import AgentCard from "../../components/AgentCard";
-import { toast } from "sonner"; // Added
+} from '@radix-ui/react-icons';
+import { getAgent, deleteAgent, getAgentMetrics } from '../../api/agents';
+import { Agent } from '../../types/agents';
+import { useTranslation } from 'react-i18next';
+import AgentCard from '../../components/AgentCard';
+import { toast } from 'sonner'; // Added
 
 // 定义客户端状态颜色映射
-const statusColors: Record<string, "red" | "green" | "yellow" | "gray"> = {
-  active: "green",
-  inactive: "red",
-  connecting: "yellow",
-  unknown: "gray",
+const statusColors: Record<string, 'red' | 'green' | 'yellow' | 'gray'> = {
+  active: 'green',
+  inactive: 'red',
+  connecting: 'yellow',
+  unknown: 'gray',
 };
 
 const AgentDetail = () => {
@@ -44,12 +44,12 @@ const AgentDetail = () => {
     setLoading(true);
     setError(null);
 
-    console.log("AgentDetail: 正在获取客户端数据...");
+    console.log('AgentDetail: 正在获取客户端数据...');
     const agentResponse = await getAgent(Number(id));
     const metricResponse = await getAgentMetrics(Number(id));
 
-    console.log("AgentDetail: 客户端数据获取成功:", agentResponse);
-    console.log("AgentDetail: 客户端指标数据获取成功:", metricResponse);
+    console.log('AgentDetail: 客户端数据获取成功:', agentResponse);
+    console.log('AgentDetail: 客户端指标数据获取成功:', metricResponse);
     console.log(agentResponse.agent, metricResponse.agent);
     if (agentResponse.agent && metricResponse.agent) {
       setAgent({
@@ -57,10 +57,10 @@ const AgentDetail = () => {
         metrics: metricResponse.agent,
       });
 
-      console.log("AgentDetail: 客户端数据处理成功:", agent);
+      console.log('AgentDetail: 客户端数据处理成功:', agent);
     }
-    console.log("AgentDetail: 客户端数据处理完成");
-    console.log("AgentInfo ", agent);
+    console.log('AgentDetail: 客户端数据处理完成');
+    console.log('AgentInfo ', agent);
     setLoading(false);
   };
 
@@ -71,7 +71,7 @@ const AgentDetail = () => {
 
       // 设置定时器，每分钟刷新一次数据
       const intervalId = setInterval(() => {
-        console.log("AgentDetail: 自动刷新数据...");
+        console.log('AgentDetail: 自动刷新数据...');
         fetchAgentData();
       }, 60000); // 60000ms = 1分钟
 
@@ -80,7 +80,7 @@ const AgentDetail = () => {
     } else if (id) {
       // 如果id存在但不是有效数字
       console.error(`无效的客户端ID: ${id}`);
-      setError(t("agents.notFoundId", { id }));
+      setError(t('agents.notFoundId', { id }));
       setLoading(false);
     }
   }, [id, t]);
@@ -102,7 +102,7 @@ const AgentDetail = () => {
       const hours = Math.floor((diffSec % 86400) / 3600);
       const minutes = Math.floor((diffSec % 3600) / 60);
 
-      let result = "";
+      let result = '';
       if (days > 0) result += `${days}天 `;
       if (hours > 0 || days > 0) result += `${hours}小时 `;
       result += `${minutes}分钟`;
@@ -111,38 +111,38 @@ const AgentDetail = () => {
     }
 
     // 如果没有活动时间记录，显示0小时
-    return "0小时";
+    return '0小时';
   };
 
   // 使用agent.updated_at代替last_seen作为上次活动时间
   const formatDateTime = (dateTimeStr: string) => {
-    if (!dateTimeStr) return t("common.notFound");
+    if (!dateTimeStr) return t('common.notFound');
     const date = new Date(dateTimeStr);
     return date.toLocaleString();
   };
 
   const handleDelete = async () => {
-    if (!confirm(t("agent.deleteConfirm"))) {
+    if (!confirm(t('agent.deleteConfirm'))) {
       return;
     }
 
     try {
       setDeleteLoading(true);
-      toast.loading(t("agent.deleting")); // Added
+      toast.loading(t('agent.deleting')); // Added
 
       const response = await deleteAgent(Number(id));
 
       if (response.success) {
-        toast.success(t("agent.deleteSuccess"));
+        toast.success(t('agent.deleteSuccess'));
         setTimeout(() => {
-          navigate("/agents");
+          navigate('/agents');
         }, 3000);
       } else {
-        toast.error(response.message || t("agent.deleteError"));
+        toast.error(response.message || t('agent.deleteError'));
       }
     } catch (error) {
-      console.error("删除客户端失败:", error);
-      toast.error(t("agent.deleteError"));
+      console.error('删除客户端失败:', error);
+      toast.error(t('agent.deleteError'));
     } finally {
       setDeleteLoading(false);
     }
@@ -152,7 +152,7 @@ const AgentDetail = () => {
     return (
       <Box>
         <Flex>
-          <Text>{t("agents.loadingDetail")}</Text>
+          <Text>{t('agents.loadingDetail')}</Text>
         </Flex>
       </Box>
     );
@@ -164,10 +164,10 @@ const AgentDetail = () => {
         <Flex>
           <Card>
             <Flex direction="column" align="center" gap="4">
-              <Heading size="6">{t("common.loadingError")}</Heading>
+              <Heading size="6">{t('common.loadingError')}</Heading>
               <Text>{error}</Text>
-              <Button onClick={() => navigate("/agents")}>
-                {t("common.backToList")}
+              <Button onClick={() => navigate('/agents')}>
+                {t('common.backToList')}
               </Button>
             </Flex>
           </Card>
@@ -182,10 +182,10 @@ const AgentDetail = () => {
         <Flex justify="center" align="center">
           <Card>
             <Flex direction="column" align="center" gap="4">
-              <Heading size="6">{t("agents.notFound")}</Heading>
-              <Text>{t("agents.notFoundId", { id })}</Text>
-              <Button onClick={() => navigate("/agents")}>
-                {t("common.backToList")}
+              <Heading size="6">{t('agents.notFound')}</Heading>
+              <Text>{t('agents.notFoundId', { id })}</Text>
+              <Button onClick={() => navigate('/agents')}>
+                {t('common.backToList')}
               </Button>
             </Flex>
           </Card>
@@ -196,16 +196,21 @@ const AgentDetail = () => {
 
   return (
     <Container size="4">
-      <Flex justify="between" align="start" direction={{ initial: "column", sm: "row" }} gap="4">
+      <Flex
+        justify="between"
+        align="start"
+        direction={{ initial: 'column', sm: 'row' }}
+        gap="4"
+      >
         <Flex align="center" gap="2">
-          <Button variant="secondary" onClick={() => navigate("/agents")}>
+          <Button variant="secondary" onClick={() => navigate('/agents')}>
             <ArrowLeftIcon />
           </Button>
-          <Heading size="6">{t("agent.details")}</Heading>
-          <Badge color={statusColors[agent.status || "inactive"]}>
-            {agent.status === "active"
-              ? t("agent.status.online")
-              : t("agent.status.offline")}
+          <Heading size="6">{t('agent.details')}</Heading>
+          <Badge color={statusColors[agent.status || 'inactive']}>
+            {agent.status === 'active'
+              ? t('agent.status.online')
+              : t('agent.status.offline')}
           </Badge>
         </Flex>
         <Flex gap="2">
@@ -215,14 +220,14 @@ const AgentDetail = () => {
             disabled={loading}
           >
             <ReloadIcon />
-            {t("common.refresh")}
+            {t('common.refresh')}
           </Button>
           <Button
             variant="secondary"
             onClick={() => navigate(`/agents/edit/${id}`)}
           >
             <Pencil1Icon />
-            {t("agent.edit")}
+            {t('agent.edit')}
           </Button>
           <Button
             variant="secondary"
@@ -230,21 +235,21 @@ const AgentDetail = () => {
             disabled={deleteLoading}
           >
             <Cross2Icon />
-            {deleteLoading ? t("common.deleting") : t("agent.delete")}
+            {deleteLoading ? t('common.deleting') : t('agent.delete')}
           </Button>
         </Flex>
       </Flex>
       <Box py="3">
-        <Grid columns={{ initial: "1" }} gap="4">
+        <Grid columns={{ initial: '1' }} gap="4">
           {/* 系统信息卡片 */}
           <Card>
             <Flex direction="column" gap="2" className="ml-4">
-              <Heading size="3">{t("agent.systemInfo")}</Heading>
+              <Heading size="3">{t('agent.systemInfo')}</Heading>
               <Box>
                 <Flex align="center" gap="2">
                   <PersonIcon />
                   <Text as="div" size="2" weight="bold">
-                    {t("agents.table.name")}:
+                    {t('agents.table.name')}:
                   </Text>
                   <Text as="div" size="2">
                     {agent.name}
@@ -255,10 +260,10 @@ const AgentDetail = () => {
                 <Flex align="center" gap="2">
                   <DesktopIcon />
                   <Text as="div" size="2" weight="bold">
-                    {t("agent.os")}:
+                    {t('agent.os')}:
                   </Text>
                   <Text as="div" size="2">
-                    {agent.os || t("common.notFound")}
+                    {agent.os || t('common.notFound')}
                   </Text>
                 </Flex>
               </Box>
@@ -267,10 +272,10 @@ const AgentDetail = () => {
                 <Flex align="center" gap="2">
                   <InfoCircledIcon />
                   <Text as="div" size="2" weight="bold">
-                    {t("agent.version")}:
+                    {t('agent.version')}:
                   </Text>
                   <Text as="div" size="2">
-                    {agent.version || t("common.notFound")}
+                    {agent.version || t('common.notFound')}
                   </Text>
                 </Flex>
               </Box>
@@ -279,10 +284,10 @@ const AgentDetail = () => {
                 <Flex align="center" gap="2">
                   <GlobeIcon />
                   <Text as="div" size="2" weight="bold">
-                    {t("agent.hostname")}:
+                    {t('agent.hostname')}:
                   </Text>
                   <Text as="div" size="2">
-                    {agent.hostname || t("common.notFound")}
+                    {agent.hostname || t('common.notFound')}
                   </Text>
                 </Flex>
               </Box>
@@ -291,7 +296,7 @@ const AgentDetail = () => {
                 <Flex align="center" gap="2">
                   <Link2Icon />
                   <Text as="div" size="2" weight="bold">
-                    {t("agent.ipAddress")}:
+                    {t('agent.ipAddress')}:
                   </Text>
                   {agent.ip_addresses ? (
                     (() => {
@@ -303,7 +308,7 @@ const AgentDetail = () => {
                               {ipArray[0]}
                               {ipArray.length > 1
                                 ? ` (+${ipArray.length - 1})`
-                                : ""}
+                                : ''}
                             </Text>
                           );
                         } else {
@@ -323,7 +328,7 @@ const AgentDetail = () => {
                     })()
                   ) : (
                     <Text as="div" size="2" color="gray">
-                      {t("common.unknown")}
+                      {t('common.unknown')}
                     </Text>
                   )}
                 </Flex>
@@ -333,7 +338,7 @@ const AgentDetail = () => {
                 <Flex align="center" gap="2">
                   <LapTimerIcon />
                   <Text as="div" size="2" weight="bold">
-                    {t("agent.uptime")}:
+                    {t('agent.uptime')}:
                   </Text>
                   <Text as="div" size="2">
                     {formatUptime(agent)}
@@ -345,7 +350,7 @@ const AgentDetail = () => {
                 <Flex align="center" gap="2">
                   <ClockIcon />
                   <Text as="div" size="2" weight="bold">
-                    {t("agent.lastUpdated")}:
+                    {t('agent.lastUpdated')}:
                   </Text>
                   <Text as="div" size="2">
                     {formatDateTime(agent.updated_at)}
@@ -382,7 +387,7 @@ const AgentDetail = () => {
           {/* Agent 资源信息卡片 */}
           <Card className="pr-4">
             <Flex direction="column" gap="2" className="ml-4">
-              <Heading size="3">{t("agent.metrics")}</Heading>
+              <Heading size="3">{t('agent.metrics')}</Heading>
               <AgentCard
                 agent={agent}
                 showIpAddress={false}

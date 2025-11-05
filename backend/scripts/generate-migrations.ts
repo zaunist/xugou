@@ -8,18 +8,22 @@ const __dirname = path.dirname(__filename);
 
 // 添加 IF NOT EXISTS 到各种 SQL 语句
 function addIfNotExists(sql: string): string {
-  return sql
-    // 处理 CREATE TABLE 语句
-    .replace(/CREATE TABLE (`?\w+`?)/g, 'CREATE TABLE IF NOT EXISTS $1')
-    // 处理 CREATE INDEX 语句
-    .replace(/CREATE (UNIQUE )?INDEX (`?\w+`?)/g, 'CREATE $1INDEX IF NOT EXISTS $2')
-    // 处理 ALTER TABLE ADD COLUMN 语句
-    .replace(
-      /ALTER TABLE (`?\w+`?) ADD (COLUMN )?(`?\w+`? \w+.*)/g,
-      (match, table, _, column) => {
-        // 提取列名（去掉类型和约束）
-        const columnName = column.match(/^`?\w+`?/)[0];
-        return `
+  return (
+    sql
+      // 处理 CREATE TABLE 语句
+      .replace(/CREATE TABLE (`?\w+`?)/g, 'CREATE TABLE IF NOT EXISTS $1')
+      // 处理 CREATE INDEX 语句
+      .replace(
+        /CREATE (UNIQUE )?INDEX (`?\w+`?)/g,
+        'CREATE $1INDEX IF NOT EXISTS $2'
+      )
+      // 处理 ALTER TABLE ADD COLUMN 语句
+      .replace(
+        /ALTER TABLE (`?\w+`?) ADD (COLUMN )?(`?\w+`? \w+.*)/g,
+        (match, table, _, column) => {
+          // 提取列名（去掉类型和约束）
+          const columnName = column.match(/^`?\w+`?/)[0];
+          return `
 -- 检查列是否存在
 SELECT CASE 
   WHEN EXISTS (
@@ -30,14 +34,21 @@ SELECT CASE
     ALTER TABLE ${table} ADD ${column}
   )
 END;`;
-      }
-    );
+        }
+      )
+  );
 }
 
 // 生成迁移文件
 async function generateMigrations() {
   const migrationsDir = path.join(__dirname, '..', 'drizzle');
-  const outputFile = path.join(__dirname, '..', 'src', 'db', 'generated-migrations.ts');
+  const outputFile = path.join(
+    __dirname,
+    '..',
+    'src',
+    'db',
+    'generated-migrations.ts'
+  );
 
   // 确保目录存在
   const outputDir = path.dirname(outputFile);
@@ -46,7 +57,8 @@ async function generateMigrations() {
   }
 
   // 读取所有 SQL 文件
-  const files = fs.readdirSync(migrationsDir)
+  const files = fs
+    .readdirSync(migrationsDir)
     .filter(file => file.endsWith('.sql'))
     .sort();
 
@@ -62,7 +74,7 @@ async function generateMigrations() {
 
     return {
       name: file,
-      content: modifiedContent.replace(/`/g, '\\`') // 转义反引号
+      content: modifiedContent.replace(/`/g, '\\`'), // 转义反引号
     };
   });
 
@@ -76,10 +88,14 @@ export interface Migration {
 }
 
 export const MIGRATIONS: Migration[] = [
-${migrations.map(m => `  {
+${migrations
+  .map(
+    m => `  {
     name: "${m.name}",
     sql: \`${m.content}\`
-  }`).join(',\n')}
+  }`
+  )
+  .join(',\n')}
 ];
 `;
 
@@ -88,4 +104,4 @@ ${migrations.map(m => `  {
   console.log(`已生成迁移文件: ${outputFile}`);
 }
 
-generateMigrations().catch(console.error); 
+generateMigrations().catch(console.error);

@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { Box, Text, Flex } from "@radix-ui/themes";
+import React, { useMemo, useState } from 'react';
+import { Box, Text, Flex } from '@radix-ui/themes';
 import {
   Tooltip,
   TooltipContent,
@@ -10,13 +10,13 @@ import {
   DialogTrigger,
   DialogTitle,
   DialogClose,
-} from "./ui";
-import { useTranslation } from "react-i18next";
-import { DailyStats } from "../types/monitors";
+} from './ui';
+import { useTranslation } from 'react-i18next';
+import { DailyStats } from '../types/monitors';
 
 // 扩展 DailyStats 类型以匹配 dailyHistory 中的结构
 interface EnrichedDailyStats extends DailyStats {
-  status: "up" | "down"; // 确保 status 属性存在且类型正确
+  status: 'up' | 'down'; // 确保 status 属性存在且类型正确
 }
 
 interface StatusBarProps {
@@ -39,32 +39,32 @@ const StatusBar: React.FC<StatusBarProps> = ({ dailyStats = [] }) => {
   const getColor = (value: string | number, isHover = false) => {
     // 如果值是百分比字符串，转换为数字
     const numValue =
-      typeof value === "string"
+      typeof value === 'string'
         ? parseFloat(value)
-        : typeof value === "number"
-        ? value
-        : 0;
+        : typeof value === 'number'
+          ? value
+          : 0;
 
     // 根据状态或百分比确定颜色
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       switch (value) {
-        case "up":
-          return isHover ? "var(--green-6)" : "var(--green-5)";
-        case "down":
-          return isHover ? "var(--red-6)" : "var(--red-5)";
+        case 'up':
+          return isHover ? 'var(--green-6)' : 'var(--green-5)';
+        case 'down':
+          return isHover ? 'var(--red-6)' : 'var(--red-5)';
         default:
-          return isHover ? "var(--gray-6)" : "var(--gray-5)";
+          return isHover ? 'var(--gray-6)' : 'var(--gray-5)';
       }
     } else {
       // 根据百分比确定颜色
       if (numValue >= 99) {
-        return isHover ? "var(--green-6)" : "var(--green-5)";
+        return isHover ? 'var(--green-6)' : 'var(--green-5)';
       } else if (numValue >= 95) {
-        return isHover ? "var(--yellow-6)" : "var(--yellow-5)";
+        return isHover ? 'var(--yellow-6)' : 'var(--yellow-5)';
       } else if (numValue >= 90) {
-        return isHover ? "var(--orange-6)" : "var(--orange-5)";
+        return isHover ? 'var(--orange-6)' : 'var(--orange-5)';
       } else {
-        return isHover ? "var(--red-6)" : "var(--red-5)";
+        return isHover ? 'var(--red-6)' : 'var(--red-5)';
       }
     }
   };
@@ -73,12 +73,12 @@ const StatusBar: React.FC<StatusBarProps> = ({ dailyStats = [] }) => {
   const dailyHistory = useMemo(() => {
     // 如果有每日统计数据，优先使用
     if (dailyStats && dailyStats.length > 0) {
-      return dailyStats.map((stat) => {
+      return dailyStats.map(stat => {
         // 确定每天的主要状态
         const dailyStatus =
           stat.up_checks > stat.down_checks
-            ? ("up" as const)
-            : ("down" as const);
+            ? ('up' as const)
+            : ('down' as const);
 
         return {
           ...stat, // 包含所有原始 stat 属性
@@ -99,13 +99,13 @@ const StatusBar: React.FC<StatusBarProps> = ({ dailyStats = [] }) => {
       {/* 状态历史条 - 使用Grid布局代替Flex */}
       <Box
         style={{
-          display: "grid",
+          display: 'grid',
           gridTemplateColumns: `repeat(${dailyHistory?.length}, 1fr)`,
-          gap: "4px",
-          width: "100%",
+          gap: '4px',
+          width: '100%',
         }}
       >
-        {dailyHistory?.map((dayData) => {
+        {dailyHistory?.map(dayData => {
           // 确保 dayData 和 monitor_id 存在
           const key =
             dayData && dayData.monitor_id
@@ -116,21 +116,21 @@ const StatusBar: React.FC<StatusBarProps> = ({ dailyStats = [] }) => {
               <TooltipContent>
                 <>
                   <Text as="span" size="1" mb="1">
-                    {t("common.date")}:{" "}
+                    {t('common.date')}:{' '}
                     {new Date(dayData.date).toLocaleDateString()}
                   </Text>
                   <br></br>
                   <Text as="span" size="1" mb="1">
-                    {t("common.status")}:{" "}
-                    {dayData.status === "up"
-                      ? t("monitor.status.normal")
-                      : dayData.status === "down"
-                      ? t("monitor.status.failure")
-                      : t("monitor.status.pending")}
+                    {t('common.status')}:{' '}
+                    {dayData.status === 'up'
+                      ? t('monitor.status.normal')
+                      : dayData.status === 'down'
+                        ? t('monitor.status.failure')
+                        : t('monitor.status.pending')}
                   </Text>
                   <br></br>
                   <Text as="span" size="1" mb="1">
-                    {t("monitor.history.availability")}:{" "}
+                    {t('monitor.history.availability')}:{' '}
                     {dayData.availability.toFixed(2)}%
                   </Text>
                 </>
@@ -138,13 +138,13 @@ const StatusBar: React.FC<StatusBarProps> = ({ dailyStats = [] }) => {
               <TooltipTrigger>
                 <Box
                   style={{
-                    width: "100%",
-                    height: "50px",
+                    width: '100%',
+                    height: '50px',
                     backgroundColor: getColor(dayData.status),
-                    borderRadius: "2px",
-                    transition: "background-color 0.2s",
-                    cursor: "pointer",
-                    padding: "0",
+                    borderRadius: '2px',
+                    transition: 'background-color 0.2s',
+                    cursor: 'pointer',
+                    padding: '0',
                   }}
                   onClick={() => handleDayClick(dayData)}
                 />
@@ -161,50 +161,50 @@ const StatusBar: React.FC<StatusBarProps> = ({ dailyStats = [] }) => {
             <DialogTitle>
               {t(
                 `📅 ${new Date(selectedDayData.date).toLocaleDateString()} ${t(
-                  "common.status"
+                  'common.status'
                 )}: ${
-                  selectedDayData.status === "up"
-                    ? t("monitor.status.normal")
-                    : t("monitor.status.failure")
+                  selectedDayData.status === 'up'
+                    ? t('monitor.status.normal')
+                    : t('monitor.status.failure')
                 }`
               )}
             </DialogTitle>
 
             <Flex direction="column" gap="3">
               <Text as="div" size="2">
-                <strong>{t("monitor.history.availability")}:</strong>{" "}
+                <strong>{t('monitor.history.availability')}:</strong>{' '}
                 {selectedDayData.availability.toFixed(2)}%
               </Text>
               <Text as="div" size="2">
-                <strong>{t("monitor.history.totalChecks")}:</strong>{" "}
+                <strong>{t('monitor.history.totalChecks')}:</strong>{' '}
                 {selectedDayData.total_checks}
               </Text>
               <Text as="div" size="2">
-                <strong>{t("monitor.history.upChecks")}:</strong>{" "}
+                <strong>{t('monitor.history.upChecks')}:</strong>{' '}
                 {selectedDayData.up_checks}
               </Text>
               <Text as="div" size="2">
-                <strong>{t("monitor.history.downChecks")}:</strong>{" "}
+                <strong>{t('monitor.history.downChecks')}:</strong>{' '}
                 {selectedDayData.down_checks}
               </Text>
               <Text as="div" size="2">
-                <strong>{t("monitor.history.avgResponseTime")}:</strong>{" "}
-                {selectedDayData.avg_response_time?.toFixed(2) ?? "N/A"} ms
+                <strong>{t('monitor.history.avgResponseTime')}:</strong>{' '}
+                {selectedDayData.avg_response_time?.toFixed(2) ?? 'N/A'} ms
               </Text>
               <Text as="div" size="2">
-                <strong>{t("monitor.history.minResponseTime")}:</strong>{" "}
-                {selectedDayData.min_response_time ?? "N/A"} ms
+                <strong>{t('monitor.history.minResponseTime')}:</strong>{' '}
+                {selectedDayData.min_response_time ?? 'N/A'} ms
               </Text>
               <Text as="div" size="2">
-                <strong>{t("monitor.history.maxResponseTime")}:</strong>{" "}
-                {selectedDayData.max_response_time ?? "N/A"} ms
+                <strong>{t('monitor.history.maxResponseTime')}:</strong>{' '}
+                {selectedDayData.max_response_time ?? 'N/A'} ms
               </Text>
             </Flex>
 
             <Flex gap="3" mt="4" justify="end">
               <DialogClose>
                 <Button variant="secondary" color="gray">
-                  {t("common.close")}
+                  {t('common.close')}
                 </Button>
               </DialogClose>
             </Flex>

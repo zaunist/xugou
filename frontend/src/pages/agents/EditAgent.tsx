@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Box, Flex, Heading, Text, TextField } from "@radix-ui/themes";
-import { Button, Card } from "@/components/ui";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import { getAgent, updateAgent } from "../../api/agents";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-import type { Agent } from "../../types/agents";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Box, Flex, Heading, Text, TextField } from '@radix-ui/themes';
+import { Button, Card } from '@/components/ui';
+import { ArrowLeftIcon } from '@radix-ui/react-icons';
+import { getAgent, updateAgent } from '../../api/agents';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import type { Agent } from '../../types/agents';
 
 const EditAgent = () => {
   const navigate = useNavigate();
@@ -15,10 +15,10 @@ const EditAgent = () => {
   const [notFound, setNotFound] = useState(false);
   const [formData, setFormData] = useState<{
     name: string;
-    status: Agent["status"];
+    status: Agent['status'];
   }>({
-    name: "",
-    status: "inactive",
+    name: '',
+    status: 'inactive',
   });
   const { t } = useTranslation();
 
@@ -38,7 +38,7 @@ const EditAgent = () => {
 
       setFormData({
         name: agent.name,
-        status: agent.status ?? "inactive",
+        status: agent.status ?? 'inactive',
       });
     } else {
       setNotFound(true);
@@ -50,7 +50,7 @@ const EditAgent = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
@@ -69,14 +69,14 @@ const EditAgent = () => {
     const response = await updateAgent(Number(id), payload);
 
     if (response.success) {
-      toast.success(t("agent.form.updateSuccess"));
+      toast.success(t('agent.form.updateSuccess'));
 
       // 短暂延迟后导航，让用户有时间看到提示
       setTimeout(() => {
-        navigate("/agents");
+        navigate('/agents');
       }, 1500);
     } else {
-      toast.error(t("agent.form.updateError", "Failed to update agent."));
+      toast.error(t('agent.form.updateError', 'Failed to update agent.'));
     }
     setLoading(false);
   };
@@ -87,10 +87,10 @@ const EditAgent = () => {
         <Flex justify="center" align="center">
           <Card>
             <Flex direction="column" align="center" gap="4" p="4">
-              <Heading size="6">{t("agents.notFound")}</Heading>
-              <Text>{t("agents.notFoundId", { id })}</Text>
-              <Button onClick={() => navigate("/agents")}>
-                {t("common.backToList")}
+              <Heading size="6">{t('agents.notFound')}</Heading>
+              <Text>{t('agents.notFoundId', { id })}</Text>
+              <Button onClick={() => navigate('/agents')}>
+                {t('common.backToList')}
               </Button>
             </Flex>
           </Card>
@@ -111,7 +111,7 @@ const EditAgent = () => {
               <ArrowLeftIcon />
             </Button>
             <Heading size="6">
-              {t("agent.form.editingClient", { name: formData.name })}
+              {t('agent.form.editingClient', { name: formData.name })}
             </Heading>
           </Flex>
         </Flex>
@@ -120,7 +120,7 @@ const EditAgent = () => {
             <Flex direction="column" gap="2" className="ml-4">
               <Box mb="4">
                 <Text as="label" size="2" mb="1" weight="bold">
-                  {t("agent.form.name")}{" "}
+                  {t('agent.form.name')}{' '}
                   <Text size="2" color="red">
                     *
                   </Text>
@@ -129,11 +129,11 @@ const EditAgent = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder={t("agent.form.namePlaceholder")}
+                  placeholder={t('agent.form.namePlaceholder')}
                   required
                 />
                 <Text size="1" color="gray" mt="1">
-                  {t("agent.form.nameHelp")}
+                  {t('agent.form.nameHelp')}
                 </Text>
               </Box>
 
@@ -142,12 +142,12 @@ const EditAgent = () => {
                   variant="secondary"
                   onClick={() => navigate(`/agents/${id}`)}
                 >
-                  {t("common.cancel")}
+                  {t('common.cancel')}
                 </Button>
                 <Button type="submit" disabled={loading}>
                   {loading
-                    ? t("common.savingChanges")
-                    : t("common.saveChanges")}
+                    ? t('common.savingChanges')
+                    : t('common.saveChanges')}
                 </Button>
               </Flex>
             </Flex>

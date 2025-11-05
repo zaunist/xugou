@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Flex,
@@ -7,7 +7,7 @@ import {
   TextField,
   Container,
   TextArea,
-} from "@radix-ui/themes";
+} from '@radix-ui/themes';
 
 import {
   Button,
@@ -27,15 +27,15 @@ import {
   SelectContent,
   SelectValue,
   Switch,
-} from "@/components/ui";
+} from '@/components/ui';
 
-import { BellIcon, PlusIcon } from "@radix-ui/react-icons";
-import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
-import { getAllMonitors } from "../../api/monitors";
-import { Monitor } from "../../types/monitors";
-import { getAllAgents } from "../../api/agents";
-import { Agent } from "../../types/agents";
+import { BellIcon, PlusIcon } from '@radix-ui/react-icons';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { getAllMonitors } from '../../api/monitors';
+import { Monitor } from '../../types/monitors';
+import { getAllAgents } from '../../api/agents';
+import { Agent } from '../../types/agents';
 import {
   getNotificationConfig,
   saveNotificationSettings,
@@ -46,12 +46,12 @@ import {
   updateNotificationTemplate,
   deleteNotificationTemplate,
   NotificationSettings as ApiNotificationSettings,
-} from "../../api/notifications";
+} from '../../api/notifications';
 import type {
   NotificationChannel as ApiNotificationChannel,
   NotificationTemplate as ApiNotificationTemplate,
-} from "../../types/notification";
-import ChannelSelector from "../../components/ChannelSelector";
+} from '../../types/notification';
+import ChannelSelector from '../../components/ChannelSelector';
 
 const NotificationsConfig = () => {
   // 状态管理
@@ -75,26 +75,26 @@ const NotificationsConfig = () => {
     null
   );
   const [channelForm, setChannelForm] = useState({
-    name: "",
-    type: "telegram",
+    name: '',
+    type: 'telegram',
     config: {
-      botToken: "",
-      chatId: "",
-      apiKey: "",
-      from: "",
-      to: "",
-      webhookUrl: "",
+      botToken: '',
+      chatId: '',
+      apiKey: '',
+      from: '',
+      to: '',
+      webhookUrl: '',
     },
     enabled: true,
   });
   const [channelFormErrors, setChannelFormErrors] = useState({
-    name: "",
-    botToken: "",
-    chatId: "",
-    apiKey: "",
-    from: "",
-    to: "",
-    webhookUrl: "",
+    name: '',
+    botToken: '',
+    chatId: '',
+    apiKey: '',
+    from: '',
+    to: '',
+    webhookUrl: '',
   });
 
   // 模板管理状态
@@ -103,10 +103,10 @@ const NotificationsConfig = () => {
   const [selectedTemplate, setSelectedTemplate] =
     useState<ApiNotificationTemplate | null>(null);
   const [templateForm, setTemplateForm] = useState({
-    name: "",
-    type: "monitor",
-    subject: "",
-    content: "",
+    name: '',
+    type: 'monitor',
+    subject: '',
+    content: '',
   });
 
   const contentTextAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -115,19 +115,19 @@ const NotificationsConfig = () => {
 
   // 模板变量
   const templateVariables = [
-    { value: "${name}", key: "name" },
-    { value: "${status}", key: "status" },
-    { value: "${previous_status}", key: "previous_status" },
-    { value: "${time}", key: "time" },
-    { value: "${url}", key: "url" },
-    { value: "${response_time}", key: "response_time" },
-    { value: "${status_code}", key: "status_code" },
-    { value: "${expected_status}", key: "expected_status" },
-    { value: "${error}", key: "error" },
-    { value: "${details}", key: "details" },
-    { value: "${hostname}", key: "hostname" },
-    { value: "${ip_addresses}", key: "ip_addresses" },
-    { value: "${os}", key: "os" },
+    { value: '${name}', key: 'name' },
+    { value: '${status}', key: 'status' },
+    { value: '${previous_status}', key: 'previous_status' },
+    { value: '${time}', key: 'time' },
+    { value: '${url}', key: 'url' },
+    { value: '${response_time}', key: 'response_time' },
+    { value: '${status_code}', key: 'status_code' },
+    { value: '${expected_status}', key: 'expected_status' },
+    { value: '${error}', key: 'error' },
+    { value: '${details}', key: 'details' },
+    { value: '${hostname}', key: 'hostname' },
+    { value: '${ip_addresses}', key: 'ip_addresses' },
+    { value: '${os}', key: 'os' },
   ];
 
   useEffect(() => {
@@ -146,12 +146,12 @@ const NotificationsConfig = () => {
         setTemplates(configResponse.data.templates);
         setSettings(configResponse.data.settings);
       } else {
-        console.error("获取通知配置失败:", configResponse.message);
-        toast.error(t("notifications.fetch.error"));
+        console.error('获取通知配置失败:', configResponse.message);
+        toast.error(t('notifications.fetch.error'));
       }
     } catch (error) {
-      console.error("加载通知设置失败", error);
-      toast.error(t("notifications.fetch.error"));
+      console.error('加载通知设置失败', error);
+      toast.error(t('notifications.fetch.error'));
     } finally {
       setLoading(false);
     }
@@ -166,7 +166,7 @@ const NotificationsConfig = () => {
     if (monitorsResponse.success && monitorsResponse.monitors) {
       setMonitors(monitorsResponse.monitors);
     } else {
-      console.error("获取监控数据失败:", monitorsResponse.message);
+      console.error('获取监控数据失败:', monitorsResponse.message);
     }
     setMonitorsLoading(false);
 
@@ -276,13 +276,13 @@ const NotificationsConfig = () => {
       const response = await saveNotificationSettings(settings);
 
       if (response.success) {
-        toast.success(t("notifications.save.success"));
+        toast.success(t('notifications.save.success'));
       } else {
-        toast.error(t("notifications.save.error"));
+        toast.error(t('notifications.save.error'));
       }
     } catch (err) {
-      console.error("保存通知设置失败", err);
-      toast.error(t("notifications.save.error"));
+      console.error('保存通知设置失败', err);
+      toast.error(t('notifications.save.error'));
     } finally {
       setSaving(false);
     }
@@ -291,26 +291,26 @@ const NotificationsConfig = () => {
   // 打开新增渠道对话框
   const handleAddChannelClick = () => {
     setChannelForm({
-      name: "",
-      type: "telegram",
+      name: '',
+      type: 'telegram',
       config: {
-        botToken: "",
-        chatId: "",
-        apiKey: "",
-        from: "",
-        to: "",
-        webhookUrl: "",
+        botToken: '',
+        chatId: '',
+        apiKey: '',
+        from: '',
+        to: '',
+        webhookUrl: '',
       },
       enabled: true,
     });
     setChannelFormErrors({
-      name: "",
-      botToken: "",
-      chatId: "",
-      apiKey: "",
-      from: "",
-      to: "",
-      webhookUrl: "",
+      name: '',
+      botToken: '',
+      chatId: '',
+      apiKey: '',
+      from: '',
+      to: '',
+      webhookUrl: '',
     });
     setIsAddChannelOpen(true);
   };
@@ -318,15 +318,15 @@ const NotificationsConfig = () => {
   // 打开编辑渠道对话框
   const handleEditChannelClick = (channel: ApiNotificationChannel) => {
     if (channel.id === undefined || channel.id === null) {
-      console.error("无效的渠道ID:", channel.id);
-      toast.error(t("notifications.channels.invalidId"));
+      console.error('无效的渠道ID:', channel.id);
+      toast.error(t('notifications.channels.invalidId'));
       return;
     }
 
     setSelectedChannelId(channel.id);
 
     let rawConfig: unknown = channel.config;
-    if (typeof rawConfig === "string") {
+    if (typeof rawConfig === 'string') {
       try {
         rawConfig = JSON.parse(rawConfig);
       } catch (e) {
@@ -336,12 +336,12 @@ const NotificationsConfig = () => {
     }
 
     const normalizedConfig =
-      rawConfig && typeof rawConfig === "object" && !Array.isArray(rawConfig)
+      rawConfig && typeof rawConfig === 'object' && !Array.isArray(rawConfig)
         ? (rawConfig as Record<string, unknown>)
         : {};
 
     const readString = (value: unknown) =>
-      typeof value === "string" ? value : "";
+      typeof value === 'string' ? value : '';
 
     setChannelForm({
       name: channel.name,
@@ -357,13 +357,13 @@ const NotificationsConfig = () => {
       enabled: channel.enabled,
     });
     setChannelFormErrors({
-      name: "",
-      botToken: "",
-      chatId: "",
-      apiKey: "",
-      from: "",
-      to: "",
-      webhookUrl: "",
+      name: '',
+      botToken: '',
+      chatId: '',
+      apiKey: '',
+      from: '',
+      to: '',
+      webhookUrl: '',
     });
     setIsEditChannelOpen(true);
   };
@@ -371,8 +371,8 @@ const NotificationsConfig = () => {
   // 打开删除渠道对话框
   const handleDeleteChannelClick = (channelId: number) => {
     if (channelId === undefined || channelId === null) {
-      console.error("无效的渠道ID:", channelId);
-      toast.error(t("notifications.channels.invalidId"));
+      console.error('无效的渠道ID:', channelId);
+      toast.error(t('notifications.channels.invalidId'));
       return;
     }
 
@@ -383,52 +383,52 @@ const NotificationsConfig = () => {
   // 验证渠道表单
   const validateChannelForm = (): boolean => {
     const errors = {
-      name: "",
-      botToken: "",
-      chatId: "",
-      apiKey: "",
-      from: "",
-      to: "",
-      webhookUrl: "",
+      name: '',
+      botToken: '',
+      chatId: '',
+      apiKey: '',
+      from: '',
+      to: '',
+      webhookUrl: '',
     };
 
     let isValid = true;
 
     if (!channelForm.name.trim()) {
-      errors.name = t("notifications.channels.errors.nameRequired");
+      errors.name = t('notifications.channels.errors.nameRequired');
       isValid = false;
     }
 
-    if (channelForm.type === "telegram") {
+    if (channelForm.type === 'telegram') {
       if (!channelForm.config.botToken.trim()) {
-        errors.botToken = t("notifications.channels.errors.botTokenRequired");
+        errors.botToken = t('notifications.channels.errors.botTokenRequired');
         isValid = false;
       }
       if (!channelForm.config.chatId.trim()) {
-        errors.chatId = t("notifications.channels.errors.chatIdRequired");
+        errors.chatId = t('notifications.channels.errors.chatIdRequired');
         isValid = false;
       }
     }
 
-    if (channelForm.type === "resend") {
+    if (channelForm.type === 'resend') {
       if (!channelForm.config.apiKey.trim()) {
-        errors.apiKey = t("notifications.channels.errors.apiKeyRequired");
+        errors.apiKey = t('notifications.channels.errors.apiKeyRequired');
         isValid = false;
       }
       if (!channelForm.config.from.trim()) {
-        errors.from = t("notifications.channels.errors.fromRequired");
+        errors.from = t('notifications.channels.errors.fromRequired');
         isValid = false;
       }
       if (!channelForm.config.to.trim()) {
-        errors.to = t("notifications.channels.errors.toRequired");
+        errors.to = t('notifications.channels.errors.toRequired');
         isValid = false;
       }
     }
 
-    if (channelForm.type === "feishu" || channelForm.type === "wecom") {
+    if (channelForm.type === 'feishu' || channelForm.type === 'wecom') {
       if (!channelForm.config.webhookUrl.trim()) {
         errors.webhookUrl = t(
-          "notifications.channels.errors.webhookUrlRequired"
+          'notifications.channels.errors.webhookUrlRequired'
         );
         isValid = false;
       }
@@ -457,24 +457,24 @@ const NotificationsConfig = () => {
           channelData
         );
         if (response.success) {
-          toast.success(t("notifications.channels.updateSuccess"));
+          toast.success(t('notifications.channels.updateSuccess'));
           await loadData();
           setIsEditChannelOpen(false);
         } else {
-          toast.error(t("notifications.channels.saveError"));
+          toast.error(t('notifications.channels.saveError'));
         }
       } else {
         const response = await createNotificationChannel(channelData);
         if (response.success) {
-          toast.success(t("notifications.channels.createSuccess"));
+          toast.success(t('notifications.channels.createSuccess'));
           await loadData();
           setIsAddChannelOpen(false);
         } else {
-          toast.error(t("notifications.channels.saveError"));
+          toast.error(t('notifications.channels.saveError'));
         }
       }
     } catch (error) {
-      toast.error(t("notifications.channels.saveError"));
+      toast.error(t('notifications.channels.saveError'));
     } finally {
       setSaving(false);
     }
@@ -487,14 +487,14 @@ const NotificationsConfig = () => {
     try {
       const response = await deleteNotificationChannel(selectedChannelId);
       if (response.success) {
-        toast.success(t("notifications.channels.deleteSuccess"));
+        toast.success(t('notifications.channels.deleteSuccess'));
         await loadData();
       } else {
-        toast.error(t("notifications.channels.deleteError"));
+        toast.error(t('notifications.channels.deleteError'));
       }
       setIsDeleteChannelOpen(false);
     } catch (error) {
-      toast.error(t("notifications.channels.deleteError"));
+      toast.error(t('notifications.channels.deleteError'));
     } finally {
       setSaving(false);
     }
@@ -504,10 +504,10 @@ const NotificationsConfig = () => {
   const handleAddTemplateClick = () => {
     setSelectedTemplate(null);
     setTemplateForm({
-      name: "",
-      type: "monitor",
-      subject: "",
-      content: "",
+      name: '',
+      type: 'monitor',
+      subject: '',
+      content: '',
     });
     setIsTemplateDialogOpen(true);
   };
@@ -539,10 +539,10 @@ const NotificationsConfig = () => {
           templateForm
         );
         if (response.success) {
-          toast.success(t("notifications.templates.updateSuccess"));
+          toast.success(t('notifications.templates.updateSuccess'));
           await loadData();
         } else {
-          toast.error(t("notifications.templates.updateError"));
+          toast.error(t('notifications.templates.updateError'));
         }
       } else {
         // 创建新模板
@@ -551,15 +551,15 @@ const NotificationsConfig = () => {
           isDefault: false,
         });
         if (response.success) {
-          toast.success(t("notifications.templates.createSuccess"));
+          toast.success(t('notifications.templates.createSuccess'));
           await loadData();
         } else {
-          toast.error(t("notifications.templates.createError"));
+          toast.error(t('notifications.templates.createError'));
         }
       }
       setIsTemplateDialogOpen(false);
     } catch (error) {
-      toast.error(t("notifications.templates.saveError"));
+      toast.error(t('notifications.templates.saveError'));
     } finally {
       setSaving(false);
     }
@@ -572,14 +572,14 @@ const NotificationsConfig = () => {
     try {
       const response = await deleteNotificationTemplate(selectedTemplate.id);
       if (response.success) {
-        toast.success(t("notifications.templates.deleteSuccess"));
+        toast.success(t('notifications.templates.deleteSuccess'));
         await loadData();
       } else {
-        toast.error(t("notifications.templates.deleteError"));
+        toast.error(t('notifications.templates.deleteError'));
       }
       setIsDeleteTemplateOpen(false);
     } catch (error) {
-      toast.error(t("notifications.templates.deleteError"));
+      toast.error(t('notifications.templates.deleteError'));
     } finally {
       setSaving(false);
     }
@@ -599,40 +599,40 @@ const NotificationsConfig = () => {
 
   // 渲染渠道Tab
   const renderChannelsTab = () => {
-    if (!settings) return <Text>{t("common.loading")}...</Text>;
+    if (!settings) return <Text>{t('common.loading')}...</Text>;
 
     return (
       <Flex direction="column" gap="2">
         <Text className="text-sm text-gray-600">
-          {t("notifications.channels.tabDescription")}
+          {t('notifications.channels.tabDescription')}
         </Text>
 
         <Box p="2">
           <Flex className="justify-between items-center mb-2">
-            <Text className="text-lg">{t("notifications.channels.title")}</Text>
+            <Text className="text-lg">{t('notifications.channels.title')}</Text>
             <Button
               className="ml-auto"
               variant="secondary"
               onClick={handleAddChannelClick}
             >
               <PlusIcon width="16" height="16" />
-              {t("notifications.channels.add")}
+              {t('notifications.channels.add')}
             </Button>
           </Flex>
 
           <Box>
             <Flex py="2" direction="column" gap="2">
               <Text className="text-gray-600 mb-3">
-                {t("notifications.channels.description")}
+                {t('notifications.channels.description')}
               </Text>
 
               {channels.length === 0 ? (
                 <Text color="gray">
-                  {t("notifications.channels.noChannels")}
+                  {t('notifications.channels.noChannels')}
                 </Text>
               ) : (
                 <Flex direction="column" gap="2">
-                  {channels.map((channel) => (
+                  {channels.map(channel => (
                     <Card key={channel.id} className="px-2">
                       <Flex className="justify-between items-center">
                         <Flex direction="column" gap="1" className="grow">
@@ -649,14 +649,14 @@ const NotificationsConfig = () => {
                             className="ml-auto"
                             onClick={() => handleEditChannelClick(channel)}
                           >
-                            {t("common.edit")}
+                            {t('common.edit')}
                           </Button>
                           <Button
                             className="ml-auto"
                             variant="secondary"
                             onClick={() => handleDeleteChannelClick(channel.id)}
                           >
-                            {t("common.delete")}
+                            {t('common.delete')}
                           </Button>
                         </Flex>
                       </Flex>
@@ -673,35 +673,35 @@ const NotificationsConfig = () => {
 
   // 渲染模板Tab
   const renderTemplatesTab = () => {
-    if (!settings) return <Text>{t("common.loading")}...</Text>;
+    if (!settings) return <Text>{t('common.loading')}...</Text>;
 
     return (
       <Flex direction="column" gap="2">
         <Text size="2" color="gray" mb="3">
-          {t("notifications.templates.tabDescription")}
+          {t('notifications.templates.tabDescription')}
         </Text>
 
         <Box>
           <Flex justify="between" align="center" mb="3">
-            <Heading size="3">{t("notifications.templates.title")}</Heading>
+            <Heading size="3">{t('notifications.templates.title')}</Heading>
             <Button variant="secondary" onClick={handleAddTemplateClick}>
               <PlusIcon width="16" height="16" />
-              {t("notifications.templates.add")}
+              {t('notifications.templates.add')}
             </Button>
           </Flex>
 
           <Box>
             <Text size="2" color="gray" mb="3">
-              {t("notifications.templates.description")}
+              {t('notifications.templates.description')}
             </Text>
 
             {templates.length === 0 ? (
               <Text color="gray">
-                {t("notifications.templates.noTemplates")}
+                {t('notifications.templates.noTemplates')}
               </Text>
             ) : (
               <Flex direction="column" gap="3">
-                {templates.map((template) => (
+                {templates.map(template => (
                   <Card key={template.id} className="px-4">
                     <Flex direction="column" gap="3">
                       <Flex justify="between" align="center">
@@ -709,7 +709,7 @@ const NotificationsConfig = () => {
                           <Text weight="medium">{template.name}</Text>
                           {template.isDefault && (
                             <Text size="1">
-                              {t("notifications.templates.defaultTemplate")}
+                              {t('notifications.templates.defaultTemplate')}
                             </Text>
                           )}
                         </Flex>
@@ -718,26 +718,26 @@ const NotificationsConfig = () => {
                             variant="secondary"
                             onClick={() => handleEditTemplateClick(template)}
                           >
-                            {t("common.edit")}
+                            {t('common.edit')}
                           </Button>
                           <Button
                             variant="secondary"
                             onClick={() => handleDeleteTemplateClick(template)}
                             disabled={template.isDefault}
                           >
-                            {t("common.delete")}
+                            {t('common.delete')}
                           </Button>
                         </Flex>
                       </Flex>
                       <Box>
                         <Text size="2" weight="medium">
-                          {t("notifications.templates.subject")}:
+                          {t('notifications.templates.subject')}:
                         </Text>
                         <Text size="2">{template.subject}</Text>
                       </Box>
                       <Box>
                         <Text size="2" weight="medium">
-                          {t("notifications.templates.content")}:
+                          {t('notifications.templates.content')}:
                         </Text>
                         <Box>{template.content}</Box>
                       </Box>
@@ -754,16 +754,16 @@ const NotificationsConfig = () => {
 
   // 渲染全局设置Tab
   const renderGlobalSettingsTab = () => {
-    if (!settings) return <Text>{t("common.loading")}...</Text>;
+    if (!settings) return <Text>{t('common.loading')}...</Text>;
 
     return (
       <Flex direction="column" gap="2">
         <Text className="text-sm">
-          {t("notifications.globalSettings.description")}
+          {t('notifications.globalSettings.description')}
         </Text>
         <Box>
           <Text className="text-lg">
-            {t("notifications.settings.monitors")}
+            {t('notifications.settings.monitors')}
           </Text>
           <Card className="mt-2">
             <Box p="1">
@@ -771,16 +771,16 @@ const NotificationsConfig = () => {
                 <Flex justify="between" align="center">
                   <Box>
                     <Text className="text-base">
-                      {t("notifications.settings.monitors")}
+                      {t('notifications.settings.monitors')}
                     </Text>
                     <Text className="text-sm text-gray-600">
-                      {t("notifications.settings.monitors.description")}
+                      {t('notifications.settings.monitors.description')}
                     </Text>
                   </Box>
                   <Switch
                     checked={settings.monitors.enabled}
-                    onCheckedChange={(checked) =>
-                      handleMonitorSettingChange("enabled", checked)
+                    onCheckedChange={checked =>
+                      handleMonitorSettingChange('enabled', checked)
                     }
                   />
                 </Flex>
@@ -790,34 +790,34 @@ const NotificationsConfig = () => {
                       <Flex align="center" gap="2">
                         <Switch
                           checked={settings.monitors.onDown}
-                          onCheckedChange={(checked) =>
-                            handleMonitorSettingChange("onDown", checked)
+                          onCheckedChange={checked =>
+                            handleMonitorSettingChange('onDown', checked)
                           }
                         />
                         <Text className="text-xs">
-                          {t("notifications.events.onDownOnly")}
+                          {t('notifications.events.onDownOnly')}
                         </Text>
                       </Flex>
                       <Flex align="center" gap="2">
                         <Switch
                           checked={settings.monitors.onRecovery}
-                          onCheckedChange={(checked) =>
-                            handleMonitorSettingChange("onRecovery", checked)
+                          onCheckedChange={checked =>
+                            handleMonitorSettingChange('onRecovery', checked)
                           }
                         />
                         <Text className="text-xs">
-                          {t("notifications.events.onRecovery")}
+                          {t('notifications.events.onRecovery')}
                         </Text>
                       </Flex>
                       <Box>
                         <Text className="text-xs mb-2">
-                          {t("notifications.specificSettings.channels")}
+                          {t('notifications.specificSettings.channels')}
                         </Text>
                         <ChannelSelector
                           channels={channels}
                           selectedChannelIds={settings.monitors.channels}
                           onChange={(channelIds: number[]) =>
-                            handleMonitorSettingChange("channels", channelIds)
+                            handleMonitorSettingChange('channels', channelIds)
                           }
                         />
                       </Box>
@@ -830,7 +830,7 @@ const NotificationsConfig = () => {
         </Box>
         <Box>
           <Text className="text-lg mb-2">
-            {t("notifications.settings.agents")}
+            {t('notifications.settings.agents')}
           </Text>
           <Card className="mt-2">
             <Box p="1">
@@ -838,16 +838,16 @@ const NotificationsConfig = () => {
                 <Flex justify="between" align="center">
                   <Box>
                     <Text className="text-base">
-                      {t("notifications.settings.agents")}
+                      {t('notifications.settings.agents')}
                     </Text>
                     <Text className="text-sm text-gray-600">
-                      {t("notifications.settings.agents.description")}
+                      {t('notifications.settings.agents.description')}
                     </Text>
                   </Box>
                   <Switch
                     checked={settings.agents.enabled}
-                    onCheckedChange={(checked) =>
-                      handleAgentSettingChange("enabled", checked)
+                    onCheckedChange={checked =>
+                      handleAgentSettingChange('enabled', checked)
                     }
                   />
                 </Flex>
@@ -857,40 +857,40 @@ const NotificationsConfig = () => {
                       <Flex align="center" gap="2">
                         <Switch
                           checked={settings.agents.onOffline}
-                          onCheckedChange={(checked) =>
-                            handleAgentSettingChange("onOffline", checked)
+                          onCheckedChange={checked =>
+                            handleAgentSettingChange('onOffline', checked)
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onOffline")}
+                          {t('notifications.events.onOffline')}
                         </Text>
                       </Flex>
                       <Flex align="center" gap="2">
                         <Switch
                           checked={settings.agents.onRecovery}
-                          onCheckedChange={(checked) =>
-                            handleAgentSettingChange("onRecovery", checked)
+                          onCheckedChange={checked =>
+                            handleAgentSettingChange('onRecovery', checked)
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onRecoveryAgent")}
+                          {t('notifications.events.onRecoveryAgent')}
                         </Text>
                       </Flex>
                       <Flex align="center" gap="2">
                         <Switch
                           checked={settings.agents.onCpuThreshold}
-                          onCheckedChange={(checked) =>
-                            handleAgentSettingChange("onCpuThreshold", checked)
+                          onCheckedChange={checked =>
+                            handleAgentSettingChange('onCpuThreshold', checked)
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onCpuThreshold")}
+                          {t('notifications.events.onCpuThreshold')}
                         </Text>
                       </Flex>
                       {settings.agents.onCpuThreshold && (
                         <Flex pl="6" align="center" gap="2">
                           <Text size="2">
-                            {t("notifications.threshold.label")}
+                            {t('notifications.threshold.label')}
                           </Text>
                           <TextField.Input
                             size="1"
@@ -898,36 +898,36 @@ const NotificationsConfig = () => {
                             min="0"
                             max="100"
                             value={settings.agents.cpuThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleAgentSettingChange(
-                                "cpuThreshold",
+                                'cpuThreshold',
                                 Number(e.target.value)
                               )
                             }
                           />
                           <Text size="2">
-                            {t("notifications.threshold.percent")}
+                            {t('notifications.threshold.percent')}
                           </Text>
                         </Flex>
                       )}
                       <Flex align="center" gap="2">
                         <Switch
                           checked={settings.agents.onMemoryThreshold}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             handleAgentSettingChange(
-                              "onMemoryThreshold",
+                              'onMemoryThreshold',
                               checked
                             )
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onMemoryThreshold")}
+                          {t('notifications.events.onMemoryThreshold')}
                         </Text>
                       </Flex>
                       {settings.agents.onMemoryThreshold && (
                         <Flex pl="6" align="center" gap="2">
                           <Text size="2">
-                            {t("notifications.threshold.label")}
+                            {t('notifications.threshold.label')}
                           </Text>
                           <TextField.Input
                             size="1"
@@ -935,33 +935,33 @@ const NotificationsConfig = () => {
                             min="0"
                             max="100"
                             value={settings.agents.memoryThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleAgentSettingChange(
-                                "memoryThreshold",
+                                'memoryThreshold',
                                 Number(e.target.value)
                               )
                             }
                           />
                           <Text size="2">
-                            {t("notifications.threshold.percent")}
+                            {t('notifications.threshold.percent')}
                           </Text>
                         </Flex>
                       )}
                       <Flex align="center" gap="2">
                         <Switch
                           checked={settings.agents.onDiskThreshold}
-                          onCheckedChange={(checked) =>
-                            handleAgentSettingChange("onDiskThreshold", checked)
+                          onCheckedChange={checked =>
+                            handleAgentSettingChange('onDiskThreshold', checked)
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onDiskThreshold")}
+                          {t('notifications.events.onDiskThreshold')}
                         </Text>
                       </Flex>
                       {settings.agents.onDiskThreshold && (
                         <Flex pl="6" align="center" gap="2">
                           <Text size="2">
-                            {t("notifications.threshold.label")}
+                            {t('notifications.threshold.label')}
                           </Text>
                           <TextField.Input
                             size="1"
@@ -969,27 +969,27 @@ const NotificationsConfig = () => {
                             min="0"
                             max="100"
                             value={settings.agents.diskThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleAgentSettingChange(
-                                "diskThreshold",
+                                'diskThreshold',
                                 Number(e.target.value)
                               )
                             }
                           />
                           <Text size="2">
-                            {t("notifications.threshold.percent")}
+                            {t('notifications.threshold.percent')}
                           </Text>
                         </Flex>
                       )}
                       <Box>
                         <Text size="2" weight="medium" mb="2">
-                          {t("notifications.specificSettings.channels")}
+                          {t('notifications.specificSettings.channels')}
                         </Text>
                         <ChannelSelector
                           channels={channels}
                           selectedChannelIds={settings.agents.channels}
-                          onChange={(channelIds) =>
-                            handleAgentSettingChange("channels", channelIds)
+                          onChange={channelIds =>
+                            handleAgentSettingChange('channels', channelIds)
                           }
                         />
                       </Box>
@@ -1006,20 +1006,20 @@ const NotificationsConfig = () => {
 
   // 渲染特定监控设置Tab
   const renderSpecificMonitorsTab = () => {
-    if (!settings) return <Text>{t("common.loading")}...</Text>;
-    if (monitorsLoading) return <Text>{t("common.loading")}...</Text>;
+    if (!settings) return <Text>{t('common.loading')}...</Text>;
+    if (monitorsLoading) return <Text>{t('common.loading')}...</Text>;
 
     if (monitors.length === 0) {
-      return <Text color="gray">{t("monitors.noMonitors")}</Text>;
+      return <Text color="gray">{t('monitors.noMonitors')}</Text>;
     }
 
     return (
       <Flex direction="column" gap="2">
         <Text size="2" color="gray" mb="3">
-          {t("notifications.specificMonitors.description")}
+          {t('notifications.specificMonitors.description')}
         </Text>
 
-        {monitors.map((monitor) => {
+        {monitors.map(monitor => {
           const monitorId = monitor.id.toString();
           const specificSettings = settings.specificMonitors[monitorId] || {
             enabled: false,
@@ -1040,10 +1040,10 @@ const NotificationsConfig = () => {
                   </Box>
                   <Switch
                     checked={specificSettings.enabled}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       handleSpecificMonitorSettingChange(
                         monitorId,
-                        "enabled",
+                        'enabled',
                         checked
                       )
                     }
@@ -1056,44 +1056,44 @@ const NotificationsConfig = () => {
                       <Flex align="center" gap="2">
                         <Switch
                           checked={specificSettings.onDown}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             handleSpecificMonitorSettingChange(
                               monitorId,
-                              "onDown",
+                              'onDown',
                               checked
                             )
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onDownOnly")}
+                          {t('notifications.events.onDownOnly')}
                         </Text>
                       </Flex>
                       <Flex align="center" gap="2">
                         <Switch
                           checked={specificSettings.onRecovery}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             handleSpecificMonitorSettingChange(
                               monitorId,
-                              "onRecovery",
+                              'onRecovery',
                               checked
                             )
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onRecovery")}
+                          {t('notifications.events.onRecovery')}
                         </Text>
                       </Flex>
                       <Box>
                         <Text size="2" weight="medium" mb="2">
-                          {t("notifications.specificSettings.channels")}
+                          {t('notifications.specificSettings.channels')}
                         </Text>
                         <ChannelSelector
                           channels={channels}
                           selectedChannelIds={specificSettings.channels}
-                          onChange={(channelIds) =>
+                          onChange={channelIds =>
                             handleSpecificMonitorSettingChange(
                               monitorId,
-                              "channels",
+                              'channels',
                               channelIds
                             )
                           }
@@ -1112,20 +1112,20 @@ const NotificationsConfig = () => {
 
   // 渲染特定客户端设置Tab
   const renderSpecificAgentsTab = () => {
-    if (!settings) return <Text>{t("common.loading")}...</Text>;
-    if (agentsLoading) return <Text>{t("common.loading")}...</Text>;
+    if (!settings) return <Text>{t('common.loading')}...</Text>;
+    if (agentsLoading) return <Text>{t('common.loading')}...</Text>;
 
     if (agents.length === 0) {
-      return <Text color="gray">{t("agents.noAgents")}</Text>;
+      return <Text color="gray">{t('agents.noAgents')}</Text>;
     }
 
     return (
       <Flex direction="column" gap="2">
         <Text size="2" color="gray" mb="3">
-          {t("notifications.specificAgents.description")}
+          {t('notifications.specificAgents.description')}
         </Text>
 
-        {agents.map((agent) => {
+        {agents.map(agent => {
           const agentId = agent.id.toString();
           const specificSettings = settings.specificAgents[agentId] || {
             enabled: false,
@@ -1150,23 +1150,23 @@ const NotificationsConfig = () => {
                       {(() => {
                         try {
                           const ipArray = JSON.parse(
-                            String(agent.ip_addresses || "[]")
+                            String(agent.ip_addresses || '[]')
                           );
                           return Array.isArray(ipArray) && ipArray.length > 0
-                            ? ipArray.join(", ")
-                            : String(agent.ip_addresses || "");
+                            ? ipArray.join(', ')
+                            : String(agent.ip_addresses || '');
                         } catch (e) {
-                          return String(agent.ip_addresses || "");
+                          return String(agent.ip_addresses || '');
                         }
                       })()}
                     </Text>
                   </Box>
                   <Switch
                     checked={specificSettings.enabled}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       handleSpecificAgentSettingChange(
                         agentId,
-                        "enabled",
+                        'enabled',
                         checked
                       )
                     }
@@ -1178,52 +1178,52 @@ const NotificationsConfig = () => {
                       <Flex align="center" gap="2">
                         <Switch
                           checked={specificSettings.onOffline}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             handleSpecificAgentSettingChange(
                               agentId,
-                              "onOffline",
+                              'onOffline',
                               checked
                             )
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onOffline")}
+                          {t('notifications.events.onOffline')}
                         </Text>
                       </Flex>
                       <Flex align="center" gap="2">
                         <Switch
                           checked={specificSettings.onRecovery}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             handleSpecificAgentSettingChange(
                               agentId,
-                              "onRecovery",
+                              'onRecovery',
                               checked
                             )
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onRecoveryAgent")}
+                          {t('notifications.events.onRecoveryAgent')}
                         </Text>
                       </Flex>
                       <Flex align="center" gap="2">
                         <Switch
                           checked={specificSettings.onCpuThreshold}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             handleSpecificAgentSettingChange(
                               agentId,
-                              "onCpuThreshold",
+                              'onCpuThreshold',
                               checked
                             )
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onCpuThreshold")}
+                          {t('notifications.events.onCpuThreshold')}
                         </Text>
                       </Flex>
                       {specificSettings.onCpuThreshold && (
                         <Flex pl="6" align="center" gap="2">
                           <Text size="2">
-                            {t("notifications.threshold.label")}
+                            {t('notifications.threshold.label')}
                           </Text>
                           <TextField.Input
                             size="1"
@@ -1231,38 +1231,38 @@ const NotificationsConfig = () => {
                             min="0"
                             max="100"
                             value={specificSettings.cpuThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleSpecificAgentSettingChange(
                                 agentId,
-                                "cpuThreshold",
+                                'cpuThreshold',
                                 Number(e.target.value)
                               )
                             }
                           />
                           <Text size="2">
-                            {t("notifications.threshold.percent")}
+                            {t('notifications.threshold.percent')}
                           </Text>
                         </Flex>
                       )}
                       <Flex align="center" gap="2">
                         <Switch
                           checked={specificSettings.onMemoryThreshold}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             handleSpecificAgentSettingChange(
                               agentId,
-                              "onMemoryThreshold",
+                              'onMemoryThreshold',
                               checked
                             )
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onMemoryThreshold")}
+                          {t('notifications.events.onMemoryThreshold')}
                         </Text>
                       </Flex>
                       {specificSettings.onMemoryThreshold && (
                         <Flex pl="6" align="center" gap="2">
                           <Text size="2">
-                            {t("notifications.threshold.label")}
+                            {t('notifications.threshold.label')}
                           </Text>
                           <TextField.Input
                             size="1"
@@ -1270,38 +1270,38 @@ const NotificationsConfig = () => {
                             min="0"
                             max="100"
                             value={specificSettings.memoryThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleSpecificAgentSettingChange(
                                 agentId,
-                                "memoryThreshold",
+                                'memoryThreshold',
                                 Number(e.target.value)
                               )
                             }
                           />
                           <Text size="2">
-                            {t("notifications.threshold.percent")}
+                            {t('notifications.threshold.percent')}
                           </Text>
                         </Flex>
                       )}
                       <Flex align="center" gap="2">
                         <Switch
                           checked={specificSettings.onDiskThreshold}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             handleSpecificAgentSettingChange(
                               agentId,
-                              "onDiskThreshold",
+                              'onDiskThreshold',
                               checked
                             )
                           }
                         />
                         <Text size="2">
-                          {t("notifications.events.onDiskThreshold")}
+                          {t('notifications.events.onDiskThreshold')}
                         </Text>
                       </Flex>
                       {specificSettings.onDiskThreshold && (
                         <Flex pl="6" align="center" gap="2">
                           <Text size="2">
-                            {t("notifications.threshold.label")}
+                            {t('notifications.threshold.label')}
                           </Text>
                           <TextField.Input
                             size="1"
@@ -1309,30 +1309,30 @@ const NotificationsConfig = () => {
                             min="0"
                             max="100"
                             value={specificSettings.diskThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleSpecificAgentSettingChange(
                                 agentId,
-                                "diskThreshold",
+                                'diskThreshold',
                                 Number(e.target.value)
                               )
                             }
                           />
                           <Text size="2">
-                            {t("notifications.threshold.percent")}
+                            {t('notifications.threshold.percent')}
                           </Text>
                         </Flex>
                       )}
                       <Box>
                         <Text size="2" weight="medium" mb="2">
-                          {t("notifications.specificSettings.channels")}
+                          {t('notifications.specificSettings.channels')}
                         </Text>
                         <ChannelSelector
                           channels={channels}
                           selectedChannelIds={specificSettings.channels}
-                          onChange={(channelIds) =>
+                          onChange={channelIds =>
                             handleSpecificAgentSettingChange(
                               agentId,
-                              "channels",
+                              'channels',
                               channelIds
                             )
                           }
@@ -1353,13 +1353,13 @@ const NotificationsConfig = () => {
   const renderChannelDialog = () => {
     const isOpen = isAddChannelOpen || isEditChannelOpen;
     const title = isEditChannelOpen
-      ? t("notifications.channels.edit")
-      : t("notifications.channels.add");
+      ? t('notifications.channels.edit')
+      : t('notifications.channels.add');
 
     return (
       <Dialog
         open={isOpen}
-        onOpenChange={(open) => {
+        onOpenChange={open => {
           if (!open) {
             setIsAddChannelOpen(false);
             setIsEditChannelOpen(false);
@@ -1369,13 +1369,13 @@ const NotificationsConfig = () => {
         <DialogContent>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            {t("notifications.channels.dialogDescription")}
+            {t('notifications.channels.dialogDescription')}
           </DialogDescription>
           <Flex direction="column" gap="3" mt="4">
             <TextField.Input
-              placeholder={t("notifications.channels.name")}
+              placeholder={t('notifications.channels.name')}
               value={channelForm.name}
-              onChange={(e) =>
+              onChange={e =>
                 setChannelForm({ ...channelForm, name: e.target.value })
               }
             />
@@ -1386,7 +1386,7 @@ const NotificationsConfig = () => {
             )}
             <Select
               value={channelForm.type}
-              onValueChange={(value) =>
+              onValueChange={value =>
                 setChannelForm({ ...channelForm, type: value })
               }
             >
@@ -1395,34 +1395,34 @@ const NotificationsConfig = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="telegram">
-                  {t("notifications.channels.type.telegram")}
+                  {t('notifications.channels.type.telegram')}
                 </SelectItem>
                 <SelectItem value="resend">
-                  {t("notifications.channels.type.resend")}
+                  {t('notifications.channels.type.resend')}
                 </SelectItem>
                 <SelectItem value="feishu">
-                  {t("notifications.channels.type.feishu")}
+                  {t('notifications.channels.type.feishu')}
                 </SelectItem>
                 <SelectItem value="wecom">
-                  {t("notifications.channels.type.wecom")}
+                  {t('notifications.channels.type.wecom')}
                 </SelectItem>
                 <SelectItem value="webhook" disabled>
-                  {t("notifications.channels.type.webhook")} (Coming Soon)
+                  {t('notifications.channels.type.webhook')} (Coming Soon)
                 </SelectItem>
                 <SelectItem value="slack" disabled>
-                  {t("notifications.channels.type.slack")} (Coming Soon)
+                  {t('notifications.channels.type.slack')} (Coming Soon)
                 </SelectItem>
                 <SelectItem value="dingtalk" disabled>
-                  {t("notifications.channels.type.dingtalk")} (Coming Soon)
+                  {t('notifications.channels.type.dingtalk')} (Coming Soon)
                 </SelectItem>
               </SelectContent>
             </Select>
-            {channelForm.type === "telegram" && (
+            {channelForm.type === 'telegram' && (
               <>
                 <TextField.Input
                   placeholder="Bot Token"
                   value={channelForm.config.botToken}
-                  onChange={(e) =>
+                  onChange={e =>
                     setChannelForm({
                       ...channelForm,
                       config: {
@@ -1440,7 +1440,7 @@ const NotificationsConfig = () => {
                 <TextField.Input
                   placeholder="Chat ID"
                   value={channelForm.config.chatId}
-                  onChange={(e) =>
+                  onChange={e =>
                     setChannelForm({
                       ...channelForm,
                       config: { ...channelForm.config, chatId: e.target.value },
@@ -1454,12 +1454,12 @@ const NotificationsConfig = () => {
                 )}
               </>
             )}
-            {channelForm.type === "resend" && (
+            {channelForm.type === 'resend' && (
               <>
                 <TextField.Input
-                  placeholder={t("notifications.channels.apiKey")}
+                  placeholder={t('notifications.channels.apiKey')}
                   value={channelForm.config.apiKey}
-                  onChange={(e) =>
+                  onChange={e =>
                     setChannelForm({
                       ...channelForm,
                       config: { ...channelForm.config, apiKey: e.target.value },
@@ -1472,9 +1472,9 @@ const NotificationsConfig = () => {
                   </Text>
                 )}
                 <TextField.Input
-                  placeholder={t("notifications.channels.from")}
+                  placeholder={t('notifications.channels.from')}
                   value={channelForm.config.from}
-                  onChange={(e) =>
+                  onChange={e =>
                     setChannelForm({
                       ...channelForm,
                       config: { ...channelForm.config, from: e.target.value },
@@ -1487,9 +1487,9 @@ const NotificationsConfig = () => {
                   </Text>
                 )}
                 <TextField.Input
-                  placeholder={t("notifications.channels.to")}
+                  placeholder={t('notifications.channels.to')}
                   value={channelForm.config.to}
-                  onChange={(e) =>
+                  onChange={e =>
                     setChannelForm({
                       ...channelForm,
                       config: { ...channelForm.config, to: e.target.value },
@@ -1503,13 +1503,13 @@ const NotificationsConfig = () => {
                 )}
               </>
             )}
-            {(channelForm.type === "feishu" ||
-              channelForm.type === "wecom") && (
+            {(channelForm.type === 'feishu' ||
+              channelForm.type === 'wecom') && (
               <>
                 <TextField.Input
-                  placeholder={t("notifications.channels.webhookUrl")}
+                  placeholder={t('notifications.channels.webhookUrl')}
                   value={channelForm.config.webhookUrl}
-                  onChange={(e) =>
+                  onChange={e =>
                     setChannelForm({
                       ...channelForm,
                       config: {
@@ -1529,10 +1529,10 @@ const NotificationsConfig = () => {
           </Flex>
           <Flex gap="3" mt="4" justify="end">
             <DialogClose asChild>
-              <Button variant="ghost">{t("common.cancel")}</Button>
+              <Button variant="ghost">{t('common.cancel')}</Button>
             </DialogClose>
             <Button onClick={handleSaveChannel} disabled={saving}>
-              {saving ? t("common.savingChanges") : t("common.save")}
+              {saving ? t('common.savingChanges') : t('common.save')}
             </Button>
           </Flex>
         </DialogContent>
@@ -1545,21 +1545,21 @@ const NotificationsConfig = () => {
     <Dialog open={isDeleteChannelOpen} onOpenChange={setIsDeleteChannelOpen}>
       <DialogContent>
         <DialogTitle>
-          {t("notifications.channels.deleteConfirmTitle")}
+          {t('notifications.channels.deleteConfirmTitle')}
         </DialogTitle>
         <DialogDescription>
-          {t("notifications.channels.deleteConfirmMessage")}
+          {t('notifications.channels.deleteConfirmMessage')}
         </DialogDescription>
         <Flex gap="3" mt="4" justify="end">
           <DialogClose asChild>
-            <Button variant="ghost">{t("common.cancel")}</Button>
+            <Button variant="ghost">{t('common.cancel')}</Button>
           </DialogClose>
           <Button
             variant="destructive"
             onClick={handleConfirmDeleteChannel}
             disabled={saving}
           >
-            {saving ? t("common.deleting") : t("common.delete")}
+            {saving ? t('common.deleting') : t('common.delete')}
           </Button>
         </Flex>
       </DialogContent>
@@ -1576,20 +1576,20 @@ const NotificationsConfig = () => {
         <DialogContent>
           <DialogTitle>
             {selectedTemplate
-              ? t("notifications.templates.edit")
-              : t("notifications.templates.add")}
+              ? t('notifications.templates.edit')
+              : t('notifications.templates.add')}
           </DialogTitle>
           <Flex direction="column" gap="3" mt="4">
             <TextField.Input
-              placeholder={t("notifications.templates.name")}
+              placeholder={t('notifications.templates.name')}
               value={templateForm.name}
-              onChange={(e) =>
+              onChange={e =>
                 setTemplateForm({ ...templateForm, name: e.target.value })
               }
             />
             <Select
               value={templateForm.type}
-              onValueChange={(value) =>
+              onValueChange={value =>
                 setTemplateForm({ ...templateForm, type: value })
               }
             >
@@ -1598,35 +1598,35 @@ const NotificationsConfig = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="monitor">
-                  {t("notifications.settings.monitors")}
+                  {t('notifications.settings.monitors')}
                 </SelectItem>
                 <SelectItem value="agent">
-                  {t("notifications.settings.agents")}
+                  {t('notifications.settings.agents')}
                 </SelectItem>
               </SelectContent>
             </Select>
             <TextField.Input
-              placeholder={t("notifications.templates.subject")}
+              placeholder={t('notifications.templates.subject')}
               value={templateForm.subject}
-              onChange={(e) =>
+              onChange={e =>
                 setTemplateForm({ ...templateForm, subject: e.target.value })
               }
             />
             <TextArea
               ref={contentTextAreaRef}
-              placeholder={t("notifications.templates.content")}
+              placeholder={t('notifications.templates.content')}
               value={templateForm.content}
-              onChange={(e) =>
+              onChange={e =>
                 setTemplateForm({ ...templateForm, content: e.target.value })
               }
               rows={8}
             />
             <Box>
               <Text size="2" weight="medium" mb="2">
-                {t("notifications.templates.variables")}
+                {t('notifications.templates.variables')}
               </Text>
               <Flex wrap="wrap" gap="2">
-                {templateVariables.map((variable) => (
+                {templateVariables.map(variable => (
                   <Button
                     key={variable.value}
                     size="sm"
@@ -1641,10 +1641,10 @@ const NotificationsConfig = () => {
           </Flex>
           <Flex gap="3" mt="4" justify="end">
             <DialogClose asChild>
-              <Button variant="ghost">{t("common.cancel")}</Button>
+              <Button variant="ghost">{t('common.cancel')}</Button>
             </DialogClose>
             <Button onClick={handleSaveTemplate} disabled={saving}>
-              {saving ? t("common.savingChanges") : t("common.save")}
+              {saving ? t('common.savingChanges') : t('common.save')}
             </Button>
           </Flex>
         </DialogContent>
@@ -1661,21 +1661,21 @@ const NotificationsConfig = () => {
       >
         <DialogContent>
           <DialogTitle>
-            {t("notifications.templates.deleteConfirmTitle")}
+            {t('notifications.templates.deleteConfirmTitle')}
           </DialogTitle>
           <DialogDescription>
-            {t("notifications.templates.deleteConfirmMessage")}
+            {t('notifications.templates.deleteConfirmMessage')}
           </DialogDescription>
           <Flex gap="3" mt="4" justify="end">
             <DialogClose asChild>
-              <Button variant="ghost">{t("common.cancel")}</Button>
+              <Button variant="ghost">{t('common.cancel')}</Button>
             </DialogClose>
             <Button
               variant="destructive"
               onClick={handleConfirmDeleteTemplate}
               disabled={saving}
             >
-              {saving ? t("common.deleting") : t("common.delete")}
+              {saving ? t('common.deleting') : t('common.delete')}
             </Button>
           </Flex>
         </DialogContent>
@@ -1691,7 +1691,7 @@ const NotificationsConfig = () => {
             <Flex align="center" gap="2">
               <BellIcon width="20" height="20" />
               <Heading size="5" weight="medium">
-                {t("notifications.title")}
+                {t('notifications.title')}
               </Heading>
             </Flex>
             <Button
@@ -1700,34 +1700,34 @@ const NotificationsConfig = () => {
               onClick={handleSave}
               disabled={saving}
             >
-              {saving ? t("common.savingChanges") : t("common.save")}
+              {saving ? t('common.savingChanges') : t('common.save')}
             </Button>
           </Flex>
           <Text color="gray" size="2">
-            {t("notifications.description")}
+            {t('notifications.description')}
           </Text>
         </Box>
 
         {loading ? (
-          <Text>{t("common.loading")}...</Text>
+          <Text>{t('common.loading')}...</Text>
         ) : (
           <Card className="mb-4">
             <Tabs defaultValue="global">
               <TabsList className="overflow-auto">
                 <TabsTrigger value="global">
-                  {t("notifications.tabs.global")}
+                  {t('notifications.tabs.global')}
                 </TabsTrigger>
                 <TabsTrigger value="channels">
-                  {t("notifications.tabs.channels")}
+                  {t('notifications.tabs.channels')}
                 </TabsTrigger>
                 <TabsTrigger value="templates">
-                  {t("notifications.tabs.templates")}
+                  {t('notifications.tabs.templates')}
                 </TabsTrigger>
                 <TabsTrigger value="specificMonitors">
-                  {t("notifications.tabs.specificMonitors")}
+                  {t('notifications.tabs.specificMonitors')}
                 </TabsTrigger>
                 <TabsTrigger value="specificAgents">
-                  {t("notifications.tabs.specificAgents")}
+                  {t('notifications.tabs.specificAgents')}
                 </TabsTrigger>
               </TabsList>
               <Box pt="2" px="2">

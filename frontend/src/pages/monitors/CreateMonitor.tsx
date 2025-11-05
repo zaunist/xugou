@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Flex,
@@ -7,7 +7,7 @@ import {
   Text,
   TextField,
   IconButton,
-} from "@radix-ui/themes";
+} from '@radix-ui/themes';
 import {
   Button,
   Card,
@@ -22,29 +22,29 @@ import {
   TableRow,
   TableBody,
   TableHeader,
-} from "@/components/ui";
-import { ArrowLeftIcon, PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import { createMonitor } from "../../api/monitors";
-import StatusCodeSelect from "../../components/StatusCodeSelect";
-import { useTranslation } from "react-i18next";
+} from '@/components/ui';
+import { ArrowLeftIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
+import { createMonitor } from '../../api/monitors';
+import StatusCodeSelect from '../../components/StatusCodeSelect';
+import { useTranslation } from 'react-i18next';
 
 const CreateMonitor = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    url: "",
-    method: "GET",
+    name: '',
+    url: '',
+    method: 'GET',
     interval: 1, // 默认为1分钟
     timeout: 30,
     expectedStatus: 200,
-    body: "",
+    body: '',
   });
   const { t } = useTranslation();
 
   // 请求头部分使用键值对数组
   const [headers, setHeaders] = useState<{ key: string; value: string }[]>([
-    { key: "", value: "" },
+    { key: '', value: '' },
   ]);
 
   const handleChange = (
@@ -53,10 +53,10 @@ const CreateMonitor = () => {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]:
-        name === "interval" || name === "timeout" || name === "expectedStatus"
+        name === 'interval' || name === 'timeout' || name === 'expectedStatus'
           ? parseInt(value) || 0
           : value,
     }));
@@ -65,7 +65,7 @@ const CreateMonitor = () => {
   // 处理请求头键值对更改
   const handleHeaderChange = (
     index: number,
-    field: "key" | "value",
+    field: 'key' | 'value',
     value: string
   ) => {
     const newHeaders = [...headers];
@@ -89,7 +89,7 @@ const CreateMonitor = () => {
     headers.forEach(({ key, value }) => {
       const trimmedKey = key.trim();
       // 只处理有效的键值对
-      if (trimmedKey && !trimmedKey.includes("\\")) {
+      if (trimmedKey && !trimmedKey.includes('\\')) {
         result[trimmedKey] = value;
       }
     });
@@ -99,7 +99,7 @@ const CreateMonitor = () => {
 
   // 处理状态码变更
   const handleStatusCodeChange = (value: number) => {
-    setFormData((prev) => ({ ...prev, expectedStatus: value }));
+    setFormData(prev => ({ ...prev, expectedStatus: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,33 +123,33 @@ const CreateMonitor = () => {
       });
 
       if (response.success) {
-        navigate("/monitors");
+        navigate('/monitors');
       } else {
         alert(
-          `${t("monitor.form.createFailed")}: ${
-            response.message || t("monitor.form.unknownError")
+          `${t('monitor.form.createFailed')}: ${
+            response.message || t('monitor.form.unknownError')
           }`
         );
       }
     } catch (error) {
-      console.error(t("monitor.form.createFailed"), error);
-      alert(t("monitor.form.createFailed"));
+      console.error(t('monitor.form.createFailed'), error);
+      alert(t('monitor.form.createFailed'));
     } finally {
       setLoading(false);
     }
   };
 
   // 判断是否需要显示请求体输入框
-  const showBodyField = ["POST", "PUT", "PATCH"].includes(formData.method);
+  const showBodyField = ['POST', 'PUT', 'PATCH'].includes(formData.method);
 
   return (
     <Box className="sm:px-6 lg:px-[8%]">
       <Flex justify="between" align="center">
         <Flex align="center" gap="2">
-          <Button variant="secondary" onClick={() => navigate("/monitors")}>
+          <Button variant="secondary" onClick={() => navigate('/monitors')}>
             <ArrowLeftIcon />
           </Button>
-          <Heading size="6">{t("monitor.form.title.create")}</Heading>
+          <Heading size="6">{t('monitor.form.title.create')}</Heading>
         </Flex>
       </Flex>
       <Card className="my-4 pr-4">
@@ -158,13 +158,13 @@ const CreateMonitor = () => {
             <Flex direction="column" gap="2" className="ml-4">
               <Box>
                 <Text as="label" size="2">
-                  {t("monitor.form.name")} *
+                  {t('monitor.form.name')} *
                 </Text>
                 <TextField.Input
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder={t("monitor.form.namePlaceholder")}
+                  placeholder={t('monitor.form.namePlaceholder')}
                   required
                 />
               </Box>
@@ -177,20 +177,20 @@ const CreateMonitor = () => {
                   name="url"
                   value={formData.url}
                   onChange={handleChange}
-                  placeholder={t("monitor.form.urlPlaceholder")}
+                  placeholder={t('monitor.form.urlPlaceholder')}
                   required
                 />
               </Box>
 
               <Box>
                 <Text as="label" size="2">
-                  {t("monitor.form.method")} *
+                  {t('monitor.form.method')} *
                 </Text>
                 <Select
                   name="method"
                   value={formData.method}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, method: value }))
+                  onValueChange={value =>
+                    setFormData(prev => ({ ...prev, method: value }))
                   }
                 >
                   <SelectTrigger>
@@ -209,7 +209,7 @@ const CreateMonitor = () => {
               <Flex gap="4">
                 <Box>
                   <Text as="label" size="2">
-                    {t("monitor.form.interval")} *
+                    {t('monitor.form.interval')} *
                   </Text>
                   <TextField.Input
                     name="interval"
@@ -220,13 +220,13 @@ const CreateMonitor = () => {
                     required
                   />
                   <Text size="1" color="gray">
-                    {t("monitor.form.intervalMin")}
+                    {t('monitor.form.intervalMin')}
                   </Text>
                 </Box>
 
                 <Box>
                   <Text as="label" size="2">
-                    {t("monitor.form.timeout")} *
+                    {t('monitor.form.timeout')} *
                   </Text>
                   <TextField.Input
                     name="timeout"
@@ -241,7 +241,7 @@ const CreateMonitor = () => {
 
               <Box>
                 <Text as="label" size="2">
-                  {t("monitor.form.expectedStatus")} *
+                  {t('monitor.form.expectedStatus')} *
                 </Text>
                 <StatusCodeSelect
                   value={formData.expectedStatus}
@@ -252,14 +252,14 @@ const CreateMonitor = () => {
 
               <Box>
                 <Text as="label" size="2">
-                  {t("monitor.form.headers")}
+                  {t('monitor.form.headers')}
                 </Text>
                 <Box>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableCell>{t("monitor.form.headerName")}</TableCell>
-                        <TableCell>{t("monitor.form.headerValue")}</TableCell>
+                        <TableCell>{t('monitor.form.headerName')}</TableCell>
+                        <TableCell>{t('monitor.form.headerValue')}</TableCell>
                         <TableCell></TableCell>
                       </TableRow>
                     </TableHeader>
@@ -269,24 +269,24 @@ const CreateMonitor = () => {
                           <TableCell>
                             <TextField.Input
                               placeholder={t(
-                                "monitor.form.headerNamePlaceholder"
+                                'monitor.form.headerNamePlaceholder'
                               )}
                               value={header.key}
-                              onChange={(e) =>
-                                handleHeaderChange(index, "key", e.target.value)
+                              onChange={e =>
+                                handleHeaderChange(index, 'key', e.target.value)
                               }
                             />
                           </TableCell>
                           <TableCell>
                             <TextField.Input
                               placeholder={t(
-                                "monitor.form.headerValuePlaceholder"
+                                'monitor.form.headerValuePlaceholder'
                               )}
                               value={header.value}
-                              onChange={(e) =>
+                              onChange={e =>
                                 handleHeaderChange(
                                   index,
-                                  "value",
+                                  'value',
                                   e.target.value
                                 )
                               }
@@ -309,32 +309,32 @@ const CreateMonitor = () => {
 
                   <Button
                     variant="secondary"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.preventDefault();
-                      setHeaders([...headers, { key: "", value: "" }]);
+                      setHeaders([...headers, { key: '', value: '' }]);
                     }}
                     className="mt-2"
                     type="button"
                   >
                     <PlusIcon />
-                    {t("monitor.form.addHeader")}
+                    {t('monitor.form.addHeader')}
                   </Button>
                 </Box>
                 <Text size="1" color="gray">
-                  {t("monitor.form.headersHelp")}
+                  {t('monitor.form.headersHelp')}
                 </Text>
               </Box>
 
               {showBodyField && (
                 <Box>
                   <Text as="label" size="2">
-                    {t("monitor.form.body")}
+                    {t('monitor.form.body')}
                   </Text>
                   <Textarea
                     name="body"
                     value={formData.body}
                     onChange={handleChange}
-                    placeholder={t("monitor.form.bodyPlaceholder")}
+                    placeholder={t('monitor.form.bodyPlaceholder')}
                   />
                 </Box>
               )}
@@ -342,11 +342,11 @@ const CreateMonitor = () => {
           </Box>
 
           <Flex justify="end" gap="2" className="ml-4">
-            <Button variant="secondary" onClick={() => navigate("/monitors")}>
-              {t("monitor.form.cancel")}
+            <Button variant="secondary" onClick={() => navigate('/monitors')}>
+              {t('monitor.form.cancel')}
             </Button>
             <Button type="submit" disabled={loading} onClick={handleSubmit}>
-              {loading ? t("monitor.form.creating") : t("monitor.form.create")}
+              {loading ? t('monitor.form.creating') : t('monitor.form.create')}
             </Button>
           </Flex>
         </form>

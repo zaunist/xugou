@@ -1,5 +1,5 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Box, Flex, Text, Container } from "@radix-ui/themes";
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Box, Flex, Text, Container } from '@radix-ui/themes';
 import {
   Separator,
   Button,
@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "./ui";
+} from './ui';
 import {
   ExitIcon,
   PersonIcon,
@@ -25,12 +25,12 @@ import {
   BellIcon,
   HamburgerMenuIcon,
   DownloadIcon,
-} from "@radix-ui/react-icons";
-import { useAuth } from "../providers/AuthProvider";
-import { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import LanguageSelector from "./LanguageSelector";
-import { promptPWAInstall } from "@/utils/pwaInstallHandler";
+} from '@radix-ui/react-icons';
+import { useAuth } from '../providers/AuthProvider';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from './LanguageSelector';
+import { promptPWAInstall } from '@/utils/pwaInstallHandler';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -50,13 +50,13 @@ const Navbar = () => {
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate('/login');
   };
 
   const isActive = (path: string) => {
@@ -66,7 +66,7 @@ const Navbar = () => {
   };
 
   return (
-    <Box className={`navbar-wrapper ${isScrolled ? "scrolled" : ""}`}>
+    <Box className={`navbar-wrapper ${isScrolled ? 'scrolled' : ''}`}>
       <Box>
         <Container size="4">
           <Flex justify="between" align="center" py="2">
@@ -83,48 +83,48 @@ const Navbar = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuItem
-                          onClick={() => navigate("/dashboard")}
+                          onClick={() => navigate('/dashboard')}
                         >
                           <Flex gap="2" align="center">
                             <DashboardIcon width="14" height="14" />
                             <Text className="pl-2" size="2">
-                              {t("navbar.dashboard")}
+                              {t('navbar.dashboard')}
                             </Text>
                           </Flex>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate("/monitors")}>
+                        <DropdownMenuItem onClick={() => navigate('/monitors')}>
                           <Flex gap="2" align="center">
                             <ActivityLogIcon width="14" height="14" />
                             <Text className="pl-2" size="2">
-                              {t("navbar.apiMonitors")}
+                              {t('navbar.apiMonitors')}
                             </Text>
                           </Flex>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate("/agents")}>
+                        <DropdownMenuItem onClick={() => navigate('/agents')}>
                           <Flex gap="2" align="center">
                             <CubeIcon width="14" height="14" />
                             <Text className="pl-2" size="2">
-                              {t("navbar.agentMonitors")}
+                              {t('navbar.agentMonitors')}
                             </Text>
                           </Flex>
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => navigate("/status/config")}
+                          onClick={() => navigate('/status/config')}
                         >
                           <Flex gap="2" align="center">
                             <PieChartIcon width="14" height="14" />
                             <Text className="pl-2" size="2">
-                              {t("navbar.statusPage")}
+                              {t('navbar.statusPage')}
                             </Text>
                           </Flex>
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => navigate("/notifications")}
+                          onClick={() => navigate('/notifications')}
                         >
                           <Flex gap="2" align="center">
                             <BellIcon width="14" height="14" />
                             <Text className="pl-2" size="2">
-                              {t("navbar.notifications")}
+                              {t('navbar.notifications')}
                             </Text>
                           </Flex>
                         </DropdownMenuItem>
@@ -132,7 +132,7 @@ const Navbar = () => {
                           <Flex gap="2" align="center">
                             <DownloadIcon width="14" height="14" />
                             <Text className="pl-2" size="2">
-                              {t("navbar.installApp")}
+                              {t('navbar.installApp')}
                             </Text>
                           </Flex>
                         </DropdownMenuItem>
@@ -167,17 +167,20 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <>
                   {/* 普通屏幕菜单栏 */}
-                  <Flex align="center" display={{ initial: "none", md: "flex" }}>
+                  <Flex
+                    align="center"
+                    display={{ initial: 'none', md: 'flex' }}
+                  >
                     <Link
                       to="/dashboard"
                       className={`nav-link ${
-                        isActive("/dashboard") ? "active" : ""
+                        isActive('/dashboard') ? 'active' : ''
                       }`}
                     >
                       <Button variant="ghost">
                         <DashboardIcon width="14" height="14" />
                         <Text ml="1" size="2">
-                          {t("navbar.dashboard")}
+                          {t('navbar.dashboard')}
                         </Text>
                       </Button>
                     </Link>
@@ -185,13 +188,13 @@ const Navbar = () => {
                     <Link
                       to="/monitors"
                       className={`nav-link ${
-                        isActive("/monitors") ? "active" : ""
+                        isActive('/monitors') ? 'active' : ''
                       }`}
                     >
                       <Button variant="ghost">
                         <ActivityLogIcon width="14" height="14" />
                         <Text ml="1" size="2">
-                          {t("navbar.apiMonitors")}
+                          {t('navbar.apiMonitors')}
                         </Text>
                       </Button>
                     </Link>
@@ -199,13 +202,13 @@ const Navbar = () => {
                     <Link
                       to="/agents"
                       className={`nav-link ${
-                        isActive("/agents") ? "active" : ""
+                        isActive('/agents') ? 'active' : ''
                       }`}
                     >
                       <Button variant="ghost">
                         <CubeIcon width="14" height="14" />
                         <Text ml="1" size="2">
-                          {t("navbar.agentMonitors")}
+                          {t('navbar.agentMonitors')}
                         </Text>
                       </Button>
                     </Link>
@@ -213,13 +216,13 @@ const Navbar = () => {
                     <Link
                       to="/status/config"
                       className={`nav-link ${
-                        isActive("/status/config") ? "active" : ""
+                        isActive('/status/config') ? 'active' : ''
                       }`}
                     >
                       <Button variant="ghost">
                         <PieChartIcon width="14" height="14" />
                         <Text ml="1" size="2">
-                          {t("navbar.statusPage")}
+                          {t('navbar.statusPage')}
                         </Text>
                       </Button>
                     </Link>
@@ -227,13 +230,13 @@ const Navbar = () => {
                     <Link
                       to="/notifications"
                       className={`nav-link ${
-                        isActive("/notifications") ? "active" : ""
+                        isActive('/notifications') ? 'active' : ''
                       }`}
                     >
                       <Button variant="ghost">
                         <BellIcon width="14" height="14" />
                         <Text ml="1" size="2">
-                          {t("navbar.notifications")}
+                          {t('navbar.notifications')}
                         </Text>
                       </Button>
                     </Link>
@@ -242,7 +245,7 @@ const Navbar = () => {
                       <Flex gap="1" align="center">
                         <DownloadIcon width="14" height="14" />
                         <Text className="pl-2" size="2">
-                          {t("navbar.installApp")}
+                          {t('navbar.installApp')}
                         </Text>
                       </Flex>
                     </Button>
@@ -280,7 +283,7 @@ const Navbar = () => {
                             )}
                           </AvatarFallback>
                         </Avatar>
-                        <Box display={{ initial: "none", sm: "block" }}>
+                        <Box display={{ initial: 'none', sm: 'block' }}>
                           <Text size="2">{user?.username}</Text>
                         </Box>
                         <ChevronDownIcon width="12" height="12" />
@@ -289,7 +292,7 @@ const Navbar = () => {
                     <DropdownMenuContent align="end" className="user-dropdown">
                       <DropdownMenuLabel>
                         <Text size="1" color="gray">
-                          {t("navbar.loggedInAs")}
+                          {t('navbar.loggedInAs')}
                         </Text>
                         <Text size="2" weight="bold">
                           {user?.username}
@@ -298,19 +301,19 @@ const Navbar = () => {
 
                       <DropdownMenuSeparator />
 
-                      {user?.role === "admin" && (
-                        <DropdownMenuItem onClick={() => navigate("/users")}>
+                      {user?.role === 'admin' && (
+                        <DropdownMenuItem onClick={() => navigate('/users')}>
                           <Flex gap="2" align="center">
                             <UserIcon width="14" height="14" />
-                            <Text size="2">{t("navbar.userManagement")}</Text>
+                            <Text size="2">{t('navbar.userManagement')}</Text>
                           </Flex>
                         </DropdownMenuItem>
                       )}
 
-                      <DropdownMenuItem onClick={() => navigate("/profile")}>
+                      <DropdownMenuItem onClick={() => navigate('/profile')}>
                         <Flex gap="2" align="center">
                           <PersonIcon width="14" height="14" />
-                          <Text size="2">{t("navbar.profile")}</Text>
+                          <Text size="2">{t('navbar.profile')}</Text>
                         </Flex>
                       </DropdownMenuItem>
 
@@ -319,7 +322,7 @@ const Navbar = () => {
                       <DropdownMenuItem color="red" onClick={handleLogout}>
                         <Flex gap="2" align="center">
                           <ExitIcon width="14" height="14" />
-                          <Text size="2">{t("navbar.logout")}</Text>
+                          <Text size="2">{t('navbar.logout')}</Text>
                         </Flex>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -332,8 +335,8 @@ const Navbar = () => {
 
                   <Separator orientation="vertical" className="!h-6" />
 
-                  <Button variant="ghost" onClick={() => navigate("/login")}>
-                    {t("navbar.login")}
+                  <Button variant="ghost" onClick={() => navigate('/login')}>
+                    {t('navbar.login')}
                   </Button>
                 </Flex>
               )}

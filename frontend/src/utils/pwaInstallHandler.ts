@@ -4,14 +4,16 @@ let deferredPrompt: any; // 用于存储 beforeinstallprompt 事件
  * 监听 'beforeinstallprompt' 事件。
  * 当浏览器准备好提示用户安装 PWA 时，此事件会触发。
  */
-window.addEventListener('beforeinstallprompt', (e) => {
+window.addEventListener('beforeinstallprompt', e => {
   // 阻止浏览器默认的迷你信息栏提示 (在某些移动浏览器上)
   e.preventDefault();
   // 保存事件，以便稍后可以触发它
   deferredPrompt = e;
   // 派发一个自定义事件，通知应用 PWA 可以安装了
   // 这允许 UI 组件（如 Navbar）更新其状态
-  window.dispatchEvent(new CustomEvent('pwaInstallReady', { detail: { canInstall: true } }));
+  window.dispatchEvent(
+    new CustomEvent('pwaInstallReady', { detail: { canInstall: true } })
+  );
   console.log('`beforeinstallprompt` 事件已触发。PWA 可以安装。');
 });
 
@@ -46,12 +48,16 @@ export const promptPWAInstall = async (): Promise<boolean> => {
     // 清除 deferredPrompt，因为它只能使用一次
     deferredPrompt = null;
     // 派发自定义事件，通知 PWA 安装状态已更改
-    window.dispatchEvent(new CustomEvent('pwaInstallReady', { detail: { canInstall: false } }));
+    window.dispatchEvent(
+      new CustomEvent('pwaInstallReady', { detail: { canInstall: false } })
+    );
     return outcome === 'accepted';
   } catch (error) {
     console.error('PWA 安装提示时发生错误:', error);
     deferredPrompt = null;
-    window.dispatchEvent(new CustomEvent('pwaInstallReady', { detail: { canInstall: false } }));
+    window.dispatchEvent(
+      new CustomEvent('pwaInstallReady', { detail: { canInstall: false } })
+    );
     return false;
   }
 };
@@ -65,5 +71,7 @@ window.addEventListener('appinstalled', () => {
   // PWA 安装后，deferredPrompt 通常应为 null，
   // 因为 beforeinstallprompt 不会再次触发，直到应用被卸载（在某些情况下）
   deferredPrompt = null;
-  window.dispatchEvent(new CustomEvent('pwaInstallReady', { detail: { canInstall: false } }));
+  window.dispatchEvent(
+    new CustomEvent('pwaInstallReady', { detail: { canInstall: false } })
+  );
 });

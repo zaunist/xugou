@@ -1,6 +1,6 @@
-import { Context, Next } from "hono";
-import { jwt } from "hono/jwt";
-import { getJwtSecret } from "../utils/jwt";
+import { Context, Next } from 'hono';
+import { jwt } from 'hono/jwt';
+import { getJwtSecret } from '../utils/jwt';
 
 /**
  * JWT认证中间件
@@ -8,33 +8,36 @@ import { getJwtSecret } from "../utils/jwt";
  */
 export const jwtMiddleware = async (c: Context, next: Next) => {
   // 跳过所有非 API 路径的认证检查（用于静态文件服务）
-  if (!c.req.path.startsWith("/api/")) {
+  if (!c.req.path.startsWith('/api/')) {
     return next();
   }
 
   // 跳过特定的 API 端点
   if (
-    (c.req.path.endsWith("/status") ||
-      c.req.path.endsWith("/register") ||
-      c.req.path.endsWith("/login")) &&
-    c.req.method === "POST"
+    (c.req.path.endsWith('/status') ||
+      c.req.path.endsWith('/register') ||
+      c.req.path.endsWith('/login')) &&
+    c.req.method === 'POST'
   ) {
     return next();
   }
 
   // 新增：跳过获取新用户注册设置的公共接口
-  if (c.req.path === "/api/settings/allow_new_user_registration" && c.req.method === "GET") {
+  if (
+    c.req.path === '/api/settings/allow_new_user_registration' &&
+    c.req.method === 'GET'
+  ) {
     return next();
   }
 
-  if (c.req.path.endsWith("/data") && c.req.method === "GET") {
+  if (c.req.path.endsWith('/data') && c.req.method === 'GET') {
     return next();
   }
   // 获取 metrics 时暂时先不验证。
   if (
-    (c.req.path.endsWith("/metrics") ||
-      c.req.path.endsWith("/metrics/latest")) &&
-    c.req.method === "GET"
+    (c.req.path.endsWith('/metrics') ||
+      c.req.path.endsWith('/metrics/latest')) &&
+    c.req.method === 'GET'
   ) {
     return next();
   }

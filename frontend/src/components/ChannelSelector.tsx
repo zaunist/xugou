@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from "react";
-import { Box, Flex, Text } from "@radix-ui/themes";
-import { CheckIcon } from "@radix-ui/react-icons";
-import { useTranslation } from "react-i18next";
-import { createPortal } from "react-dom";
-import { ChannelSelectorProps } from "@/types/components";
+import { useState, useRef, useEffect } from 'react';
+import { Box, Flex, Text } from '@radix-ui/themes';
+import { CheckIcon } from '@radix-ui/react-icons';
+import { useTranslation } from 'react-i18next';
+import { createPortal } from 'react-dom';
+import { ChannelSelectorProps } from '@/types/components';
 
 /**
  * 通知渠道选择器组件
@@ -29,18 +29,18 @@ const ChannelSelector = ({
   // 显示已选择的渠道名称
   const getSelectedText = () => {
     if (selectedChannelIds.length === 0) {
-      return placeholder || t("notifications.channels.selectChannels");
+      return placeholder || t('notifications.channels.selectChannels');
     }
 
     if (selectedChannelIds.length === 1) {
-      const channel = channels.find((c) => c.id === selectedChannelIds[0]);
+      const channel = channels.find(c => c.id === selectedChannelIds[0]);
       return channel
         ? channel.name
-        : placeholder || t("notifications.channels.selectChannels");
+        : placeholder || t('notifications.channels.selectChannels');
     }
 
     return `${selectedChannelIds.length} ${t(
-      "notifications.channels.selected"
+      'notifications.channels.selected'
     )}`;
   };
 
@@ -49,7 +49,7 @@ const ChannelSelector = ({
     // 切换选择状态
     const isSelected = selectedChannelIds.includes(channelId);
     const newSelectedIds = isSelected
-      ? selectedChannelIds.filter((id) => id !== channelId)
+      ? selectedChannelIds.filter(id => id !== channelId)
       : [...selectedChannelIds, channelId];
 
     onChange(newSelectedIds);
@@ -70,11 +70,11 @@ const ChannelSelector = ({
     };
 
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
 
@@ -98,24 +98,24 @@ const ChannelSelector = ({
         ref={triggerRef}
         onClick={() => setIsOpen(!isOpen)}
         style={{
-          borderRadius: "6px",
-          border: "1px solid var(--gray-7)",
-          padding: "8px 12px",
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          backgroundColor: "white",
-          width: "100%",
+          borderRadius: '6px',
+          border: '1px solid var(--gray-7)',
+          padding: '8px 12px',
+          cursor: 'pointer',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: 'white',
+          width: '100%',
         }}
       >
         <Text>{getSelectedText()}</Text>
         <div
           style={{
-            borderLeft: "5px solid transparent",
-            borderRight: "5px solid transparent",
-            borderTop: "5px solid var(--gray-11)",
-            marginLeft: "8px",
+            borderLeft: '5px solid transparent',
+            borderRight: '5px solid transparent',
+            borderTop: '5px solid var(--gray-11)',
+            marginLeft: '8px',
           }}
         ></div>
       </Box>
@@ -125,42 +125,42 @@ const ChannelSelector = ({
           <Box
             ref={selectContentRef}
             style={{
-              position: "absolute",
+              position: 'absolute',
               top: `${position.top}px`,
               left: `${position.left}px`,
               width: `${position.width}px`,
-              backgroundColor: "white",
-              border: "1px solid var(--gray-6)",
-              borderRadius: "6px",
-              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
+              backgroundColor: 'white',
+              border: '1px solid var(--gray-6)',
+              borderRadius: '6px',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
               zIndex: 9999,
-              maxHeight: "250px",
-              overflowY: "auto",
+              maxHeight: '250px',
+              overflowY: 'auto',
             }}
           >
             {channels.length === 0 ? (
               <Box p="2">
                 <Text color="gray">
-                  {t("notifications.channels.noChannels")}
+                  {t('notifications.channels.noChannels')}
                 </Text>
               </Box>
             ) : (
               <>
-                {channels.map((channel) => (
+                {channels.map(channel => (
                   <Box
                     key={channel.id}
                     onClick={() => handleItemClick(channel.id)}
                     style={{
-                      padding: "8px 12px",
-                      cursor: "pointer",
-                      borderBottom: "1px solid var(--gray-4)",
-                      backgroundColor: "white",
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      borderBottom: '1px solid var(--gray-4)',
+                      backgroundColor: 'white',
                     }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.backgroundColor = "var(--gray-3)";
+                    onMouseOver={e => {
+                      e.currentTarget.style.backgroundColor = 'var(--gray-3)';
                     }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.backgroundColor = "white";
+                    onMouseOut={e => {
+                      e.currentTarget.style.backgroundColor = 'white';
                     }}
                   >
                     <Flex justify="between" align="center" width="100%">

@@ -1,14 +1,18 @@
-import { Agent, Metrics } from "../models/agent";
-import { agents, agentMetrics24h } from "../db/schema";
-import { db } from "../config";
-import { desc, eq, inArray } from "drizzle-orm";
+import { Agent, Metrics } from '../models/agent';
+import { agents, agentMetrics24h } from '../db/schema';
+import { db } from '../config';
+import { desc, eq, inArray } from 'drizzle-orm';
 /**
  * 客户端相关的数据库操作
  */
 
 // 获取所有客户端
 export async function getAllAgents(userId: number) {
-  return await db.select().from(agents).where(eq(agents.created_by, userId)).orderBy(desc(agents.created_at));
+  return await db
+    .select()
+    .from(agents)
+    .where(eq(agents.created_by, userId))
+    .orderBy(desc(agents.created_at));
 }
 
 // 批量获取客户端详情
@@ -50,7 +54,7 @@ export async function createAgent(
   name: string,
   token: string,
   createdBy: number,
-  status: string = "inactive",
+  status: string = 'inactive',
   hostname: string | null = null,
   os: string | null = null,
   version: string | null = null,
@@ -80,7 +84,7 @@ export async function createAgent(
     .returning();
 
   if (!result) {
-    throw new Error("创建客户端失败");
+    throw new Error('创建客户端失败');
   }
   return result[0];
 }
@@ -101,8 +105,8 @@ export async function updateAgent(agent: Agent) {
       .returning();
     return updatedAgent[0];
   } catch (error) {
-    console.error("更新客户端失败:", error);
-    throw new Error("更新客户端失败");
+    console.error('更新客户端失败:', error);
+    throw new Error('更新客户端失败');
   }
 }
 
@@ -114,11 +118,11 @@ export async function deleteAgent(id: number) {
     // 再删除客户端
     await db.delete(agents).where(eq(agents.id, id));
   } catch (error) {
-    console.error("删除客户端失败:", error);
-    throw new Error("删除客户端失败");
+    console.error('删除客户端失败:', error);
+    throw new Error('删除客户端失败');
   }
 
-  return { success: true, message: "客户端已删除" };
+  return { success: true, message: '客户端已删除' };
 }
 
 // 新增：根据用户ID删除客户端
@@ -132,12 +136,13 @@ export async function deleteAgentsByUserId(userId: number) {
   }
 
   // 批量删除关联的指标数据
-  await db.delete(agentMetrics24h).where(inArray(agentMetrics24h.agent_id, agentIds));
+  await db
+    .delete(agentMetrics24h)
+    .where(inArray(agentMetrics24h.agent_id, agentIds));
 
   // 批量删除客户端
   await db.delete(agents).where(inArray(agents.id, agentIds));
 }
-
 
 // 通过令牌获取客户端
 export async function getAgentByToken(token: string) {
@@ -150,7 +155,7 @@ export async function getActiveAgents() {
   const activeAgents = await db
     .select()
     .from(agents)
-    .where(eq(agents.status, "active"));
+    .where(eq(agents.status, 'active'));
   return activeAgents;
 }
 
@@ -160,14 +165,14 @@ export async function setAgentInactive(id: number) {
 
   return await db
     .update(agents)
-    .set({ status: "inactive", updated_at: now })
+    .set({ status: 'inactive', updated_at: now })
     .where(eq(agents.id, id));
 }
 
 // 插入客户端资源指标
 export async function insertAgentMetrics(metrics: Metrics[]) {
   return await db.batch(
-    metrics.map((metric) => db.insert(agentMetrics24h).values(metric))
+    metrics.map(metric => db.insert(agentMetrics24h).values(metric))
   );
 }
 

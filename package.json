@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Xugou monitoring system",
   "private": true,
+  "devDependencies": {
+    "prettier": "^3.0.0"
+  },
   "scripts": {
     "dev:frontend": "cd frontend && pnpm run dev",
     "dev:backend": "cd backend && pnpm run dev",
@@ -12,6 +15,13 @@
     "build": "pnpm run generate && pnpm run build:frontend && pnpm run build:backend",
     "deploy": "wrangler deploy",
     "dev:preview": "pnpm run build && cd backend && pnpm run dev",
-    "preview": "cd backend && pnpm run dev"
+    "preview": "cd backend && pnpm run dev",
+    "lint": "pnpm run lint:frontend && pnpm run lint:backend",
+    "lint:frontend": "cd frontend && pnpm run lint",
+    "lint:backend": "cd backend && pnpm run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "audit": "pnpm audit",
+    "audit:fix": "pnpm audit --fix"
   }
 }

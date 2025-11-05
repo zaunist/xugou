@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Box, Flex, Heading, Text, TextField } from "@radix-ui/themes";
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Box, Flex, Heading, Text, TextField } from '@radix-ui/themes';
 import {
   Button,
   Card,
@@ -9,12 +9,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import { getUser, updateUser } from "../../api/users";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-import { User } from "@/types";
+} from '@/components/ui';
+import { ArrowLeftIcon } from '@radix-ui/react-icons';
+import { getUser, updateUser } from '../../api/users';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { User } from '@/types';
 
 const EditUser = () => {
   const navigate = useNavigate();
@@ -22,9 +22,9 @@ const EditUser = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    role: "user",
+    username: '',
+    email: '',
+    role: 'user',
   });
   const { t } = useTranslation();
 
@@ -37,11 +37,11 @@ const EditUser = () => {
           setUser(response.user); // 保存原始用户信息
           setFormData({
             username: response.user.username,
-            email: response.user.email || "",
-            role: response.user.role || "user",
+            email: response.user.email || '',
+            role: response.user.role || 'user',
           });
         } else {
-          toast.error(response.message || "获取用户信息失败");
+          toast.error(response.message || '获取用户信息失败');
         }
         setLoading(false);
       };
@@ -51,14 +51,14 @@ const EditUser = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
   };
 
   const handleRoleChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, role: value }));
+    setFormData(prev => ({ ...prev, role: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,31 +69,31 @@ const EditUser = () => {
       const response = await updateUser(Number(id), formData);
 
       if (response.success) {
-        toast.success("用户更新成功");
-        navigate("/users");
+        toast.success('用户更新成功');
+        navigate('/users');
       } else {
-        toast.error(response.message || "更新用户失败");
+        toast.error(response.message || '更新用户失败');
       }
     } catch (error) {
-      toast.error("更新用户失败");
+      toast.error('更新用户失败');
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <Text>{t("common.loading")}</Text>;
+    return <Text>{t('common.loading')}</Text>;
   }
 
   return (
     <Box className="sm:px-6 lg:px-[8%]">
       <Flex justify="between" align="center">
         <Flex align="center" gap="2">
-          <Button variant="secondary" onClick={() => navigate("/users")}>
+          <Button variant="secondary" onClick={() => navigate('/users')}>
             <ArrowLeftIcon />
           </Button>
           <Heading size="6">
-            {t("common.edit")} {t("users.title")}
+            {t('common.edit')} {t('users.title')}
           </Heading>
         </Flex>
       </Flex>
@@ -103,45 +103,45 @@ const EditUser = () => {
             <Flex direction="column" gap="3" className="ml-4">
               <Box>
                 <Text as="label" size="2">
-                  {t("user.username")} *
+                  {t('user.username')} *
                 </Text>
                 <TextField.Input
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  placeholder={t("user.username")}
+                  placeholder={t('user.username')}
                   required
                 />
               </Box>
 
               <Box>
                 <Text as="label" size="2">
-                  {t("user.email")}
+                  {t('user.email')}
                 </Text>
                 <TextField.Input
                   name="email"
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder={t("user.email")}
+                  placeholder={t('user.email')}
                 />
               </Box>
 
               <Box>
                 <Text as="label" size="2">
-                  {t("user.role")} *
+                  {t('user.role')} *
                 </Text>
                 <Select
                   value={formData.role}
                   onValueChange={handleRoleChange}
-                  disabled={user?.role === "admin"}
+                  disabled={user?.role === 'admin'}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {/* 如果是 admin，只显示 admin 选项，否则显示 manager 和 user */}
-                    {user?.role === "admin" ? (
+                    {user?.role === 'admin' ? (
                       <SelectItem value="admin">Admin</SelectItem>
                     ) : (
                       <>
@@ -154,13 +154,13 @@ const EditUser = () => {
               </Box>
 
               <Flex justify="end" mt="4" gap="2">
-                <Button variant="secondary" onClick={() => navigate("/users")}>
-                  {t("common.cancel")}
+                <Button variant="secondary" onClick={() => navigate('/users')}>
+                  {t('common.cancel')}
                 </Button>
                 <Button type="submit" disabled={loading}>
                   {loading
-                    ? t("common.savingChanges")
-                    : t("common.saveChanges")}
+                    ? t('common.savingChanges')
+                    : t('common.saveChanges')}
                 </Button>
               </Flex>
             </Flex>

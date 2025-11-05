@@ -8,7 +8,11 @@
     "build": "tsc && pnpm run generate:migrations",
     "deploy": "wrangler deploy",
     "db:generate": "drizzle-kit generate",
-    "generate:migrations": "tsx scripts/generate-migrations.ts"
+    "generate:migrations": "tsx scripts/generate-migrations.ts",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write \"src/**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,json,md}\""
   },
   "keywords": [],
   "author": "",
@@ -22,16 +26,21 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.44.2",
-    "hono": "^4.7.4",
+    "hono": "^4.10.3",
     "jsonwebtoken": "^9.0.2",
     "typescript": "^5.8.2",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250317.0",
+    "@eslint/js": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "cross-env": "^7.0.3",
-    "drizzle-kit": "^0.31.2",
+    "drizzle-kit": "^0.31.6",
+    "eslint": "^8.57.1",
     "nodemon": "^3.1.9",
+    "prettier": "^3.0.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.4",
     "wrangler": "^4.13.1"

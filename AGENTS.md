@@ -3,6 +3,7 @@
 ## 项目概述
 
 XUGOU 是一个基于 CloudFlare 的轻量化系统监控平台，采用现代化的全栈架构：
+
 - **Frontend**: React + TypeScript + Vite + TailwindCSS + Radix UI
 - **Backend**: Hono + TypeScript + CloudFlare Workers + D1 Database
 - **Agent**: Go + Cobra CLI + gopsutil
@@ -23,6 +24,7 @@ XUGOU 是一个基于 CloudFlare 的轻量化系统监控平台，采用现代�
 ### Frontend 规范
 
 #### 文件组织
+
 ```
 src/
 ├── api/           # API 调用封装
@@ -41,6 +43,7 @@ src/
 ```
 
 #### 组件规范
+
 1. 使用函数式组件和 React Hooks
 2. 组件文件使用 PascalCase 命名 (如 `MonitorCard.tsx`)
 3. 导出组件使用 default export
@@ -50,6 +53,7 @@ src/
 7. 状态管理优先使用 React Context，复杂状态考虑 Zustand
 
 #### 示例组件结构
+
 ```typescript
 interface MonitorCardProps {
   monitor: Monitor;
@@ -69,6 +73,7 @@ export default function MonitorCard({ monitor, onEdit }: MonitorCardProps) {
 ### Backend 规范
 
 #### 文件组织
+
 ```
 src/
 ├── api/           # API 路由处理
@@ -85,6 +90,7 @@ src/
 ```
 
 #### API 规范
+
 1. 使用 Hono 框架构建 RESTful API
 2. 路由文件按功能模块组织 (如 `auth.ts`, `monitors.ts`)
 3. 统一的错误处理和响应格式
@@ -92,6 +98,7 @@ src/
 5. API 路径统一使用 `/api/` 前缀
 
 #### 数据库规范
+
 1. 使用 Drizzle ORM 进行数据库操作
 2. 所有表结构定义在 `schema.ts` 中
 3. 使用 SQLite (CloudFlare D1) 作为数据库
@@ -100,10 +107,11 @@ src/
 6. 使用 Repository 模式封装数据访问
 
 #### 示例 API 结构
+
 ```typescript
 const monitors = new Hono<{ Bindings: Bindings }>();
 
-monitors.get('/', async (c) => {
+monitors.get('/', async c => {
   try {
     const result = await MonitorService.getAllMonitors(c.env);
     return c.json({ success: true, data: result });
@@ -116,6 +124,7 @@ monitors.get('/', async (c) => {
 ### Agent 规范
 
 #### 文件组织
+
 ```
 cmd/
 └── agent/         # CLI 命令定义
@@ -128,6 +137,7 @@ pkg/
 ```
 
 #### Go 代码规范
+
 1. 遵循 Go 官方代码规范
 2. 使用 Cobra 构建 CLI 应用
 3. 使用 Viper 进行配置管理

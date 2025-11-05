@@ -1,10 +1,10 @@
-import api from "./client";
+import api from './client';
 import {
   Agent,
   AgentResponse,
   AgentsResponse,
   MetricHistory,
-} from "../types/agents";
+} from '../types/agents';
 
 export const generateToken = async (): Promise<{
   success: boolean;
@@ -12,19 +12,19 @@ export const generateToken = async (): Promise<{
   message?: string;
 }> => {
   try {
-    const response = await api.post("/api/agents/token/generate");
+    const response = await api.post('/api/agents/token/generate');
     return response.data;
   } catch (error) {
-    console.error("生成客户端注册令牌失败:", error);
+    console.error('生成客户端注册令牌失败:', error);
     return {
       success: false,
-      message: "生成客户端注册令牌失败",
+      message: '生成客户端注册令牌失败',
     };
   }
 };
 
 export const getAllAgents = async (): Promise<AgentsResponse> => {
-  const response = await api.get("/api/agents");
+  const response = await api.get('/api/agents');
   return {
     success: true,
     agents: response.data.agents,
@@ -49,7 +49,7 @@ export const deleteAgent = async (
     console.error(`删除客户端 ${id} 失败:`, error);
     return {
       success: false,
-      message: "删除客户端失败",
+      message: '删除客户端失败',
     };
   }
 };
@@ -83,7 +83,7 @@ export const getAgentMetrics = async (
     console.error(`获取客户端 ${id} 的指标失败:`, error);
     return {
       success: false,
-      message: "获取客户端指标失败",
+      message: '获取客户端指标失败',
     };
   }
 };

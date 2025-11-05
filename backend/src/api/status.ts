@@ -1,10 +1,10 @@
-import { Hono } from "hono";
-import { Bindings } from "../models/db";
+import { Hono } from 'hono';
+import { Bindings } from '../models/db';
 import {
   getStatusPageConfig,
   saveStatusPageConfig,
   getStatusPagePublicData,
-} from "../services/StatusService";
+} from '../services/StatusService';
 
 // 状态页配置接口
 interface StatusPageConfig {
@@ -20,45 +20,45 @@ interface StatusPageConfig {
 const status = new Hono<{ Bindings: Bindings }>();
 
 // 获取状态页配置(管理员)
-status.get("/config", async (c) => {
-  const payload = c.get("jwtPayload");
+status.get('/config', async c => {
+  const payload = c.get('jwtPayload');
   const userId = payload.id;
 
   try {
     const config = await getStatusPageConfig(userId);
     return c.json(config);
   } catch (error) {
-    console.error("获取状态页配置失败:", error);
-    return c.json({ error: "获取状态页配置失败" }, 500);
+    console.error('获取状态页配置失败:', error);
+    return c.json({ error: '获取状态页配置失败' }, 500);
   }
 });
 
 // 保存状态页配置
-status.post("/config", async (c) => {
-  const payload = c.get("jwtPayload");
+status.post('/config', async c => {
+  const payload = c.get('jwtPayload');
   const userId = payload.id;
   const data = (await c.req.json()) as StatusPageConfig;
 
-  console.log("接收到的配置数据:", JSON.stringify(data));
+  console.log('接收到的配置数据:', JSON.stringify(data));
 
   if (!data) {
-    console.log("无效的请求数据");
-    return c.json({ error: "无效的请求数据" }, 400);
+    console.log('无效的请求数据');
+    return c.json({ error: '无效的请求数据' }, 400);
   }
 
   try {
     const result = await saveStatusPageConfig(userId, data);
     return c.json(result);
   } catch (error) {
-    console.error("保存状态页配置失败:", error);
-    return c.json({ error: "保存状态页配置失败" }, 500);
+    console.error('保存状态页配置失败:', error);
+    return c.json({ error: '保存状态页配置失败' }, 500);
   }
 });
 
-status.get("/public/:userId/data", async (c) => {
-  const userId = parseInt(c.req.param("userId"));
+status.get('/public/:userId/data', async c => {
+  const userId = parseInt(c.req.param('userId'));
   if (isNaN(userId)) {
-    return c.json({ error: "无效的用户ID" }, 400);
+    return c.json({ error: '无效的用户ID' }, 400);
   }
   const result = await getStatusPagePublicData(userId);
   return c.json(result);

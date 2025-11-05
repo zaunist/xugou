@@ -1,14 +1,14 @@
-import React from "react";
-import { MetricHistory, AgentWithLatestMetrics } from "../types";
-import { Badge } from "./ui/badge";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React from 'react';
+import { MetricHistory, AgentWithLatestMetrics } from '../types';
+import { Badge } from './ui/badge';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faWindows,
   faLinux,
   faApple,
   faAndroid,
-} from "@fortawesome/free-brands-svg-icons";
-import { faLaptop } from "@fortawesome/free-solid-svg-icons";
+} from '@fortawesome/free-brands-svg-icons';
+import { faLaptop } from '@fortawesome/free-solid-svg-icons';
 
 interface AgentStatusBarProps {
   latestMetric?: MetricHistory;
@@ -34,16 +34,16 @@ interface NetworkMetric {
 }
 
 const formatBytes = (bytes: number | undefined, decimals = 2): string => {
-  if (bytes === undefined || bytes === 0) return "0 B";
+  if (bytes === undefined || bytes === 0) return '0 B';
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
 const formatPercent = (val: number | undefined, decimals = 2) =>
-  val !== undefined ? `${val.toFixed(decimals)}%` : "-";
+  val !== undefined ? `${val.toFixed(decimals)}%` : '-';
 
 const ProgressBar = ({
   percent,
@@ -86,11 +86,11 @@ const MetricCard = ({
 const getOsIcon = (os: string | undefined) => {
   if (!os) return faLaptop;
   const osLower = os.toLowerCase();
-  if (osLower.includes("windows")) return faWindows;
-  if (osLower.includes("mac") || osLower.includes("darwin")) return faApple;
-  if (osLower.includes("linux")) return faLinux;
-  if (osLower.includes("android")) return faAndroid;
-  if (osLower.includes("ios")) return faApple;
+  if (osLower.includes('windows')) return faWindows;
+  if (osLower.includes('mac') || osLower.includes('darwin')) return faApple;
+  if (osLower.includes('linux')) return faLinux;
+  if (osLower.includes('android')) return faAndroid;
+  if (osLower.includes('ios')) return faApple;
   return faLaptop;
 };
 
@@ -112,13 +112,13 @@ const AgentStatusBar: React.FC<AgentStatusBarProps> = ({
     if (latestMetric.disk_metrics) {
       try {
         const disks = JSON.parse(latestMetric.disk_metrics) as DiskMetric[];
-        disks.forEach((disk) => {
+        disks.forEach(disk => {
           totalStorage += disk.total;
           usedStorage += disk.used;
         });
         storageUsageRate = (usedStorage / totalStorage) * 100;
       } catch (e) {
-        console.error("解析磁盘数据失败:", e);
+        console.error('解析磁盘数据失败:', e);
       }
     }
 
@@ -128,12 +128,12 @@ const AgentStatusBar: React.FC<AgentStatusBarProps> = ({
         const networks = JSON.parse(
           latestMetric.network_metrics
         ) as NetworkMetric[];
-        networks.forEach((network) => {
+        networks.forEach(network => {
           totalUpload += network.bytes_sent;
           totalDownload += network.bytes_recv;
         });
       } catch (e) {
-        console.error("解析网络数据失败:", e);
+        console.error('解析网络数据失败:', e);
       }
     }
   }
@@ -151,9 +151,9 @@ const AgentStatusBar: React.FC<AgentStatusBarProps> = ({
           </span>
           <Badge
             variant="outline"
-            color={agent.status === "active" ? "green" : "gray"}
+            color={agent.status === 'active' ? 'green' : 'gray'}
           >
-            {agent.status === "active" ? "在线" : "离线"}
+            {agent.status === 'active' ? '在线' : '离线'}
           </Badge>
         </div>
       </div>
@@ -191,7 +191,7 @@ const AgentStatusBar: React.FC<AgentStatusBarProps> = ({
         />
         <MetricCard
           label="系统负载"
-          value={latestMetric?.load_1?.toFixed(2) || "-"}
+          value={latestMetric?.load_1?.toFixed(2) || '-'}
           subValue={
             latestMetric
               ? `${latestMetric.load_5?.toFixed(

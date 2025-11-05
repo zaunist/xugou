@@ -1,9 +1,9 @@
-import api from "./client";
+import api from './client';
 import type {
   NotificationChannel,
   NotificationConfig,
   NotificationTemplate,
-} from "../types/notification";
+} from '../types/notification';
 
 type BackendNotificationChannel = {
   id: number;
@@ -28,7 +28,7 @@ type BackendNotificationTemplate = {
   updated_at?: string;
 };
 
-export type NotificationSettings = NotificationConfig["settings"];
+export type NotificationSettings = NotificationConfig['settings'];
 
 export interface NotificationConfigResponse {
   success: boolean;
@@ -37,25 +37,25 @@ export interface NotificationConfigResponse {
 }
 
 const parseChannelConfig = (
-  config: BackendNotificationChannel["config"]
+  config: BackendNotificationChannel['config']
 ): Record<string, unknown> => {
   if (!config) {
     return {};
   }
 
-  if (typeof config === "string") {
+  if (typeof config === 'string') {
     try {
       const parsed = JSON.parse(config);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
         return parsed as Record<string, unknown>;
       }
     } catch (error) {
-      console.error("解析通知渠道配置失败:", error);
+      console.error('解析通知渠道配置失败:', error);
     }
     return {};
   }
 
-  if (typeof config === "object" && !Array.isArray(config)) {
+  if (typeof config === 'object' && !Array.isArray(config)) {
     return config as Record<string, unknown>;
   }
 
@@ -63,16 +63,16 @@ const parseChannelConfig = (
 };
 
 const normalizeBoolean = (value: unknown, fallback = false): boolean => {
-  if (typeof value === "boolean") {
+  if (typeof value === 'boolean') {
     return value;
   }
 
-  if (typeof value === "number") {
+  if (typeof value === 'number') {
     return value !== 0;
   }
 
-  if (typeof value === "string") {
-    return value === "1" || value.toLowerCase() === "true";
+  if (typeof value === 'string') {
+    return value === '1' || value.toLowerCase() === 'true';
   }
 
   return fallback;
@@ -88,24 +88,24 @@ const normalizeChannelIds = (value: unknown): number[] => {
     return [];
   }
 
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     try {
       const parsed = JSON.parse(value);
       if (Array.isArray(parsed)) {
         return parsed
-          .map((item) => Number(item))
-          .filter((item) => Number.isInteger(item));
+          .map(item => Number(item))
+          .filter(item => Number.isInteger(item));
       }
     } catch (error) {
-      console.error("解析通知渠道ID列表失败:", error);
+      console.error('解析通知渠道ID列表失败:', error);
       return [];
     }
   }
 
   if (Array.isArray(value)) {
     return value
-      .map((item) => Number(item))
-      .filter((item) => Number.isInteger(item));
+      .map(item => Number(item))
+      .filter(item => Number.isInteger(item));
   }
 
   return [];
@@ -169,7 +169,9 @@ const normalizeSettings = (settings: any): NotificationSettings => {
   if (settings.monitors) {
     normalized.monitors = {
       enabled: normalizeBoolean(settings.monitors.enabled),
-      onDown: normalizeBoolean(settings.monitors.onDown ?? settings.monitors.on_down),
+      onDown: normalizeBoolean(
+        settings.monitors.onDown ?? settings.monitors.on_down
+      ),
       onRecovery: normalizeBoolean(
         settings.monitors.onRecovery ?? settings.monitors.on_recovery
       ),
@@ -180,14 +182,19 @@ const normalizeSettings = (settings: any): NotificationSettings => {
   if (settings.agents) {
     normalized.agents = {
       enabled: normalizeBoolean(settings.agents.enabled),
-      onOffline: normalizeBoolean(settings.agents.onOffline ?? settings.agents.on_offline),
+      onOffline: normalizeBoolean(
+        settings.agents.onOffline ?? settings.agents.on_offline
+      ),
       onRecovery: normalizeBoolean(
         settings.agents.onRecovery ?? settings.agents.on_recovery
       ),
       onCpuThreshold: normalizeBoolean(
         settings.agents.onCpuThreshold ?? settings.agents.on_cpu_threshold
       ),
-      cpuThreshold: normalizeNumber(settings.agents.cpuThreshold ?? settings.agents.cpu_threshold, 90),
+      cpuThreshold: normalizeNumber(
+        settings.agents.cpuThreshold ?? settings.agents.cpu_threshold,
+        90
+      ),
       onMemoryThreshold: normalizeBoolean(
         settings.agents.onMemoryThreshold ?? settings.agents.on_memory_threshold
       ),
@@ -276,7 +283,7 @@ export const getNotificationConfig =
           templates?: BackendNotificationTemplate[];
           settings?: any;
         };
-      }>("/api/notifications");
+      }>('/api/notifications');
 
       const backendData = response.data.data;
 
@@ -309,10 +316,10 @@ export const getNotificationConfig =
         },
       };
     } catch (error) {
-      console.error("获取通知配置失败:", error);
+      console.error('获取通知配置失败:', error);
       return {
         success: false,
-        message: "获取通知配置失败",
+        message: '获取通知配置失败',
       };
     }
   };
@@ -328,7 +335,7 @@ export const getNotificationChannels = async (): Promise<{
       success: boolean;
       message?: string;
       data?: BackendNotificationChannel[];
-    }>("/api/notifications/channels");
+    }>('/api/notifications/channels');
 
     const channels = Array.isArray(response.data.data)
       ? response.data.data.map(transformChannel)
@@ -340,10 +347,10 @@ export const getNotificationChannels = async (): Promise<{
       channels,
     };
   } catch (error) {
-    console.error("获取通知渠道失败:", error);
+    console.error('获取通知渠道失败:', error);
     return {
       success: false,
-      message: "获取通知渠道失败",
+      message: '获取通知渠道失败',
     };
   }
 };
@@ -359,7 +366,7 @@ export const getNotificationTemplates = async (): Promise<{
       success: boolean;
       message?: string;
       data?: BackendNotificationTemplate[];
-    }>("/api/notifications/templates");
+    }>('/api/notifications/templates');
 
     const templates = Array.isArray(response.data.data)
       ? response.data.data.map(transformTemplate)
@@ -371,10 +378,10 @@ export const getNotificationTemplates = async (): Promise<{
       templates,
     };
   } catch (error) {
-    console.error("获取通知模板失败:", error);
+    console.error('获取通知模板失败:', error);
     return {
       success: false,
-      message: "获取通知模板失败",
+      message: '获取通知模板失败',
     };
   }
 };
@@ -392,18 +399,18 @@ export const saveNotificationSettings = async (
 
     // 转换全局监控设置
     const monitorSettings = {
-      target_type: "global-monitor",
+      target_type: 'global-monitor',
       enabled: settings.monitors.enabled,
       on_down: settings.monitors.onDown,
       on_recovery: settings.monitors.onRecovery,
       channels: JSON.stringify(settings.monitors.channels),
     };
 
-    saveRequests.push(api.post("/api/notifications/settings", monitorSettings));
+    saveRequests.push(api.post('/api/notifications/settings', monitorSettings));
 
     // 转换全局客户端设置
     const agentSettings = {
-      target_type: "global-agent",
+      target_type: 'global-agent',
       enabled: settings.agents.enabled,
       on_offline: settings.agents.onOffline,
       on_recovery: settings.agents.onRecovery,
@@ -416,14 +423,14 @@ export const saveNotificationSettings = async (
       channels: JSON.stringify(settings.agents.channels),
     };
 
-    saveRequests.push(api.post("/api/notifications/settings", agentSettings));
+    saveRequests.push(api.post('/api/notifications/settings', agentSettings));
 
     // 处理特定监控设置
     for (const monitorId in settings.specificMonitors) {
       const monitorSetting = settings.specificMonitors[monitorId];
 
       const specificMonitorSettings = {
-        target_type: "monitor",
+        target_type: 'monitor',
         target_id: parseInt(monitorId),
         enabled: monitorSetting.enabled,
         on_down: monitorSetting.onDown,
@@ -432,7 +439,7 @@ export const saveNotificationSettings = async (
       };
 
       saveRequests.push(
-        api.post("/api/notifications/settings", specificMonitorSettings)
+        api.post('/api/notifications/settings', specificMonitorSettings)
       );
     }
 
@@ -441,7 +448,7 @@ export const saveNotificationSettings = async (
       const agentSetting = settings.specificAgents[agentId];
 
       const specificAgentSettings = {
-        target_type: "agent",
+        target_type: 'agent',
         target_id: parseInt(agentId),
         enabled: agentSetting.enabled,
         on_offline: agentSetting.onOffline,
@@ -456,7 +463,7 @@ export const saveNotificationSettings = async (
       };
 
       saveRequests.push(
-        api.post("/api/notifications/settings", specificAgentSettings)
+        api.post('/api/notifications/settings', specificAgentSettings)
       );
     }
 
@@ -464,34 +471,35 @@ export const saveNotificationSettings = async (
     const results = await Promise.all(saveRequests);
 
     // 检查是否有任何请求失败
-    const failedRequests = results.filter(
-      (response) => !response.data?.success
-    );
+    const failedRequests = results.filter(response => !response.data?.success);
 
     if (failedRequests.length > 0) {
-      console.error("部分通知设置保存失败:", failedRequests);
+      console.error('部分通知设置保存失败:', failedRequests);
       return {
         success: false,
-        message: "部分通知设置保存失败",
+        message: '部分通知设置保存失败',
       };
     }
 
     return {
       success: true,
-      message: "通知设置保存成功",
+      message: '通知设置保存成功',
     };
   } catch (error) {
-    console.error("保存通知设置失败:", error);
+    console.error('保存通知设置失败:', error);
     return {
       success: false,
-      message: "保存通知设置失败",
+      message: '保存通知设置失败',
     };
   }
 };
 
 // 创建通知渠道
 export const createNotificationChannel = async (
-  channel: Omit<NotificationChannel, "id" | "createdBy" | "createdAt" | "updatedAt">
+  channel: Omit<
+    NotificationChannel,
+    'id' | 'createdBy' | 'createdAt' | 'updatedAt'
+  >
 ): Promise<{
   success: boolean;
   message?: string;
@@ -502,7 +510,7 @@ export const createNotificationChannel = async (
       success: boolean;
       message?: string;
       data?: { id: number };
-    }>("/api/notifications/channels", channel);
+    }>('/api/notifications/channels', channel);
 
     return {
       success: response.data.success,
@@ -510,10 +518,10 @@ export const createNotificationChannel = async (
       channelId: response.data.data?.id,
     };
   } catch (error) {
-    console.error("创建通知渠道失败:", error);
+    console.error('创建通知渠道失败:', error);
     return {
       success: false,
-      message: "创建通知渠道失败",
+      message: '创建通知渠道失败',
     };
   }
 };
@@ -522,7 +530,7 @@ export const createNotificationChannel = async (
 export const updateNotificationChannel = async (
   id: number,
   channel: Partial<
-    Omit<NotificationChannel, "id" | "createdBy" | "createdAt" | "updatedAt">
+    Omit<NotificationChannel, 'id' | 'createdBy' | 'createdAt' | 'updatedAt'>
   >
 ): Promise<{
   success: boolean;
@@ -542,10 +550,10 @@ export const updateNotificationChannel = async (
 
     return response.data;
   } catch (error) {
-    console.error("更新通知渠道失败:", error);
+    console.error('更新通知渠道失败:', error);
     return {
       success: false,
-      message: "更新通知渠道失败",
+      message: '更新通知渠道失败',
     };
   }
 };
@@ -565,17 +573,20 @@ export const deleteNotificationChannel = async (
 
     return response.data;
   } catch (error) {
-    console.error("删除通知渠道失败:", error);
+    console.error('删除通知渠道失败:', error);
     return {
       success: false,
-      message: "删除通知渠道失败",
+      message: '删除通知渠道失败',
     };
   }
 };
 
 // 创建通知模板
 export const createNotificationTemplate = async (
-  template: Omit<NotificationTemplate, "id" | "createdBy" | "createdAt" | "updatedAt">
+  template: Omit<
+    NotificationTemplate,
+    'id' | 'createdBy' | 'createdAt' | 'updatedAt'
+  >
 ): Promise<{
   success: boolean;
   message?: string;
@@ -594,7 +605,7 @@ export const createNotificationTemplate = async (
       success: boolean;
       message?: string;
       data?: { id: number };
-    }>("/api/notifications/templates", payload);
+    }>('/api/notifications/templates', payload);
 
     return {
       success: response.data.success,
@@ -602,10 +613,10 @@ export const createNotificationTemplate = async (
       templateId: response.data.data?.id,
     };
   } catch (error) {
-    console.error("创建通知模板失败:", error);
+    console.error('创建通知模板失败:', error);
     return {
       success: false,
-      message: "创建通知模板失败",
+      message: '创建通知模板失败',
     };
   }
 };
@@ -614,7 +625,7 @@ export const createNotificationTemplate = async (
 export const updateNotificationTemplate = async (
   id: number,
   template: Partial<
-    Omit<NotificationTemplate, "id" | "createdBy" | "createdAt" | "updatedAt">
+    Omit<NotificationTemplate, 'id' | 'createdBy' | 'createdAt' | 'updatedAt'>
   >
 ): Promise<{
   success: boolean;
@@ -636,10 +647,10 @@ export const updateNotificationTemplate = async (
     );
     return response.data;
   } catch (error) {
-    console.error("更新通知模板失败:", error);
+    console.error('更新通知模板失败:', error);
     return {
       success: false,
-      message: "更新通知模板失败",
+      message: '更新通知模板失败',
     };
   }
 };
@@ -655,10 +666,10 @@ export const deleteNotificationTemplate = async (
     const response = await api.delete(`/api/notifications/templates/${id}`);
     return response.data;
   } catch (error) {
-    console.error("删除通知模板失败:", error);
+    console.error('删除通知模板失败:', error);
     return {
       success: false,
-      message: "删除通知模板失败",
+      message: '删除通知模板失败',
     };
   }
 };
@@ -678,24 +689,24 @@ export const getNotificationHistory = async (params: {
   try {
     // 构建查询参数
     const queryParams = new URLSearchParams();
-    if (params.type) queryParams.append("type", params.type);
+    if (params.type) queryParams.append('type', params.type);
     if (params.targetId !== undefined)
-      queryParams.append("targetId", params.targetId.toString());
-    if (params.status) queryParams.append("status", params.status);
+      queryParams.append('targetId', params.targetId.toString());
+    if (params.status) queryParams.append('status', params.status);
     if (params.limit !== undefined)
-      queryParams.append("limit", params.limit.toString());
+      queryParams.append('limit', params.limit.toString());
     if (params.offset !== undefined)
-      queryParams.append("offset", params.offset.toString());
+      queryParams.append('offset', params.offset.toString());
 
     const url = `/api/notifications/history?${queryParams.toString()}`;
     const response = await api.get(url);
 
     return response.data;
   } catch (error) {
-    console.error("获取通知历史记录失败:", error);
+    console.error('获取通知历史记录失败:', error);
     return {
       success: false,
-      message: "获取通知历史记录失败",
+      message: '获取通知历史记录失败',
     };
   }
 };

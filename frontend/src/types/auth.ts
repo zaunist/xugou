@@ -1,4 +1,4 @@
-import { User } from "./users";
+import { User } from './users';
 
 /**
  * 认证相关类型定义

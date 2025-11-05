@@ -1,6 +1,6 @@
-import { Box, Flex, Heading, Text } from "@radix-ui/themes";
-import { Card } from "./ui";
-import { ReactNode } from "react";
+import { Box, Flex, Heading, Text } from '@radix-ui/themes';
+import { Card } from './ui';
+import { ReactNode } from 'react';
 
 interface StatusItem {
   icon: ReactNode;

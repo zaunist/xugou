@@ -1,6 +1,6 @@
-import { Hono } from "hono";
-import bcrypt from "bcryptjs";
-import { runMigrations } from "./migration";
+import { Hono } from 'hono';
+import bcrypt from 'bcryptjs';
+import { runMigrations } from './migration';
 import {
   users,
   notificationTemplates,
@@ -12,20 +12,20 @@ import {
   monitors,
   agents,
   settings, // 导入 settings
-} from "./schema";
-import { db } from "../config";
-import { eq, desc } from "drizzle-orm";
-import { Bindings } from "../models";
+} from './schema';
+import { db } from '../config';
+import { eq, desc } from 'drizzle-orm';
+import { Bindings } from '../models';
 
 const seed = new Hono<{}>();
 
 // 检查并初始化数据库
-export async function checkAndInitializeDatabase(d1: Bindings["DB"]): Promise<{
+export async function checkAndInitializeDatabase(d1: Bindings['DB']): Promise<{
   initialized: boolean;
   message: string;
 }> {
   try {
-    console.log("开始数据库初始化流程...");
+    console.log('开始数据库初始化流程...');
 
     // 1. 执行迁移
     await runMigrations(d1);
@@ -39,7 +39,7 @@ export async function checkAndInitializeDatabase(d1: Bindings["DB"]): Promise<{
 
     return {
       initialized: true,
-      message: "数据库初始化成功",
+      message: '数据库初始化成功',
     };
   } catch (error) {
     return {
@@ -51,25 +51,25 @@ export async function checkAndInitializeDatabase(d1: Bindings["DB"]): Promise<{
 
 // 创建管理员用户
 export async function createAdminUser(): Promise<void> {
-  console.log("检查管理员用户...");
+  console.log('检查管理员用户...');
   const adminUser = await db
     .select()
     .from(users)
-    .where(eq(users.username, "admin"));
+    .where(eq(users.username, 'admin'));
 
   // 如果不存在管理员用户，则创建一个
   if (adminUser.length === 0) {
-    console.log("创建管理员用户...");
+    console.log('创建管理员用户...');
 
-    const hashedPassword = await bcrypt.hash("admin123", 10);
+    const hashedPassword = await bcrypt.hash('admin123', 10);
     const now = new Date().toISOString();
 
     await db.insert(users).values({
       id: 1,
-      username: "admin",
+      username: 'admin',
       password: hashedPassword,
-      email: "admin@mdzz.uk",
-      role: "admin",
+      email: 'admin@mdzz.uk',
+      role: 'admin',
       created_at: now,
       updated_at: now,
     });
@@ -83,17 +83,17 @@ export async function createNotificationTemplates(): Promise<void> {
   const existingTemplates = await db.select().from(notificationTemplates);
 
   if (existingTemplates.length === 0) {
-    console.log("添加默认通知模板...");
+    console.log('添加默认通知模板...');
     const now = new Date().toISOString();
     const userId = 1; // 管理员用户ID
 
     await db.insert(notificationTemplates).values({
       id: 1,
-      name: "Monitor监控模板",
-      type: "monitor",
-      subject: "【${status}】${name} 监控状态变更",
+      name: 'Monitor监控模板',
+      type: 'monitor',
+      subject: '【${status}】${name} 监控状态变更',
       content:
-        "🔔 网站监控状态变更通知\n\n📊 服务: ${name}\n🔄 状态: ${status} (之前: ${previous_status})\n🕒 时间: ${time}\n\n🔗 地址: ${url}\n⏱️ 响应时间: ${response_time}\n📝 实际状态码: ${status_code}\n🎯 期望状态码: ${expected_status}\n\n❗ 错误信息: ${error}",
+        '🔔 网站监控状态变更通知\n\n📊 服务: ${name}\n🔄 状态: ${status} (之前: ${previous_status})\n🕒 时间: ${time}\n\n🔗 地址: ${url}\n⏱️ 响应时间: ${response_time}\n📝 实际状态码: ${status_code}\n🎯 期望状态码: ${expected_status}\n\n❗ 错误信息: ${error}',
       is_default: 1,
       created_by: userId,
       created_at: now,
@@ -102,11 +102,11 @@ export async function createNotificationTemplates(): Promise<void> {
 
     await db.insert(notificationTemplates).values({
       id: 2,
-      name: "Agent监控模板",
-      type: "agent",
-      subject: "【${status}】${name} 客户端状态变更",
+      name: 'Agent监控模板',
+      type: 'agent',
+      subject: '【${status}】${name} 客户端状态变更',
       content:
-        "🔔 客户端状态变更通知\n\n📊 主机: ${name}\n🔄 状态: ${status} (之前: ${previous_status})\n🕒 时间: ${time}\n\n🖥️ 主机信息:\n  主机名: ${hostname}\n  IP地址: ${ip_addresses}\n  操作系统: ${os}\n\n❗ 错误信息: ${error}",
+        '🔔 客户端状态变更通知\n\n📊 主机: ${name}\n🔄 状态: ${status} (之前: ${previous_status})\n🕒 时间: ${time}\n\n🖥️ 主机信息:\n  主机名: ${hostname}\n  IP地址: ${ip_addresses}\n  操作系统: ${os}\n\n❗ 错误信息: ${error}',
       is_default: 1,
       created_by: userId,
       created_at: now,
@@ -121,14 +121,14 @@ export async function createNotificationChannelsAndSettings(): Promise<void> {
   const existingChannels = await db.select().from(notificationChannels);
 
   if (existingChannels.length === 0) {
-    console.log("添加默认通知渠道...");
+    console.log('添加默认通知渠道...');
     const now = new Date().toISOString();
     const userId = 1; // 管理员用户ID
 
     await db.insert(notificationChannels).values({
       id: 1,
-      name: "默认Telegram通知渠道(https://t.me/xugou_group)",
-      type: "telegram",
+      name: '默认Telegram通知渠道(https://t.me/xugou_group)',
+      type: 'telegram',
       config:
         '{"botToken": "8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU", "chatId": "-1002608818360"}',
       enabled: 1,
@@ -142,18 +142,18 @@ export async function createNotificationChannelsAndSettings(): Promise<void> {
   const existingSettings = await db.select().from(notificationSettings);
 
   if (existingSettings.length === 0) {
-    console.log("添加默认通知设置...");
+    console.log('添加默认通知设置...');
     const now = new Date().toISOString();
     const userId = 1; // 管理员用户ID
 
     await db.insert(notificationSettings).values({
       id: 1,
       user_id: userId,
-      target_type: "global-monitor",
+      target_type: 'global-monitor',
       enabled: 0,
       on_down: 1,
       on_recovery: 1,
-      channels: "[1]", // channels (只有Telegram)
+      channels: '[1]', // channels (只有Telegram)
       created_at: now,
       updated_at: now,
     });
@@ -161,7 +161,7 @@ export async function createNotificationChannelsAndSettings(): Promise<void> {
     await db.insert(notificationSettings).values({
       id: 2,
       user_id: userId,
-      target_type: "global-agent",
+      target_type: 'global-agent',
       enabled: 0,
       on_down: 1,
       on_recovery: 1,
@@ -171,7 +171,7 @@ export async function createNotificationChannelsAndSettings(): Promise<void> {
       memory_threshold: 80,
       on_disk_threshold: 1,
       disk_threshold: 90,
-      channels: "[1]", // channels (只有Telegram)
+      channels: '[1]', // channels (只有Telegram)
       created_at: now,
       updated_at: now,
     });
@@ -184,17 +184,17 @@ export async function createDefaultStatusPage(): Promise<void> {
   const existingConfig = await db.select().from(statusPageConfig);
 
   if (existingConfig.length === 0) {
-    console.log("创建默认状态页配置...");
+    console.log('创建默认状态页配置...');
     const now = new Date().toISOString();
     const userId = 1; // 管理员用户ID
 
     // 创建配置
     await db.insert(statusPageConfig).values({
       user_id: userId,
-      title: "系统状态",
-      description: "实时监控系统运行状态",
-      logo_url: "",
-      custom_css: "",
+      title: '系统状态',
+      description: '实时监控系统运行状态',
+      logo_url: '',
+      custom_css: '',
       created_at: now,
       updated_at: now,
     });
@@ -238,17 +238,17 @@ export async function createDefaultStatusPage(): Promise<void> {
 
 // 新增：创建默认的应用设置
 export async function createDefaultSettings(): Promise<void> {
-  console.log("检查默认的应用设置...");
+  console.log('检查默认的应用设置...');
   const registrationSetting = await db
     .select()
     .from(settings)
-    .where(eq(settings.key, "allow_new_user_registration"));
+    .where(eq(settings.key, 'allow_new_user_registration'));
 
   if (registrationSetting.length === 0) {
-    console.log("创建默认的新用户注册设置...");
+    console.log('创建默认的新用户注册设置...');
     await db.insert(settings).values({
-      key: "allow_new_user_registration",
-      value: "false", // 默认不允许新用户注册
+      key: 'allow_new_user_registration',
+      value: 'false', // 默认不允许新用户注册
     });
   }
 }

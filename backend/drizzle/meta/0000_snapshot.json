@@ -120,12 +120,8 @@
           "name": "agent_metrics_24h_agent_id_agents_id_fk",
           "tableFrom": "agent_metrics_24h",
           "tableTo": "agents",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -275,9 +271,7 @@
       "indexes": {
         "agents_token_unique": {
           "name": "agents_token_unique",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "isUnique": true
         }
       },
@@ -286,12 +280,8 @@
           "name": "agents_created_by_users_id_fk",
           "tableFrom": "agents",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -394,12 +384,8 @@
           "name": "monitor_daily_stats_monitor_id_monitors_id_fk",
           "tableFrom": "monitor_daily_stats",
           "tableTo": "monitors",
-          "columnsFrom": [
-            "monitor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["monitor_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -468,12 +454,8 @@
           "name": "monitor_status_history_24h_monitor_id_monitors_id_fk",
           "tableFrom": "monitor_status_history_24h",
           "tableTo": "monitors",
-          "columnsFrom": [
-            "monitor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["monitor_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -606,12 +588,8 @@
           "name": "monitors_created_by_users_id_fk",
           "tableFrom": "monitors",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -689,12 +667,8 @@
           "name": "notification_channels_created_by_users_id_fk",
           "tableFrom": "notification_channels",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -777,12 +751,8 @@
           "name": "notification_history_channel_id_notification_channels_id_fk",
           "tableFrom": "notification_history",
           "tableTo": "notification_channels",
-          "columnsFrom": [
-            "channel_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["channel_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -790,12 +760,8 @@
           "name": "notification_history_template_id_notification_templates_id_fk",
           "tableFrom": "notification_history",
           "tableTo": "notification_templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -947,12 +913,8 @@
           "name": "notification_settings_user_id_users_id_fk",
           "tableFrom": "notification_settings",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1037,12 +999,8 @@
           "name": "notification_templates_created_by_users_id_fk",
           "tableFrom": "notification_templates",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1075,12 +1033,8 @@
           "name": "status_page_agents_config_id_status_page_config_id_fk",
           "tableFrom": "status_page_agents",
           "tableTo": "status_page_config",
-          "columnsFrom": [
-            "config_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["config_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1088,22 +1042,15 @@
           "name": "status_page_agents_agent_id_agents_id_fk",
           "tableFrom": "status_page_agents",
           "tableTo": "agents",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "status_page_agents_config_id_agent_id_pk": {
-          "columns": [
-            "config_id",
-            "agent_id"
-          ],
+          "columns": ["config_id", "agent_id"],
           "name": "status_page_agents_config_id_agent_id_pk"
         }
       },
@@ -1182,12 +1129,8 @@
           "name": "status_page_config_user_id_users_id_fk",
           "tableFrom": "status_page_config",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1220,12 +1163,8 @@
           "name": "status_page_monitors_config_id_status_page_config_id_fk",
           "tableFrom": "status_page_monitors",
           "tableTo": "status_page_config",
-          "columnsFrom": [
-            "config_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["config_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1233,22 +1172,15 @@
           "name": "status_page_monitors_monitor_id_monitors_id_fk",
           "tableFrom": "status_page_monitors",
           "tableTo": "monitors",
-          "columnsFrom": [
-            "monitor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["monitor_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "status_page_monitors_config_id_monitor_id_pk": {
-          "columns": [
-            "config_id",
-            "monitor_id"
-          ],
+          "columns": ["config_id", "monitor_id"],
           "name": "status_page_monitors_config_id_monitor_id_pk"
         }
       },
@@ -1311,9 +1243,7 @@
       "indexes": {
         "users_username_unique": {
           "name": "users_username_unique",
-          "columns": [
-            "username"
-          ],
+          "columns": ["username"],
           "isUnique": true
         }
       },
