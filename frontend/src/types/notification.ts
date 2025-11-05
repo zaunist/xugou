@@ -3,27 +3,25 @@ export interface NotificationChannel {
   id: number;
   name: string;
   type: string; // telegram, resend, feishu, wecom
-  config: string; // JSON字符串
+  config: Record<string, unknown>;
   enabled: boolean;
-  created_by: number;
-  created_at: string;
-  updated_at: string;
+  createdBy?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // 通知模板类型定义
 export interface NotificationTemplate {
   id: number;
   name: string;
-  type: string; // default, custom
+  type: string; // monitor, agent
   subject: string;
   content: string;
-  is_default: boolean;
-  created_by: number;
-  created_at: string;
-  updated_at: string;
+  isDefault: boolean;
+  createdBy?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
-
-
 
 // 前端接口所需的通知配置类型
 export interface NotificationConfig {
@@ -34,7 +32,7 @@ export interface NotificationConfig {
       enabled: boolean;
       onDown: boolean;
       onRecovery: boolean;
-      channels: string[];
+      channels: number[];
     };
     agents: {
       enabled: boolean;
@@ -46,14 +44,14 @@ export interface NotificationConfig {
       memoryThreshold: number;
       onDiskThreshold: boolean;
       diskThreshold: number;
-      channels: string[];
+      channels: number[];
     };
     specificMonitors: {
       [monitorId: string]: {
         enabled: boolean;
         onDown: boolean;
         onRecovery: boolean;
-        channels: string[];
+        channels: number[];
       };
     };
     specificAgents: {
@@ -67,7 +65,7 @@ export interface NotificationConfig {
         memoryThreshold: number;
         onDiskThreshold: boolean;
         diskThreshold: number;
-        channels: string[];
+        channels: number[];
       };
     };
   };

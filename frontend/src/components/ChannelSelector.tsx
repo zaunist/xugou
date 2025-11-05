@@ -3,23 +3,7 @@ import { Box, Flex, Text } from "@radix-ui/themes";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { useTranslation } from "react-i18next";
 import { createPortal } from "react-dom";
-
-// 通知渠道类型定义
-export interface NotificationChannel {
-  id: string;
-  name: string;
-  type: string;
-  config?: any;
-  enabled?: boolean;
-}
-
-// 组件属性接口
-export interface ChannelSelectorProps {
-  channels: NotificationChannel[];
-  selectedChannelIds: string[];
-  onChange: (channelIds: string[]) => void;
-  placeholder?: string;
-}
+import { ChannelSelectorProps } from "@/types/components";
 
 /**
  * 通知渠道选择器组件
@@ -61,7 +45,7 @@ const ChannelSelector = ({
   };
 
   // 处理选项点击
-  const handleItemClick = (channelId: string) => {
+  const handleItemClick = (channelId: number) => {
     // 切换选择状态
     const isSelected = selectedChannelIds.includes(channelId);
     const newSelectedIds = isSelected

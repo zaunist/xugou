@@ -182,15 +182,35 @@ export const updateNotificationTemplate = async (
     Omit<NotificationTemplate, "id" | "created_at" | "updated_at">
   >
 ): Promise<boolean> => {
+  const updateData: Partial<typeof notificationTemplates.$inferInsert> = {};
+
+  if (template.name !== undefined) {
+    updateData.name = template.name;
+  }
+
+  if (template.type !== undefined) {
+    updateData.type = template.type;
+  }
+
+  if (template.subject !== undefined) {
+    updateData.subject = template.subject;
+  }
+
+  if (template.content !== undefined) {
+    updateData.content = template.content;
+  }
+
+  if (template.is_default !== undefined) {
+    updateData.is_default = template.is_default ? 1 : 0;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return true; // 没有需要更新的字段时视为成功
+  }
+
   const result = await db
     .update(notificationTemplates)
-    .set({
-      name: template.name,
-      type: template.type,
-      subject: template.subject,
-      content: template.content,
-      is_default: template.is_default ? 1 : 0,
-    })
+    .set(updateData)
     .where(and(eq(notificationTemplates.id, id), eq(notificationTemplates.created_by, userId)));
 
   return result.success; // fix: 返回 success 布尔值

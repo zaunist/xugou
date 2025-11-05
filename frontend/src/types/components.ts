@@ -1,24 +1,34 @@
 /**
  * 组件相关类型定义
  */
-import { NotificationChannel } from "./notification";
 import { Monitor } from "./monitors";
 import { Agent, MetricHistory } from "./agents";
+import { NotificationChannel } from "./notification";
 
 
 
 // ChannelSelector 组件类型
 export interface ChannelSelectorProps {
   channels: NotificationChannel[];
-  selectedChannelIds: string[];
-  onChange: (channelIds: string[]) => void;
+  selectedChannelIds: number[];
+  onChange: (channelIds: number[]) => void;
+  placeholder?: string;
 }
 
 // StatusSummaryCard 组件类型
 export interface StatusItem {
   id: string;
   name: string;
-  status: "up" | "down" | "pending" | "unknown" | "active" | "inactive";
+  status:
+    | "up"
+    | "down"
+    | "pending"
+    | "unknown"
+    | "active"
+    | "inactive"
+    | "online"
+    | "offline"
+    | "error";
   time?: string;
 }
 

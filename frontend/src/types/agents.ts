@@ -7,7 +7,13 @@ export interface Agent {
   name: string;
   hostname?: string;
   ip_addresses?: string;
-  status: "active" | "inactive" | "connecting" | "unknown";
+  status:
+    | "active"
+    | "inactive"
+    | "connecting"
+    | "unknown"
+    | "online"
+    | "offline";
   version?: string;
   os?: string;
   created_at: string;
@@ -20,7 +26,13 @@ export interface AgentWithLatestMetrics {
   name: string;
   hostname?: string;
   ip_addresses?: string;
-  status: "active" | "inactive" | "connecting" | "unknown";
+  status:
+    | "active"
+    | "inactive"
+    | "connecting"
+    | "unknown"
+    | "online"
+    | "offline";
   version?: string;
   os?: string;
   created_at: string;

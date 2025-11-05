@@ -6,6 +6,7 @@ import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { getAgent, updateAgent } from "../../api/agents";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import type { Agent } from "../../types/agents";
 
 const EditAgent = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const EditAgent = () => {
   const [notFound, setNotFound] = useState(false);
   const [formData, setFormData] = useState<{
     name: string;
-    status: "active" | "inactive" | "connecting" | "unknown";
+    status: Agent["status"];
   }>({
     name: "",
     status: "inactive",
@@ -37,7 +38,7 @@ const EditAgent = () => {
 
       setFormData({
         name: agent.name,
-        status: agent.status || "inactive",
+        status: agent.status ?? "inactive",
       });
     } else {
       setNotFound(true);

@@ -7,12 +7,12 @@ export interface Monitor {
   name: string;
   url: string;
   method: string;
-  headers?: string;
+  headers?: Record<string, string> | string | null;
   body?: string;
   expected_status?: number;
   interval: number;
   timeout: number;
-  status: "up" | "down" | "pending" | "unknown";
+  status: "up" | "down" | "pending" | "unknown" | "error";
   last_checked?: string;
   response_time?: number;
   user_id: number;

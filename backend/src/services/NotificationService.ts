@@ -677,13 +677,23 @@ export async function sendNotification(
     const templates = await repositories.getNotificationTemplates(userId);
     console.log(`[发送通知] 获取到${templates.length}个通知模板`);
 
-    const defaultTemplate = templates.find(
+    let defaultTemplate = templates.find(
       (t) => t.is_default && t.type === type
     );
 
     if (!defaultTemplate) {
-      console.error(`[发送通知] 找不到类型为${type}的默认通知模板`);
-      return { success: false, results: [] };
+      const fallbackTemplate = templates.find((t) => t.type === type);
+
+      if (!fallbackTemplate) {
+        console.error(`[发送通知] 找不到类型为${type}的任何通知模板`);
+        return { success: false, results: [] };
+      }
+
+      console.warn(
+        `[发送通知] 找不到类型为${type}的默认通知模板，使用ID=${fallbackTemplate.id}作为回退模板`
+      );
+
+      defaultTemplate = fallbackTemplate;
     }
 
     console.log(

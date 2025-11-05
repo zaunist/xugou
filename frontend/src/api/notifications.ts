@@ -1,187 +1,313 @@
 import api from "./client";
+import type {
+  NotificationChannel,
+  NotificationConfig,
+  NotificationTemplate,
+} from "../types/notification";
 
-// 通知渠道类型
-export interface NotificationChannel {
-  id: string;
+type BackendNotificationChannel = {
+  id: number;
   name: string;
   type: string;
-  config: Record<string, any>;
-  enabled: boolean;
-}
+  config: string | Record<string, unknown> | null;
+  enabled: number | boolean;
+  created_by?: number;
+  created_at?: string;
+  updated_at?: string;
+};
 
-// 通知模板类型
-export interface NotificationTemplate {
-  id: string;
+type BackendNotificationTemplate = {
+  id: number;
   name: string;
   type: string;
   subject: string;
   content: string;
-  isDefault: boolean;
-}
+  is_default: number | boolean;
+  created_by?: number;
+  created_at?: string;
+  updated_at?: string;
+};
 
-// 通知设置类型
-export interface NotificationSettings {
-  monitors: {
-    enabled: boolean;
-    onDown: boolean;
-    onRecovery: boolean;
-    channels: string[];
-  };
-  agents: {
-    enabled: boolean;
-    onOffline: boolean;
-    onRecovery: boolean;
-    onCpuThreshold: boolean;
-    cpuThreshold: number;
-    onMemoryThreshold: boolean;
-    memoryThreshold: number;
-    onDiskThreshold: boolean;
-    diskThreshold: number;
-    channels: string[];
-  };
-  specificMonitors: {
-    [monitorId: string]: {
-      enabled: boolean;
-      onDown: boolean;
-      onRecovery: boolean;
-      channels: string[];
-    };
-  };
-  specificAgents: {
-    [agentId: string]: {
-      enabled: boolean;
-      onOffline: boolean;
-      onRecovery: boolean;
-      onCpuThreshold: boolean;
-      cpuThreshold: number;
-      onMemoryThreshold: boolean;
-      memoryThreshold: number;
-      onDiskThreshold: boolean;
-      diskThreshold: number;
-      channels: string[];
-    };
-  };
-}
+export type NotificationSettings = NotificationConfig["settings"];
 
-// 通知配置响应类型
 export interface NotificationConfigResponse {
   success: boolean;
   message?: string;
-  data?: {
-    channels: NotificationChannel[];
-    templates: NotificationTemplate[];
-    settings: NotificationSettings;
-  };
+  data?: NotificationConfig;
 }
+
+const parseChannelConfig = (
+  config: BackendNotificationChannel["config"]
+): Record<string, unknown> => {
+  if (!config) {
+    return {};
+  }
+
+  if (typeof config === "string") {
+    try {
+      const parsed = JSON.parse(config);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed as Record<string, unknown>;
+      }
+    } catch (error) {
+      console.error("解析通知渠道配置失败:", error);
+    }
+    return {};
+  }
+
+  if (typeof config === "object" && !Array.isArray(config)) {
+    return config as Record<string, unknown>;
+  }
+
+  return {};
+};
+
+const normalizeBoolean = (value: unknown, fallback = false): boolean => {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return value !== 0;
+  }
+
+  if (typeof value === "string") {
+    return value === "1" || value.toLowerCase() === "true";
+  }
+
+  return fallback;
+};
+
+const normalizeNumber = (value: unknown, fallback: number): number => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+};
+
+const normalizeChannelIds = (value: unknown): number[] => {
+  if (!value) {
+    return [];
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item) => Number(item))
+          .filter((item) => Number.isInteger(item));
+      }
+    } catch (error) {
+      console.error("解析通知渠道ID列表失败:", error);
+      return [];
+    }
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => Number(item))
+      .filter((item) => Number.isInteger(item));
+  }
+
+  return [];
+};
+
+const transformChannel = (
+  channel: BackendNotificationChannel
+): NotificationChannel => ({
+  id: Number(channel.id),
+  name: channel.name,
+  type: channel.type,
+  config: parseChannelConfig(channel.config),
+  enabled: normalizeBoolean(channel.enabled, true),
+  createdBy: channel.created_by,
+  createdAt: channel.created_at,
+  updatedAt: channel.updated_at,
+});
+
+const transformTemplate = (
+  template: BackendNotificationTemplate
+): NotificationTemplate => ({
+  id: Number(template.id),
+  name: template.name,
+  type: template.type,
+  subject: template.subject,
+  content: template.content,
+  isDefault: normalizeBoolean(template.is_default, false),
+  createdBy: template.created_by,
+  createdAt: template.created_at,
+  updatedAt: template.updated_at,
+});
+
+const normalizeSettings = (settings: any): NotificationSettings => {
+  const normalized: NotificationSettings = {
+    monitors: {
+      enabled: false,
+      onDown: false,
+      onRecovery: false,
+      channels: [],
+    },
+    agents: {
+      enabled: false,
+      onOffline: false,
+      onRecovery: false,
+      onCpuThreshold: false,
+      cpuThreshold: 90,
+      onMemoryThreshold: false,
+      memoryThreshold: 85,
+      onDiskThreshold: false,
+      diskThreshold: 90,
+      channels: [],
+    },
+    specificMonitors: {},
+    specificAgents: {},
+  };
+
+  if (!settings) {
+    return normalized;
+  }
+
+  if (settings.monitors) {
+    normalized.monitors = {
+      enabled: normalizeBoolean(settings.monitors.enabled),
+      onDown: normalizeBoolean(settings.monitors.onDown ?? settings.monitors.on_down),
+      onRecovery: normalizeBoolean(
+        settings.monitors.onRecovery ?? settings.monitors.on_recovery
+      ),
+      channels: normalizeChannelIds(settings.monitors.channels),
+    };
+  }
+
+  if (settings.agents) {
+    normalized.agents = {
+      enabled: normalizeBoolean(settings.agents.enabled),
+      onOffline: normalizeBoolean(settings.agents.onOffline ?? settings.agents.on_offline),
+      onRecovery: normalizeBoolean(
+        settings.agents.onRecovery ?? settings.agents.on_recovery
+      ),
+      onCpuThreshold: normalizeBoolean(
+        settings.agents.onCpuThreshold ?? settings.agents.on_cpu_threshold
+      ),
+      cpuThreshold: normalizeNumber(settings.agents.cpuThreshold ?? settings.agents.cpu_threshold, 90),
+      onMemoryThreshold: normalizeBoolean(
+        settings.agents.onMemoryThreshold ?? settings.agents.on_memory_threshold
+      ),
+      memoryThreshold: normalizeNumber(
+        settings.agents.memoryThreshold ?? settings.agents.memory_threshold,
+        85
+      ),
+      onDiskThreshold: normalizeBoolean(
+        settings.agents.onDiskThreshold ?? settings.agents.on_disk_threshold
+      ),
+      diskThreshold: normalizeNumber(
+        settings.agents.diskThreshold ?? settings.agents.disk_threshold,
+        90
+      ),
+      channels: normalizeChannelIds(settings.agents.channels),
+    };
+  }
+
+  if (settings.specificMonitors) {
+    Object.entries(settings.specificMonitors).forEach(
+      ([monitorId, monitorSetting]: [string, any]) => {
+        normalized.specificMonitors[monitorId] = {
+          enabled: normalizeBoolean(monitorSetting?.enabled),
+          onDown: normalizeBoolean(
+            monitorSetting?.onDown ?? monitorSetting?.on_down
+          ),
+          onRecovery: normalizeBoolean(
+            monitorSetting?.onRecovery ?? monitorSetting?.on_recovery
+          ),
+          channels: normalizeChannelIds(monitorSetting?.channels),
+        };
+      }
+    );
+  }
+
+  if (settings.specificAgents) {
+    Object.entries(settings.specificAgents).forEach(
+      ([agentId, agentSetting]: [string, any]) => {
+        normalized.specificAgents[agentId] = {
+          enabled: normalizeBoolean(agentSetting?.enabled),
+          onOffline: normalizeBoolean(
+            agentSetting?.onOffline ?? agentSetting?.on_offline
+          ),
+          onRecovery: normalizeBoolean(
+            agentSetting?.onRecovery ?? agentSetting?.on_recovery
+          ),
+          onCpuThreshold: normalizeBoolean(
+            agentSetting?.onCpuThreshold ?? agentSetting?.on_cpu_threshold
+          ),
+          cpuThreshold: normalizeNumber(
+            agentSetting?.cpuThreshold ?? agentSetting?.cpu_threshold,
+            normalized.agents.cpuThreshold
+          ),
+          onMemoryThreshold: normalizeBoolean(
+            agentSetting?.onMemoryThreshold ?? agentSetting?.on_memory_threshold
+          ),
+          memoryThreshold: normalizeNumber(
+            agentSetting?.memoryThreshold ?? agentSetting?.memory_threshold,
+            normalized.agents.memoryThreshold
+          ),
+          onDiskThreshold: normalizeBoolean(
+            agentSetting?.onDiskThreshold ?? agentSetting?.on_disk_threshold
+          ),
+          diskThreshold: normalizeNumber(
+            agentSetting?.diskThreshold ?? agentSetting?.disk_threshold,
+            normalized.agents.diskThreshold
+          ),
+          channels: normalizeChannelIds(agentSetting?.channels),
+        };
+      }
+    );
+  }
+
+  return normalized;
+};
 
 // 获取完整的通知配置
 export const getNotificationConfig =
   async (): Promise<NotificationConfigResponse> => {
     try {
-      const response = await api.get<NotificationConfigResponse>(
-        "/api/notifications"
-      );
+      const response = await api.get<{
+        success: boolean;
+        message?: string;
+        data?: {
+          channels?: BackendNotificationChannel[];
+          templates?: BackendNotificationTemplate[];
+          settings?: any;
+        };
+      }>("/api/notifications");
 
-      // 如果响应成功并且有数据，处理数据格式
-      if (response.data.success && response.data.data) {
-        // 处理渠道配置 - 确保config字段是对象而不是字符串
-        if (response.data.data.channels) {
-          response.data.data.channels = response.data.data.channels.map(
-            (channel) => {
-              // 使用类型断言访问后端特有属性
-              const backendChannel = channel as any;
-              return {
-                id: channel.id,
-                name: channel.name,
-                type: channel.type,
-                // 将字符串类型的config解析为对象
-                config:
-                  typeof backendChannel.config === "string"
-                    ? JSON.parse(backendChannel.config)
-                    : backendChannel.config,
-                enabled: !!backendChannel.enabled,
-              };
-            }
-          );
-        }
+      const backendData = response.data.data;
 
-        // 处理模板配置 - 确保is_default是布尔类型
-        if (response.data.data.templates) {
-          response.data.data.templates = response.data.data.templates.map(
-            (template) => {
-              // 使用类型断言访问后端特有属性
-              const backendTemplate = template as any;
-              return {
-                id: template.id,
-                name: template.name,
-                type: template.type,
-                subject: template.subject,
-                content: template.content,
-                isDefault: !!backendTemplate.is_default,
-              };
-            }
-          );
-        }
-
-        // 确保settings中的所有布尔字段是真正的布尔类型而不是0/1
-        if (response.data.data.settings) {
-          const { settings } = response.data.data;
-
-          // 处理全局监控设置
-          if (settings.monitors) {
-            settings.monitors = {
-              ...settings.monitors,
-              enabled: !!settings.monitors.enabled,
-              onDown: !!settings.monitors.onDown,
-              onRecovery: !!settings.monitors.onRecovery,
-            };
-          }
-
-          // 处理全局客户端设置
-          if (settings.agents) {
-            settings.agents = {
-              ...settings.agents,
-              enabled: !!settings.agents.enabled,
-              onOffline: !!settings.agents.onOffline,
-              onRecovery: !!settings.agents.onRecovery,
-              onCpuThreshold: !!settings.agents.onCpuThreshold,
-              onMemoryThreshold: !!settings.agents.onMemoryThreshold,
-              onDiskThreshold: !!settings.agents.onDiskThreshold,
-            };
-          }
-
-          // 处理特定监控设置
-          if (settings.specificMonitors) {
-            Object.keys(settings.specificMonitors).forEach((monitorId) => {
-              const monitorSetting = settings.specificMonitors[monitorId];
-              settings.specificMonitors[monitorId] = {
-                ...monitorSetting,
-                enabled: !!monitorSetting.enabled,
-                onDown: !!monitorSetting.onDown,
-                onRecovery: !!monitorSetting.onRecovery,
-              };
-            });
-          }
-
-          // 处理特定客户端设置
-          if (settings.specificAgents) {
-            Object.keys(settings.specificAgents).forEach((agentId) => {
-              const agentSetting = settings.specificAgents[agentId];
-              settings.specificAgents[agentId] = {
-                ...agentSetting,
-                enabled: !!agentSetting.enabled,
-                onOffline: !!agentSetting.onOffline,
-                onRecovery: !!agentSetting.onRecovery,
-                onCpuThreshold: !!agentSetting.onCpuThreshold,
-                onMemoryThreshold: !!agentSetting.onMemoryThreshold,
-                onDiskThreshold: !!agentSetting.onDiskThreshold,
-              };
-            });
-          }
-        }
+      if (!backendData) {
+        return {
+          success: response.data.success,
+          message: response.data.message,
+        };
       }
 
-      return response.data;
+      const channels = Array.isArray(backendData.channels)
+        ? (backendData.channels as BackendNotificationChannel[]).map(
+            transformChannel
+          )
+        : [];
+
+      const templates = Array.isArray(backendData.templates)
+        ? (backendData.templates as BackendNotificationTemplate[]).map(
+            transformTemplate
+          )
+        : [];
+
+      return {
+        success: response.data.success,
+        message: response.data.message,
+        data: {
+          channels,
+          templates,
+          settings: normalizeSettings(backendData.settings),
+        },
+      };
     } catch (error) {
       console.error("获取通知配置失败:", error);
       return {
@@ -201,13 +327,17 @@ export const getNotificationChannels = async (): Promise<{
     const response = await api.get<{
       success: boolean;
       message?: string;
-      data?: NotificationChannel[];
+      data?: BackendNotificationChannel[];
     }>("/api/notifications/channels");
+
+    const channels = Array.isArray(response.data.data)
+      ? response.data.data.map(transformChannel)
+      : [];
 
     return {
       success: response.data.success,
       message: response.data.message,
-      channels: response.data.data,
+      channels,
     };
   } catch (error) {
     console.error("获取通知渠道失败:", error);
@@ -228,13 +358,17 @@ export const getNotificationTemplates = async (): Promise<{
     const response = await api.get<{
       success: boolean;
       message?: string;
-      data?: NotificationTemplate[];
+      data?: BackendNotificationTemplate[];
     }>("/api/notifications/templates");
+
+    const templates = Array.isArray(response.data.data)
+      ? response.data.data.map(transformTemplate)
+      : [];
 
     return {
       success: response.data.success,
       message: response.data.message,
-      templates: response.data.data,
+      templates,
     };
   } catch (error) {
     console.error("获取通知模板失败:", error);
@@ -357,17 +491,17 @@ export const saveNotificationSettings = async (
 
 // 创建通知渠道
 export const createNotificationChannel = async (
-  channel: Omit<NotificationChannel, "id">
+  channel: Omit<NotificationChannel, "id" | "createdBy" | "createdAt" | "updatedAt">
 ): Promise<{
   success: boolean;
   message?: string;
-  channelId?: string;
+  channelId?: number;
 }> => {
   try {
     const response = await api.post<{
       success: boolean;
       message?: string;
-      data?: { id: string };
+      data?: { id: number };
     }>("/api/notifications/channels", channel);
 
     return {
@@ -386,17 +520,25 @@ export const createNotificationChannel = async (
 
 // 更新通知渠道
 export const updateNotificationChannel = async (
-  id: string,
-  channel: Partial<NotificationChannel>
+  id: number,
+  channel: Partial<
+    Omit<NotificationChannel, "id" | "createdBy" | "createdAt" | "updatedAt">
+  >
 ): Promise<{
   success: boolean;
   message?: string;
 }> => {
   try {
+    const payload: Record<string, unknown> = {};
+    if (channel.name !== undefined) payload.name = channel.name;
+    if (channel.type !== undefined) payload.type = channel.type;
+    if (channel.config !== undefined) payload.config = channel.config;
+    if (channel.enabled !== undefined) payload.enabled = channel.enabled;
+
     const response = await api.put<{
       success: boolean;
       message?: string;
-    }>(`/api/notifications/channels/${id}`, channel);
+    }>(`/api/notifications/channels/${id}`, payload);
 
     return response.data;
   } catch (error) {
@@ -410,7 +552,7 @@ export const updateNotificationChannel = async (
 
 // 删除通知渠道
 export const deleteNotificationChannel = async (
-  id: string
+  id: number
 ): Promise<{
   success: boolean;
   message?: string;
@@ -433,18 +575,26 @@ export const deleteNotificationChannel = async (
 
 // 创建通知模板
 export const createNotificationTemplate = async (
-  template: Omit<NotificationTemplate, "id">
+  template: Omit<NotificationTemplate, "id" | "createdBy" | "createdAt" | "updatedAt">
 ): Promise<{
   success: boolean;
   message?: string;
-  templateId?: string;
+  templateId?: number;
 }> => {
   try {
+    const payload = {
+      name: template.name,
+      type: template.type,
+      subject: template.subject,
+      content: template.content,
+      is_default: template.isDefault,
+    };
+
     const response = await api.post<{
       success: boolean;
       message?: string;
-      data?: { id: string };
-    }>("/api/notifications/templates", template);
+      data?: { id: number };
+    }>("/api/notifications/templates", payload);
 
     return {
       success: response.data.success,
@@ -462,16 +612,27 @@ export const createNotificationTemplate = async (
 
 // 更新通知模板
 export const updateNotificationTemplate = async (
-  id: string,
-  template: Partial<NotificationTemplate>
+  id: number,
+  template: Partial<
+    Omit<NotificationTemplate, "id" | "createdBy" | "createdAt" | "updatedAt">
+  >
 ): Promise<{
   success: boolean;
   message?: string;
 }> => {
   try {
-    const response = await api.put(
+    const payload: Record<string, unknown> = {};
+    if (template.name !== undefined) payload.name = template.name;
+    if (template.type !== undefined) payload.type = template.type;
+    if (template.subject !== undefined) payload.subject = template.subject;
+    if (template.content !== undefined) payload.content = template.content;
+    if (template.isDefault !== undefined) {
+      payload.is_default = template.isDefault;
+    }
+
+    const response = await api.put<{ success: boolean; message?: string }>(
       `/api/notifications/templates/${id}`,
-      template
+      payload
     );
     return response.data;
   } catch (error) {
@@ -485,7 +646,7 @@ export const updateNotificationTemplate = async (
 
 // 删除通知模板
 export const deleteNotificationTemplate = async (
-  id: string
+  id: number
 ): Promise<{
   success: boolean;
   message?: string;
