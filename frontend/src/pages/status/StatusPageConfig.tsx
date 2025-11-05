@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Box,
   Flex,
@@ -6,7 +6,7 @@ import {
   Text,
   TextField,
   Container,
-} from "@radix-ui/themes";
+} from '@radix-ui/themes';
 import {
   Card,
   Button,
@@ -16,13 +16,13 @@ import {
   TabsTrigger,
   Textarea,
   Checkbox,
-} from "@/components/ui";
-import { EyeOpenIcon, CopyIcon, CheckIcon } from "@radix-ui/react-icons";
-import { toast } from "sonner";
-import { getStatusPageConfig, saveStatusPageConfig } from "../../api/status";
-import { StatusPageConfig as StatusConfig } from "../../types/status";
-import { useTranslation } from "react-i18next";
-import { useAuth } from "../../providers/AuthProvider";
+} from '@/components/ui';
+import { EyeOpenIcon, CopyIcon, CheckIcon } from '@radix-ui/react-icons';
+import { toast } from 'sonner';
+import { getStatusPageConfig, saveStatusPageConfig } from '../../api/status';
+import { StatusPageConfig as StatusConfig } from '../../types/status';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../providers/AuthProvider';
 
 // 监控项带选择状态
 interface MonitorWithSelection {
@@ -58,20 +58,20 @@ const StatusPageConfig = () => {
 
   // 初始化配置对象
   const [config, setConfig] = useState<StatusConfigWithDetails>({
-    title: t("statusPage.title"),
-    description: t("statusPage.allOperational"),
-    logoUrl: "",
-    customCss: "",
-    publicUrl: "",
+    title: t('statusPage.title'),
+    description: t('statusPage.allOperational'),
+    logoUrl: '',
+    customCss: '',
+    publicUrl: '',
     monitors: [],
     agents: [],
   });
-  
+
   useEffect(() => {
     if (user) {
       setConfig(prev => ({
         ...prev,
-        publicUrl: `${window.location.origin}/status/public/${user.id}`
+        publicUrl: `${window.location.origin}/status/public/${user.id}`,
       }));
     }
   }, [user]);
@@ -84,22 +84,22 @@ const StatusPageConfig = () => {
   const fetchData = async () => {
     // 获取状态页配置
     setLoading(true);
-    console.log(t("statusPageConfig.fetchingConfig"));
+    console.log(t('statusPageConfig.fetchingConfig'));
     const configResponse = await getStatusPageConfig();
     console.log(
-      "==== 状态页配置API响应 ====",
+      '==== 状态页配置API响应 ====',
       JSON.stringify(configResponse, null, 2)
     );
 
     // 如果获取到有效的配置数据，直接使用
     if (configResponse) {
-      setConfig((prev) => ({
+      setConfig(prev => ({
         ...prev,
-        title: configResponse?.title || t("statusPage.title"),
+        title: configResponse?.title || t('statusPage.title'),
         description:
-          configResponse?.description || t("statusPage.allOperational"),
-        logoUrl: configResponse?.logoUrl || "",
-        customCss: configResponse?.customCss || "",
+          configResponse?.description || t('statusPage.allOperational'),
+        logoUrl: configResponse?.logoUrl || '',
+        customCss: configResponse?.customCss || '',
         monitors: configResponse.monitors || [],
         agents: configResponse.agents || [],
       }));
@@ -112,7 +112,7 @@ const StatusPageConfig = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setConfig((prev) => ({
+    setConfig(prev => ({
       ...prev,
       [name]: value,
     }));
@@ -120,9 +120,9 @@ const StatusPageConfig = () => {
 
   // 处理监控选择变化
   const handleMonitorChange = (id: number, checked: boolean) => {
-    setConfig((prev) => ({
+    setConfig(prev => ({
       ...prev,
-      monitors: prev.monitors.map((monitor) =>
+      monitors: prev.monitors.map(monitor =>
         monitor.id === id ? { ...monitor, selected: checked } : monitor
       ),
     }));
@@ -132,13 +132,13 @@ const StatusPageConfig = () => {
   const handleAgentChange = (id: number, checked: boolean) => {
     // 确保id是有效的数字
     if (isNaN(id) || id <= 0) {
-      console.error(t("statusPageConfig.invalidAgentId"), id);
+      console.error(t('statusPageConfig.invalidAgentId'), id);
       return;
     }
 
-    setConfig((prev) => ({
+    setConfig(prev => ({
       ...prev,
-      agents: prev.agents.map((agent) =>
+      agents: prev.agents.map(agent =>
         agent.id === id ? { ...agent, selected: checked } : agent
       ),
     }));
@@ -171,9 +171,9 @@ const StatusPageConfig = () => {
     const response = await saveStatusPageConfig(configToSave);
 
     if (response) {
-      toast.success(t("statusPageConfig.configSaved"));
+      toast.success(t('statusPageConfig.configSaved'));
     } else {
-      toast.error(t("statusPageConfig.saveError"));
+      toast.error(t('statusPageConfig.saveError'));
     }
     setSaving(false);
   };
@@ -182,7 +182,7 @@ const StatusPageConfig = () => {
   const handlePreview = () => {
     // 在新标签页中打开状态页
     if (user) {
-      window.open(`/status/public/${user.id}`, "_blank");
+      window.open(`/status/public/${user.id}`, '_blank');
     }
   };
 
@@ -190,8 +190,8 @@ const StatusPageConfig = () => {
     return (
       <Box>
         <div className="page-container detail-page">
-          <Flex justify="center" align="center" style={{ minHeight: "50vh" }}>
-            <Text size="3">{t("common.loading")}</Text>
+          <Flex justify="center" align="center" style={{ minHeight: '50vh' }}>
+            <Text size="3">{t('common.loading')}</Text>
           </Flex>
         </div>
       </Box>
@@ -201,10 +201,14 @@ const StatusPageConfig = () => {
   return (
     <Container>
       <Box>
-        <Flex justify="between" align="start" direction={{ initial: "column", sm: "row" }}>
+        <Flex
+          justify="between"
+          align="start"
+          direction={{ initial: 'column', sm: 'row' }}
+        >
           <Flex align="center">
             <Heading size="5" weight="medium">
-              {t("statusPageConfig.title")}
+              {t('statusPageConfig.title')}
             </Heading>
           </Flex>
           <Flex align="center" className="mt-2">
@@ -214,18 +218,18 @@ const StatusPageConfig = () => {
               onClick={handlePreview}
             >
               <EyeOpenIcon width="8" height="8" />
-              <Text size="2">{t("statusPageConfig.preview")}</Text>
+              <Text size="2">{t('statusPageConfig.preview')}</Text>
             </Button>
             <Button variant="secondary" onClick={handleSave} disabled={saving}>
               {saving ? (
                 <>
                   <span
                     style={{
-                      width: "16px",
-                      height: "16px",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      width: '16px',
+                      height: '16px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     <svg
@@ -249,12 +253,12 @@ const StatusPageConfig = () => {
                       </path>
                     </svg>
                   </span>
-                  <Text size="2">{t("common.savingChanges")}</Text>
+                  <Text size="2">{t('common.savingChanges')}</Text>
                 </>
               ) : (
                 <>
                   <CheckIcon width="8" height="8" />
-                  <Text size="2">{t("statusPageConfig.save")}</Text>
+                  <Text size="2">{t('statusPageConfig.save')}</Text>
                 </>
               )}
             </Button>
@@ -265,13 +269,13 @@ const StatusPageConfig = () => {
         <Tabs defaultValue="general">
           <TabsList className="overflow-auto">
             <TabsTrigger value="general">
-              {t("statusPageConfig.general")}
+              {t('statusPageConfig.general')}
             </TabsTrigger>
             <TabsTrigger value="services">
-              {t("statusPageConfig.services")}
+              {t('statusPageConfig.services')}
             </TabsTrigger>
             <TabsTrigger value="agents">
-              {t("statusPageConfig.agents")}
+              {t('statusPageConfig.agents')}
             </TabsTrigger>
           </TabsList>
 
@@ -280,33 +284,33 @@ const StatusPageConfig = () => {
               <Flex direction="column" gap="2">
                 <Box>
                   <Text as="label" className="text-sm font-medium">
-                    {t("statusPageConfig.pageTitle")}
+                    {t('statusPageConfig.pageTitle')}
                   </Text>
                   <TextField.Input
                     name="title"
                     value={config.title}
                     onChange={handleChange}
-                    placeholder={t("statusPageConfig.pageTitlePlaceholder")}
+                    placeholder={t('statusPageConfig.pageTitlePlaceholder')}
                   />
                 </Box>
 
                 <Box>
                   <Text as="label" className="text-sm font-medium">
-                    {t("statusPageConfig.pageDescription")}
+                    {t('statusPageConfig.pageDescription')}
                   </Text>
                   <Textarea
                     name="description"
                     value={config.description}
                     onChange={handleChange}
                     placeholder={t(
-                      "statusPageConfig.pageDescriptionPlaceholder"
+                      'statusPageConfig.pageDescriptionPlaceholder'
                     )}
                   />
                 </Box>
 
                 <Box>
                   <Text as="label" className="text-sm font-medium">
-                    {t("statusPageConfig.publicUrl")}
+                    {t('statusPageConfig.publicUrl')}
                   </Text>
                   <Flex gap="2">
                     <Box className="flex-1 relative">
@@ -320,24 +324,24 @@ const StatusPageConfig = () => {
                       {copied ? (
                         <>
                           <CheckIcon width="16" height="16" />
-                          <Text>{t("common.copied")}</Text>
+                          <Text>{t('common.copied')}</Text>
                         </>
                       ) : (
                         <>
                           <CopyIcon width="16" height="16" />
-                          <Text>{t("common.copy")}</Text>
+                          <Text>{t('common.copy')}</Text>
                         </>
                       )}
                     </Button>
                   </Flex>
                   <Text className="text-xs text-gray-500">
-                    {t("statusPageConfig.publicUrlHelp")}
+                    {t('statusPageConfig.publicUrlHelp')}
                   </Text>
                 </Box>
 
                 <Box className="mt-1">
                   <Text className="text-sm font-medium text-ellipsis">
-                    {t("statusPageConfig.selectionNote")}
+                    {t('statusPageConfig.selectionNote')}
                   </Text>
                 </Box>
               </Flex>
@@ -345,18 +349,18 @@ const StatusPageConfig = () => {
 
             <TabsContent value="services">
               <Flex direction="column">
-                <Text>{t("statusPageConfig.selectServicesPrompt")}</Text>
+                <Text>{t('statusPageConfig.selectServicesPrompt')}</Text>
 
                 {config.monitors.length === 0 ? (
-                  <Text>{t("monitors.noMonitors")}</Text>
+                  <Text>{t('monitors.noMonitors')}</Text>
                 ) : (
                   <Box>
-                    {config.monitors.map((monitor) => {
+                    {config.monitors.map(monitor => {
                       console.log(
-                        `【${t("statusPageConfig.serviceRendering")}】${
+                        `【${t('statusPageConfig.serviceRendering')}】${
                           monitor.name
                         }(${monitor.id}), ${t(
-                          "statusPageConfig.selectedStatus"
+                          'statusPageConfig.selectedStatus'
                         )}: ${monitor.selected}`
                       );
                       return (
@@ -369,15 +373,15 @@ const StatusPageConfig = () => {
                             id={`monitor-${monitor.id}`}
                             className="ml-auto"
                             checked={monitor.selected}
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={checked => {
                               const newCheckedState = !!checked;
                               console.log(
                                 `${t(
-                                  "statusPageConfig.monitorStatusChange"
+                                  'statusPageConfig.monitorStatusChange'
                                 )}: ${monitor.name}(${monitor.id}), ${t(
-                                  "statusPageConfig.from"
+                                  'statusPageConfig.from'
                                 )} ${monitor.selected} ${t(
-                                  "statusPageConfig.to"
+                                  'statusPageConfig.to'
                                 )} ${newCheckedState}`
                               );
                               handleMonitorChange(monitor.id, newCheckedState);
@@ -393,18 +397,18 @@ const StatusPageConfig = () => {
 
             <TabsContent value="agents">
               <Flex direction="column">
-                <Text>{t("statusPageConfig.selectAgentsPrompt")}</Text>
+                <Text>{t('statusPageConfig.selectAgentsPrompt')}</Text>
 
                 {config.agents.length === 0 ? (
-                  <Text color="gray">{t("agents.noAgents")}</Text>
+                  <Text color="gray">{t('agents.noAgents')}</Text>
                 ) : (
                   <Box>
-                    {config.agents.map((agent) => {
+                    {config.agents.map(agent => {
                       console.log(
-                        `【${t("statusPageConfig.agentRendering")}】${
+                        `【${t('statusPageConfig.agentRendering')}】${
                           agent.name
                         }(${agent.id}), ${t(
-                          "statusPageConfig.selectedStatus"
+                          'statusPageConfig.selectedStatus'
                         )}: ${agent.selected}`
                       );
                       return (
@@ -417,15 +421,15 @@ const StatusPageConfig = () => {
                             id={`agent-${agent.id}`}
                             checked={agent.selected}
                             className="ml-auto"
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={checked => {
                               const newCheckedState = !!checked;
                               console.log(
-                                `${t("statusPageConfig.agentStatusChange")}: ${
+                                `${t('statusPageConfig.agentStatusChange')}: ${
                                   agent.name
-                                }(${agent.id}), ${t("statusPageConfig.from")} ${
+                                }(${agent.id}), ${t('statusPageConfig.from')} ${
                                   agent.selected
                                 } ${t(
-                                  "statusPageConfig.to"
+                                  'statusPageConfig.to'
                                 )} ${newCheckedState}`
                               );
                               handleAgentChange(agent.id, newCheckedState);

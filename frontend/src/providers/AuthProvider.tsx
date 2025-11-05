@@ -4,20 +4,15 @@ import React, {
   useState,
   useEffect,
   ReactNode,
-} from "react";
+} from 'react';
 import {
   login as apiLogin,
   register as apiRegister,
   getCurrentUser,
-} from "../api/auth";
-import { getAllowNewUserRegistration } from "../api/settings"; // 新增
-import {
-  User,
-  LoginRequest,
-  RegisterRequest,
-  AuthContextType,
-} from "../types";
-import { useTranslation } from "react-i18next";
+} from '../api/auth';
+import { getAllowNewUserRegistration } from '../api/settings'; // 新增
+import { User, LoginRequest, RegisterRequest, AuthContextType } from '../types';
+import { useTranslation } from 'react-i18next';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -31,8 +26,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     // 从 localStorage 获取 token 和 user
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
 
     if (storedToken && storedUser) {
       setToken(storedToken);
@@ -55,18 +50,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       const response = await getCurrentUser();
       if (response.success && response.user) {
         setUser(response.user);
-        localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem('user', JSON.stringify(response.user));
       } else {
         // 如果获取用户信息失败，清除 token 和 user
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         setToken(null);
         setUser(null);
       }
     } catch (error) {
-      console.error(t("auth.error.fetchUser"), error);
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      console.error(t('auth.error.fetchUser'), error);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       setToken(null);
       setUser(null);
     }
@@ -76,15 +71,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     try {
       const response = await apiLogin(data);
       if (response.success && response.token && response.user) {
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
         setToken(response.token);
         setUser(response.user);
       }
       return { success: response.success, message: response.message };
     } catch (error) {
-      console.error(t("auth.error.login"), error);
-      return { success: false, message: t("login.error.tryAgain") };
+      console.error(t('auth.error.login'), error);
+      return { success: false, message: t('login.error.tryAgain') };
     }
   };
 
@@ -93,22 +88,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       // 客户端再次检查是否允许注册
       const allowResponse = await getAllowNewUserRegistration();
       if (!allowResponse.success || !allowResponse.allow) {
-          return { success: false, message: t('register.disabled') };
+        return { success: false, message: t('register.disabled') };
       }
       const response = await apiRegister(data);
       return { success: response.success, message: response.message };
     } catch (error) {
-      console.error(t("auth.error.register"), error);
-      return { success: false, message: t("register.error.tryAgain") };
+      console.error(t('auth.error.register'), error);
+      return { success: false, message: t('register.error.tryAgain') };
     }
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-    window.location.href = "/login";
+    window.location.href = '/login';
   };
 
   return (
@@ -131,7 +126,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

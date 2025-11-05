@@ -4,18 +4,18 @@ import React, {
   useMemo,
   useCallback,
   useState,
-} from "react";
-import { Box, Flex } from "@radix-ui/themes";
+} from 'react';
+import { Box, Flex } from '@radix-ui/themes';
 import {
   Select,
   SelectContent,
   SelectTrigger,
   SelectItem,
   SelectValue, // 添加 SelectValue 到导入列表
-} from "./ui";
-import { useTranslation } from "react-i18next";
-import { Line } from "react-chartjs-2";
-import { MetricHistory, MetricType } from "../types";
+} from './ui';
+import { useTranslation } from 'react-i18next';
+import { Line } from 'react-chartjs-2';
+import { MetricHistory, MetricType } from '../types';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -28,8 +28,8 @@ import {
   TimeScale,
   ChartOptions,
   TooltipItem,
-} from "chart.js";
-import "chartjs-adapter-moment";
+} from 'chart.js';
+import 'chartjs-adapter-moment';
 
 // 注册Chart.js组件
 ChartJS.register(
@@ -82,20 +82,20 @@ interface MetricsChartProps {
   showTimeLabels?: boolean;
   diskDevice?: string; // 用于选择特定的磁盘设备（可选，如果不提供则使用默认值）
   networkInterface?: string; // 用于选择特定的网络接口（可选，如果不提供则使用默认值）
-  loadType?: "1" | "5" | "15"; // 负载类型：1分钟、5分钟、15分钟
+  loadType?: '1' | '5' | '15'; // 负载类型：1分钟、5分钟、15分钟
 }
 
 // 格式化字节数为可读形式
 const formatBytes = (bytes: number | undefined, decimals = 2): string => {
-  if (bytes === undefined || bytes === 0) return "0 B";
+  if (bytes === undefined || bytes === 0) return '0 B';
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
 const MetricsChart: React.FC<MetricsChartProps> = ({
@@ -105,10 +105,10 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
   showTimeLabels = true,
   diskDevice,
   networkInterface,
-  loadType = "1",
+  loadType = '1',
 }) => {
   const { t } = useTranslation();
-  const chartRef = useRef<ChartJS<"line">>(null);
+  const chartRef = useRef<ChartJS<'line'>>(null);
 
   // 获取磁盘和网络设备列表并管理选中的设备
   const [availableDiskDevices, setAvailableDiskDevices] = useState<
@@ -118,16 +118,16 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
     DeviceOption[]
   >([]);
   const [selectedDiskDevice, setSelectedDiskDevice] = useState<string>(
-    diskDevice || "/"
+    diskDevice || '/'
   );
   const [selectedNetworkInterface, setSelectedNetworkInterface] =
-    useState<string>(networkInterface || "en0");
+    useState<string>(networkInterface || 'en0');
   const [selectedNetworkMetric, setSelectedNetworkMetric] = useState<
-    "received" | "sent"
-  >("received");
+    'received' | 'sent'
+  >('received');
   // 添加 load 类型状态
-  const [selectedLoadType, setSelectedLoadType] = useState<"1" | "5" | "15">(
-    loadType || "1"
+  const [selectedLoadType, setSelectedLoadType] = useState<'1' | '5' | '15'>(
+    loadType || '1'
   );
 
   console.log(`MetricsChart组件的history (${metricType}): `, history);
@@ -141,19 +141,19 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
     // 提取所有可用的网络接口
     const networks = new Map<string, string>();
 
-    history.forEach((item) => {
+    history.forEach(item => {
       // 处理磁盘信息
       if (item.disk_metrics) {
         try {
           const diskData = JSON.parse(item.disk_metrics) as DiskMetric[];
-          diskData.forEach((disk) => {
+          diskData.forEach(disk => {
             disks.set(disk.mount_point, {
               device: disk.device,
               mount_point: disk.mount_point,
             });
           });
         } catch (e) {
-          console.error("解析磁盘信息失败:", e);
+          console.error('解析磁盘信息失败:', e);
         }
       }
 
@@ -163,25 +163,25 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
           const networkData = JSON.parse(
             item.network_metrics
           ) as NetworkMetric[];
-          networkData.forEach((network) => {
+          networkData.forEach(network => {
             networks.set(network.interface, network.interface);
           });
         } catch (e) {
-          console.error("解析网络信息失败:", e);
+          console.error('解析网络信息失败:', e);
         }
       }
     });
 
     // 转换为选项数组
     const diskOptions: DeviceOption[] = Array.from(disks.values()).map(
-      (disk) => ({
+      disk => ({
         value: disk.mount_point,
         label: `${disk.device} (${disk.mount_point})`,
       })
     );
 
     const networkOptions: DeviceOption[] = Array.from(networks.values()).map(
-      (network) => ({
+      network => ({
         value: network,
         label: network,
       })
@@ -193,16 +193,14 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
     // 如果当前选择的设备不在列表中，则选择第一个可用设备
     if (
       diskOptions.length > 0 &&
-      !diskOptions.some((option) => option.value === selectedDiskDevice)
+      !diskOptions.some(option => option.value === selectedDiskDevice)
     ) {
       setSelectedDiskDevice(diskOptions[0].value);
     }
 
     if (
       networkOptions.length > 0 &&
-      !networkOptions.some(
-        (option) => option.value === selectedNetworkInterface
-      )
+      !networkOptions.some(option => option.value === selectedNetworkInterface)
     ) {
       setSelectedNetworkInterface(networkOptions[0].value);
     }
@@ -213,24 +211,24 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
     try {
       // 检查日期是否有效
       if (!(date instanceof Date) || isNaN(date.getTime())) {
-        return "无效日期";
+        return '无效日期';
       }
 
       // 统一使用本地时间格式
       const options: Intl.DateTimeFormatOptions = {
-        year: "numeric",
-        month: "numeric",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
         hour12: false, // 使用24小时制
       };
 
       return date.toLocaleString(undefined, options);
     } catch (e) {
-      console.error("格式化日期失败:", e);
-      return "无效日期";
+      console.error('格式化日期失败:', e);
+      return '无效日期';
     }
   }, []);
 
@@ -238,52 +236,52 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
   const getMetricConfig = useCallback(
     (type: MetricType) => {
       switch (type) {
-        case "cpu":
+        case 'cpu':
           return {
-            title: t("agent.metrics.cpu.title"),
-            unit: "%",
-            color: "rgba(54, 162, 235, 0.8)",
-            bgColor: "rgba(54, 162, 235, 0.1)",
+            title: t('agent.metrics.cpu.title'),
+            unit: '%',
+            color: 'rgba(54, 162, 235, 0.8)',
+            bgColor: 'rgba(54, 162, 235, 0.1)',
           };
-        case "memory":
+        case 'memory':
           return {
-            title: t("agent.metrics.memory.title"),
-            unit: "%",
-            color: "rgba(255, 99, 132, 0.8)",
-            bgColor: "rgba(255, 99, 132, 0.1)",
+            title: t('agent.metrics.memory.title'),
+            unit: '%',
+            color: 'rgba(255, 99, 132, 0.8)',
+            bgColor: 'rgba(255, 99, 132, 0.1)',
           };
-        case "disk":
+        case 'disk':
           return {
-            title: t("agent.metrics.disk.title"),
-            unit: "%",
-            color: "rgba(75, 192, 192, 0.8)",
-            bgColor: "rgba(75, 192, 192, 0.1)",
+            title: t('agent.metrics.disk.title'),
+            unit: '%',
+            color: 'rgba(75, 192, 192, 0.8)',
+            bgColor: 'rgba(75, 192, 192, 0.1)',
           };
-        case "network":
+        case 'network':
           return {
             title:
-              selectedNetworkMetric === "received"
-                ? t("agent.metrics.network.received")
-                : t("agent.metrics.network.sent"),
-            unit: "B/s", // 修改为基本单位 B/s，在 scales.y.ticks.callback 中会根据实际值动态调整显示
-            color: "rgba(153, 102, 255, 0.8)",
-            bgColor: "rgba(153, 102, 255, 0.1)",
+              selectedNetworkMetric === 'received'
+                ? t('agent.metrics.network.received')
+                : t('agent.metrics.network.sent'),
+            unit: 'B/s', // 修改为基本单位 B/s，在 scales.y.ticks.callback 中会根据实际值动态调整显示
+            color: 'rgba(153, 102, 255, 0.8)',
+            bgColor: 'rgba(153, 102, 255, 0.1)',
           };
-        case "load":
+        case 'load':
           return {
-            title: `(${selectedLoadType}${t("agent.metrics.load.minute")})${t(
-              "agent.metrics.load.title"
+            title: `(${selectedLoadType}${t('agent.metrics.load.minute')})${t(
+              'agent.metrics.load.title'
             )}`,
-            unit: "",
-            color: "rgba(34, 33, 32, 0.8)",
-            bgColor: "rgba(255, 159, 64, 0.1)",
+            unit: '',
+            color: 'rgba(34, 33, 32, 0.8)',
+            bgColor: 'rgba(255, 159, 64, 0.1)',
           };
         default:
           return {
-            title: t("agent.metrics.unknown"),
-            unit: "",
-            color: "rgba(128, 128, 128, 0.8)",
-            bgColor: "rgba(128, 128, 128, 0.1)",
+            title: t('agent.metrics.unknown'),
+            unit: '',
+            color: 'rgba(128, 128, 128, 0.8)',
+            bgColor: 'rgba(128, 128, 128, 0.1)',
           };
       }
     },
@@ -293,11 +291,11 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
   // 根据指标类型获取数据点的显示格式
   const getValueDisplayText = useCallback((type: MetricType, value: number) => {
     switch (type) {
-      case "cpu":
-      case "memory":
-      case "disk":
+      case 'cpu':
+      case 'memory':
+      case 'disk':
         return `${Math.round(value * 100) / 100}%`;
-      case "network":
+      case 'network':
         // 根据大小自动选择合适的单位
         if (value < 1024) {
           return `${Math.round(value)} B/s`;
@@ -306,7 +304,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
         } else {
           return `${Math.round((value / 1024 / 1024) * 100) / 100} MB/s`;
         }
-      case "load":
+      case 'load':
         return value.toFixed(2);
       default:
         return `${value}`;
@@ -323,104 +321,104 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
 
       // 根据指标类型添加详细信息
       switch (type) {
-        case "cpu":
+        case 'cpu':
           if (metric.cpu_usage !== undefined)
             lines.push(
-              `${t("agent.metrics.cpu.usage")}: ${metric.cpu_usage.toFixed(2)}%`
+              `${t('agent.metrics.cpu.usage')}: ${metric.cpu_usage.toFixed(2)}%`
             );
           if (metric.cpu_cores !== undefined)
-            lines.push(`${t("agent.metrics.cpu.cores")}: ${metric.cpu_cores}`);
+            lines.push(`${t('agent.metrics.cpu.cores')}: ${metric.cpu_cores}`);
           if (metric.cpu_model)
-            lines.push(`${t("agent.metrics.cpu.model")}: ${metric.cpu_model}`);
+            lines.push(`${t('agent.metrics.cpu.model')}: ${metric.cpu_model}`);
           break;
 
-        case "memory":
+        case 'memory':
           if (metric.memory_total !== undefined)
             lines.push(
-              `${t("agent.metrics.memory.total")}: ${formatBytes(
+              `${t('agent.metrics.memory.total')}: ${formatBytes(
                 metric.memory_total
               )}`
             );
           if (metric.memory_used !== undefined)
             lines.push(
-              `${t("agent.metrics.memory.used")}: ${formatBytes(
+              `${t('agent.metrics.memory.used')}: ${formatBytes(
                 metric.memory_used
               )}`
             );
           if (metric.memory_free !== undefined)
             lines.push(
-              `${t("agent.metrics.memory.free")}: ${formatBytes(
+              `${t('agent.metrics.memory.free')}: ${formatBytes(
                 metric.memory_free
               )}`
             );
           if (metric.memory_usage_rate !== undefined)
             lines.push(
               `${t(
-                "agent.metrics.memory.usageRate"
+                'agent.metrics.memory.usageRate'
               )}: ${metric.memory_usage_rate.toFixed(2)}%`
             );
           break;
 
-        case "disk":
+        case 'disk':
           try {
             if (metric.disk_metrics) {
               const diskData = JSON.parse(metric.disk_metrics) as DiskMetric[];
               const selectedDisk = diskData.find(
-                (d) => d.mount_point === selectedDiskDevice
+                d => d.mount_point === selectedDiskDevice
               );
 
               if (selectedDisk) {
                 lines.push(
-                  `${t("agent.metrics.disk.device")}: ${selectedDisk.device}`
+                  `${t('agent.metrics.disk.device')}: ${selectedDisk.device}`
                 );
                 lines.push(
-                  `${t("agent.metrics.disk.mountPoint")}: ${
+                  `${t('agent.metrics.disk.mountPoint')}: ${
                     selectedDisk.mount_point
                   }`
                 );
                 lines.push(
-                  `${t("agent.metrics.disk.total")}: ${formatBytes(
+                  `${t('agent.metrics.disk.total')}: ${formatBytes(
                     selectedDisk.total
                   )}`
                 );
                 lines.push(
-                  `${t("agent.metrics.disk.used")}: ${formatBytes(
+                  `${t('agent.metrics.disk.used')}: ${formatBytes(
                     selectedDisk.used
                   )}`
                 );
                 lines.push(
-                  `${t("agent.metrics.disk.free")}: ${formatBytes(
+                  `${t('agent.metrics.disk.free')}: ${formatBytes(
                     selectedDisk.free
                   )}`
                 );
                 lines.push(
                   `${t(
-                    "agent.metrics.disk.usageRate"
+                    'agent.metrics.disk.usageRate'
                   )}: ${selectedDisk.usage_rate.toFixed(2)}%`
                 );
                 lines.push(
-                  `${t("agent.metrics.disk.fsType")}: ${selectedDisk.fs_type}`
+                  `${t('agent.metrics.disk.fsType')}: ${selectedDisk.fs_type}`
                 );
               }
             }
           } catch (e) {
-            console.error("解析磁盘数据失败:", e);
+            console.error('解析磁盘数据失败:', e);
           }
           break;
 
-        case "network":
+        case 'network':
           try {
             if (metric.network_metrics) {
               const networkData = JSON.parse(
                 metric.network_metrics
               ) as NetworkMetric[];
               const selectedInterface = networkData.find(
-                (n) => n.interface === selectedNetworkInterface
+                n => n.interface === selectedNetworkInterface
               );
 
               if (selectedInterface) {
                 lines.push(
-                  `${t("agent.metrics.network.interface")}: ${
+                  `${t('agent.metrics.network.interface')}: ${
                     selectedInterface.interface
                   }`
                 );
@@ -428,62 +426,62 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
                 // 显示当前网络速率
                 const currentRate = dataPoint.y;
                 if (currentRate !== undefined) {
-                  if (selectedNetworkMetric === "sent") {
+                  if (selectedNetworkMetric === 'sent') {
                     lines.push(
                       `${t(
-                        "agent.metrics.network.rate"
-                      )}: ${getValueDisplayText("network", currentRate)}`
+                        'agent.metrics.network.rate'
+                      )}: ${getValueDisplayText('network', currentRate)}`
                     );
                   } else {
                     lines.push(
                       `${t(
-                        "agent.metrics.network.rate"
-                      )}: ${getValueDisplayText("network", currentRate)}`
+                        'agent.metrics.network.rate'
+                      )}: ${getValueDisplayText('network', currentRate)}`
                     );
                   }
                 }
 
                 // 显示累计数据
                 lines.push(
-                  `${t("agent.metrics.network.sent")}: ${formatBytes(
+                  `${t('agent.metrics.network.sent')}: ${formatBytes(
                     selectedInterface.bytes_sent
                   )}`
                 );
                 lines.push(
-                  `${t("agent.metrics.network.received")}: ${formatBytes(
+                  `${t('agent.metrics.network.received')}: ${formatBytes(
                     selectedInterface.bytes_recv
                   )}`
                 );
 
                 lines.push(
-                  `${t("agent.metrics.network.packetsSent")}: ${
+                  `${t('agent.metrics.network.packetsSent')}: ${
                     selectedInterface.packets_sent
                   }`
                 );
                 lines.push(
-                  `${t("agent.metrics.network.packetsReceived")}: ${
+                  `${t('agent.metrics.network.packetsReceived')}: ${
                     selectedInterface.packets_recv
                   }`
                 );
               }
             }
           } catch (e) {
-            console.error("解析网络数据失败:", e);
+            console.error('解析网络数据失败:', e);
           }
           break;
 
-        case "load":
+        case 'load':
           if (metric.load_1 !== undefined)
             lines.push(
-              `${t("agent.metrics.load.1min")}: ${metric.load_1.toFixed(2)}`
+              `${t('agent.metrics.load.1min')}: ${metric.load_1.toFixed(2)}`
             );
           if (metric.load_5 !== undefined)
             lines.push(
-              `${t("agent.metrics.load.5min")}: ${metric.load_5.toFixed(2)}`
+              `${t('agent.metrics.load.5min')}: ${metric.load_5.toFixed(2)}`
             );
           if (metric.load_15 !== undefined)
             lines.push(
-              `${t("agent.metrics.load.15min")}: ${metric.load_15.toFixed(2)}`
+              `${t('agent.metrics.load.15min')}: ${metric.load_15.toFixed(2)}`
             );
           break;
       }
@@ -496,14 +494,14 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
   // 使用 useMemo 计算并缓存 tooltip 回调函数
   const tooltipCallbacks = useMemo(() => {
     return {
-      title: (items: TooltipItem<"line">[]) => {
+      title: (items: TooltipItem<'line'>[]) => {
         if (items.length > 0 && items[0].raw) {
           const dataPoint = items[0].raw as DataPoint;
           return formatTime(new Date(dataPoint.x));
         }
-        return "";
+        return '';
       },
-      label: (context: TooltipItem<"line">) => {
+      label: (context: TooltipItem<'line'>) => {
         const dataPoint = context.raw as DataPoint;
         return generateDetailedTooltip(dataPoint, metricType);
       },
@@ -511,8 +509,8 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
   }, [metricType, formatTime, generateDetailedTooltip]);
 
   // 使用 useMemo 缓存基础图表选项
-  const baseChartOptions = useMemo<ChartOptions<"line">>(() => {
-    console.log("创建新的基础图表选项");
+  const baseChartOptions = useMemo<ChartOptions<'line'>>(() => {
+    console.log('创建新的基础图表选项');
     const config = getMetricConfig(metricType);
 
     return {
@@ -520,12 +518,12 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
       maintainAspectRatio: false,
       animation: {
         duration: 300,
-        easing: "easeOutQuad",
+        easing: 'easeOutQuad',
       },
       interaction: {
-        mode: "nearest" as const,
+        mode: 'nearest' as const,
         intersect: true,
-        axis: "xy" as const,
+        axis: 'xy' as const,
         includeInvisible: false,
       },
       plugins: {
@@ -533,14 +531,14 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
           display: false,
         },
         tooltip: {
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
-          titleColor: "white",
-          bodyColor: "white",
-          titleAlign: "left" as const,
-          bodyAlign: "left" as const,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          titleColor: 'white',
+          bodyColor: 'white',
+          titleAlign: 'left' as const,
+          bodyAlign: 'left' as const,
           titleFont: {
             size: 14,
-            weight: "bold" as const,
+            weight: 'bold' as const,
           },
           bodyFont: {
             size: 12,
@@ -550,15 +548,15 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
           displayColors: false,
           animation: {
             duration: 200,
-            easing: "easeOutQuad",
+            easing: 'easeOutQuad',
           },
           callbacks: tooltipCallbacks,
         },
         title: {
           display: true,
           text: config.title,
-          align: "start",
-          color: "#888",
+          align: 'start',
+          color: '#888',
           font: {
             size: 14,
           },
@@ -567,20 +565,20 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
       },
       scales: {
         x: {
-          type: "time",
+          type: 'time',
           display: showTimeLabels,
           time: {
-            unit: "hour",
+            unit: 'hour',
             displayFormats: {
-              hour: "HH:mm",
+              hour: 'HH:mm',
             },
           },
           grid: {
-            color: "#e0e0e0",
+            color: '#e0e0e0',
             lineWidth: 0.5,
           },
           ticks: {
-            color: "#888",
+            color: '#888',
             font: {
               size: 10,
             },
@@ -592,26 +590,26 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
             callback: function (value) {
               const date = new Date(value);
               if (date.getHours() % 2 === 0) {
-                return `${date.getHours().toString().padStart(2, "0")}:00`;
+                return `${date.getHours().toString().padStart(2, '0')}:00`;
               }
-              return "";
+              return '';
             },
           },
         },
         y: {
           beginAtZero: true,
           grid: {
-            color: "#e0e0e0",
+            color: '#e0e0e0',
             lineWidth: 0.5,
           },
           ticks: {
-            color: "#888",
+            color: '#888',
             font: {
               size: 10,
             },
-            callback: (value) => {
+            callback: value => {
               // 对于网络指标，根据数值大小动态调整单位
-              if (metricType === "network" && typeof value === "number") {
+              if (metricType === 'network' && typeof value === 'number') {
                 if (value < 1024) {
                   return `${value} B/s`;
                 } else if (value < 1024 * 1024) {
@@ -627,27 +625,27 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
         },
       },
       hover: {
-        mode: "nearest",
+        mode: 'nearest',
         intersect: true,
       },
       animations: {
         colors: {
           duration: 300,
-          easing: "easeOutQuad",
+          easing: 'easeOutQuad',
         },
         radius: {
           duration: 300,
-          easing: "easeOutQuad",
+          easing: 'easeOutQuad',
           from: 0,
           to: 4,
           loop: false,
         },
         hover: {
           duration: 300,
-          easing: "easeOutQuad",
+          easing: 'easeOutQuad',
         },
       },
-      events: ["mouseout", "mousemove", "touchstart", "touchmove"],
+      events: ['mouseout', 'mousemove', 'touchstart', 'touchmove'],
     };
   }, [t, showTimeLabels, tooltipCallbacks, metricType, getMetricConfig]);
 
@@ -656,7 +654,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
     console.log(`----开始处理${metricType}图表数据----`);
 
     if (history.length === 0) {
-      console.log("没有接收到历史数据");
+      console.log('没有接收到历史数据');
       return {
         chartData: {
           datasets: [
@@ -670,8 +668,8 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
               pointRadius: [],
               tension: 0.4,
               pointHoverRadius: 5,
-              pointHoverBackgroundColor: "",
-              pointHoverBorderColor: "",
+              pointHoverBackgroundColor: '',
+              pointHoverBorderColor: '',
               pointHoverBorderWidth: 2,
               pointHitRadius: [],
             },
@@ -715,40 +713,40 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
         let value: number | undefined;
 
         switch (metricType) {
-          case "cpu":
+          case 'cpu':
             value = item.cpu_usage;
             break;
-          case "memory":
+          case 'memory':
             value = item.memory_usage_rate;
             break;
-          case "disk":
+          case 'disk':
             try {
               if (item.disk_metrics) {
                 const diskData = JSON.parse(item.disk_metrics) as DiskMetric[];
                 const selectedDisk = diskData.find(
-                  (d) => d.mount_point === selectedDiskDevice
+                  d => d.mount_point === selectedDiskDevice
                 );
                 value = selectedDisk?.usage_rate;
               }
             } catch (e) {
-              console.error("解析磁盘数据失败:", e);
+              console.error('解析磁盘数据失败:', e);
             }
             break;
-          case "network":
+          case 'network':
             try {
               if (item.network_metrics) {
                 const networkData = JSON.parse(
                   item.network_metrics
                 ) as NetworkMetric[];
                 const selectedInterface = networkData.find(
-                  (n) => n.interface === selectedNetworkInterface
+                  n => n.interface === selectedNetworkInterface
                 );
 
                 // 计算网络速率
                 if (selectedInterface) {
                   const currentTimestamp = timestamp.getTime();
                   const currentBytes =
-                    selectedNetworkMetric === "received"
+                    selectedNetworkMetric === 'received'
                       ? selectedInterface.bytes_recv
                       : selectedInterface.bytes_sent;
 
@@ -759,7 +757,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
                     currentTimestamp > prevNetworkData.timestamp
                   ) {
                     const prevBytes =
-                      selectedNetworkMetric === "received"
+                      selectedNetworkMetric === 'received'
                         ? prevNetworkData.interfaces[selectedNetworkInterface]
                             .bytes_recv
                         : prevNetworkData.interfaces[selectedNetworkInterface]
@@ -808,18 +806,18 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
                 }
               }
             } catch (e) {
-              console.error("解析网络数据失败:", e);
+              console.error('解析网络数据失败:', e);
             }
             break;
-          case "load":
+          case 'load':
             switch (selectedLoadType) {
-              case "1":
+              case '1':
                 value = item.load_1;
                 break;
-              case "5":
+              case '5':
                 value = item.load_5;
                 break;
-              case "15":
+              case '15':
                 value = item.load_15;
                 break;
             }
@@ -843,7 +841,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
 
     // 过滤24小时前的数据并排序
     metricsData = metricsData
-      .filter((point) => point.x >= twentyFourHoursAgo)
+      .filter(point => point.x >= twentyFourHoursAgo)
       .sort((a, b) => a.x - b.x);
 
     console.log(`${metricType}Data:`, metricsData);
@@ -879,8 +877,8 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
               pointRadius: [],
               tension: 0.4,
               pointHoverRadius: 5,
-              pointHoverBackgroundColor: "",
-              pointHoverBorderColor: "",
+              pointHoverBackgroundColor: '',
+              pointHoverBorderColor: '',
               pointHoverBorderWidth: 2,
               pointHitRadius: [],
             },
@@ -895,24 +893,24 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
     metricsData = filteredData;
 
     // 计算最大值，用于设置y轴
-    const maxValue = Math.max(...metricsData.map((point) => point.y || 0));
+    const maxValue = Math.max(...metricsData.map(point => point.y || 0));
 
     // 设置y轴最大值（根据不同指标类型进行调整）
     let calculatedYAxisMax: number | undefined;
 
     switch (metricType) {
-      case "cpu":
-      case "memory":
-      case "disk":
+      case 'cpu':
+      case 'memory':
+      case 'disk':
         // 百分比图表，最大值不超过100%
         calculatedYAxisMax = Math.min(Math.ceil(maxValue * 1.1), 100);
         break;
-      case "network":
+      case 'network':
         // 网络流量，动态调整
         calculatedYAxisMax =
           maxValue < 1000000 ? Math.ceil(maxValue * 1.1) : undefined;
         break;
-      case "load":
+      case 'load':
         // 系统负载，动态调整
         calculatedYAxisMax =
           maxValue < 10 ? Math.ceil(maxValue * 1.5) : Math.ceil(maxValue * 1.2);
@@ -937,8 +935,8 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
 
     // 设置点的样式
     metricsData.forEach(() => {
-      pointBackgroundColors.push("rgba(0, 0, 0, 0)");
-      pointBorderColors.push("rgba(0, 0, 0, 0)");
+      pointBackgroundColors.push('rgba(0, 0, 0, 0)');
+      pointBorderColors.push('rgba(0, 0, 0, 0)');
       pointRadii.push(0);
       pointHitRadii.push(20);
     });
@@ -980,7 +978,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
 
   // 渲染设备选择器
   const renderDeviceSelector = () => {
-    if (metricType === "disk" && availableDiskDevices.length > 0) {
+    if (metricType === 'disk' && availableDiskDevices.length > 0) {
       return (
         <Box mb="2">
           <Select
@@ -991,7 +989,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {availableDiskDevices.map((device) => (
+              {availableDiskDevices.map(device => (
                 <SelectItem key={device.value} value={device.value}>
                   {device.label}
                 </SelectItem>
@@ -1002,7 +1000,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
       );
     }
 
-    if (metricType === "network" && availableNetworkInterfaces.length > 0) {
+    if (metricType === 'network' && availableNetworkInterfaces.length > 0) {
       return (
         <Flex gap="2" mb="2" align="center">
           <Select
@@ -1013,7 +1011,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {availableNetworkInterfaces.map((iface) => (
+              {availableNetworkInterfaces.map(iface => (
                 <SelectItem key={iface.value} value={iface.value}>
                   {iface.label}
                 </SelectItem>
@@ -1022,8 +1020,8 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
           </Select>
           <Select
             value={selectedNetworkMetric}
-            onValueChange={(value) =>
-              setSelectedNetworkMetric(value as "received" | "sent")
+            onValueChange={value =>
+              setSelectedNetworkMetric(value as 'received' | 'sent')
             }
           >
             <SelectTrigger>
@@ -1031,10 +1029,10 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="received">
-                {t("agent.metrics.network.received")}
+                {t('agent.metrics.network.received')}
               </SelectItem>
               <SelectItem value="sent">
-                {t("agent.metrics.network.sent")}
+                {t('agent.metrics.network.sent')}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -1043,23 +1041,23 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
     }
 
     // 添加 load 类型选择器
-    if (metricType === "load") {
+    if (metricType === 'load') {
       return (
         <Box mb="2">
           <Select
             value={selectedLoadType}
-            onValueChange={(value) =>
-              setSelectedLoadType(value as "1" | "5" | "15")
+            onValueChange={value =>
+              setSelectedLoadType(value as '1' | '5' | '15')
             }
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1">{t("agent.metrics.load.1min")}</SelectItem>
-              <SelectItem value="5">{t("agent.metrics.load.5min")}</SelectItem>
+              <SelectItem value="1">{t('agent.metrics.load.1min')}</SelectItem>
+              <SelectItem value="5">{t('agent.metrics.load.5min')}</SelectItem>
               <SelectItem value="15">
-                {t("agent.metrics.load.15min")}
+                {t('agent.metrics.load.15min')}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -1073,7 +1071,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
   return (
     <Box>
       {renderDeviceSelector()}
-      <Box style={{ height: `${height}px`, position: "relative" }}>
+      <Box style={{ height: `${height}px`, position: 'relative' }}>
         <Line ref={chartRef} data={chartData} options={baseChartOptions} />
       </Box>
     </Box>

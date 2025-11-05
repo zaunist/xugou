@@ -1,6 +1,6 @@
-import * as models from "../models";
-import * as repositories from "../repositories";
-import * as NotificationService from "./NotificationService";
+import * as models from '../models';
+import * as repositories from '../repositories';
+import * as NotificationService from './NotificationService';
 
 export async function getMonitorsToCheck() {
   return await repositories.getMonitorsToCheck();
@@ -27,11 +27,11 @@ export async function checkMonitor(monitor: models.Monitor) {
       );
 
       // 如果headers是字符串，则转换为对象
-      if (typeof monitor.headers === "string") {
+      if (typeof monitor.headers === 'string') {
         const parseHeaders = JSON.parse(monitor.headers);
         if (
           parseHeaders &&
-          typeof parseHeaders === "object" &&
+          typeof parseHeaders === 'object' &&
           !Array.isArray(parseHeaders)
         ) {
           const headerObj = Object.assign({}, parseHeaders);
@@ -45,9 +45,12 @@ export async function checkMonitor(monitor: models.Monitor) {
 
       // 发送请求
       response = await fetch(monitor.url, {
-        method: monitor.method || "GET",
+        method: monitor.method || 'GET',
         headers: headers,
-        body: monitor.method !== "GET" && monitor.method !== "HEAD" ? monitor.body || "" : undefined,
+        body:
+          monitor.method !== 'GET' && monitor.method !== 'HEAD'
+            ? monitor.body || ''
+            : undefined,
         signal: controller.signal,
       });
 
@@ -60,7 +63,7 @@ export async function checkMonitor(monitor: models.Monitor) {
 
       return {
         success: false,
-        status: "down",
+        status: 'down',
         previous_status: previousStatus,
         error,
         responseTime: Date.now() - startTime,
@@ -85,7 +88,7 @@ export async function checkMonitor(monitor: models.Monitor) {
       isExpectedStatus = response.status === expectedStatus;
     }
 
-    const status = isExpectedStatus ? "up" : "down";
+    const status = isExpectedStatus ? 'up' : 'down';
 
     // 记录状态历史
     await repositories.insertMonitorStatusHistory(
@@ -117,7 +120,7 @@ export async function checkMonitor(monitor: models.Monitor) {
     console.error(`检查监控出错 (${monitor.name}):`, error);
     return {
       success: false,
-      status: "error",
+      status: 'error',
       previous_status: monitor.status,
       error: error instanceof Error ? error.message : String(error),
       responseTime: 0,
@@ -136,11 +139,15 @@ export async function getAllMonitors(userId: number) {
   };
 }
 
-export async function getMonitorById(id: number, userId: number, userRole: string) {
+export async function getMonitorById(
+  id: number,
+  userId: number,
+  userRole: string
+) {
   const monitor = await repositories.getMonitorById(id, userId, userRole);
 
   if (!monitor) {
-    return { success: false, message: "监控不存在或无权访问", status: 404 };
+    return { success: false, message: '监控不存在或无权访问', status: 404 };
   }
 
   // 获取历史状态数据
@@ -160,11 +167,11 @@ export async function createMonitor(data: any, userId: number) {
   try {
     // 验证必填字段
     if (!data.name || !data.url || !data.method) {
-      return { success: false, message: "缺少必填字段", status: 400 };
+      return { success: false, message: '缺少必填字段', status: 400 };
     }
 
     // 如果headers是对象，则转换为字符串
-    if (typeof data.headers !== "string") {
+    if (typeof data.headers !== 'string') {
       data.headers = JSON.stringify(data.headers);
     }
 
@@ -177,7 +184,7 @@ export async function createMonitor(data: any, userId: number) {
       data.timeout || 30,
       data.expected_status || 200,
       data.headers || {},
-      data.body || "",
+      data.body || '',
       userId
     );
 
@@ -187,23 +194,28 @@ export async function createMonitor(data: any, userId: number) {
       status: 201,
     };
   } catch (error) {
-    console.error("创建监控错误:", error);
+    console.error('创建监控错误:', error);
     return {
       success: false,
-      message: "创建监控失败",
+      message: '创建监控失败',
       error: error instanceof Error ? error.message : String(error),
       status: 500,
     };
   }
 }
 
-export async function updateMonitor(id: number, data: any, userId: number, userRole: string) {
+export async function updateMonitor(
+  id: number,
+  data: any,
+  userId: number,
+  userRole: string
+) {
   try {
     // 检查监控是否存在并验证权限
     const monitor = await repositories.getMonitorById(id, userId, userRole);
 
     if (!monitor) {
-      return { success: false, message: "监控不存在或无权访问", status: 404 };
+      return { success: false, message: '监控不存在或无权访问', status: 404 };
     }
 
     // 准备更新数据
@@ -231,7 +243,7 @@ export async function updateMonitor(id: number, data: any, userId: number, userR
       updateData
     );
 
-    if (typeof updatedMonitor === "object" && "message" in updatedMonitor) {
+    if (typeof updatedMonitor === 'object' && 'message' in updatedMonitor) {
       return {
         success: true,
         message: updatedMonitor.message,
@@ -246,33 +258,38 @@ export async function updateMonitor(id: number, data: any, userId: number, userR
       status: 200,
     };
   } catch (error) {
-    console.error("更新监控错误:", error);
+    console.error('更新监控错误:', error);
     return {
       success: false,
-      message: "更新监控失败",
+      message: '更新监控失败',
       error: error instanceof Error ? error.message : String(error),
       status: 500,
     };
   }
 }
 
-export async function deleteMonitor(id: number, userId: number, userRole: string) {
+export async function deleteMonitor(
+  id: number,
+  userId: number,
+  userRole: string
+) {
   try {
     // 检查监控是否存在并验证权限
     const monitor = await repositories.getMonitorById(id, userId, userRole);
 
     if (!monitor) {
-      return { success: false, message: "监控不存在或无权访问", status: 404 };
+      return { success: false, message: '监控不存在或无权访问', status: 404 };
     }
 
     // 执行通知设置删除
-    const notificationResult = await NotificationService.deleteNotificationSettings(
-      "monitor",
-      id,
-      userId // 修复: 传入 userId
-    );
+    const notificationResult =
+      await NotificationService.deleteNotificationSettings(
+        'monitor',
+        id,
+        userId // 修复: 传入 userId
+      );
     if (!notificationResult.success) {
-      console.error("删除监控通知设置失败:", notificationResult.message);
+      console.error('删除监控通知设置失败:', notificationResult.message);
       // 继续执行监控删除，不影响主流程
     }
 
@@ -281,14 +298,14 @@ export async function deleteMonitor(id: number, userId: number, userRole: string
 
     return {
       success: true,
-      message: "监控已删除",
+      message: '监控已删除',
       status: 200,
     };
   } catch (error) {
-    console.error("删除监控错误:", error);
+    console.error('删除监控错误:', error);
     return {
       success: false,
-      message: "删除监控失败",
+      message: '删除监控失败',
       error: error instanceof Error ? error.message : String(error),
       status: 500,
     };
@@ -305,7 +322,7 @@ export async function getMonitorStatusHistoryById(
     const monitor = await repositories.getMonitorById(id, userId, userRole);
 
     if (!monitor) {
-      return { success: false, message: "监控不存在或无权访问", status: 404 };
+      return { success: false, message: '监控不存在或无权访问', status: 404 };
     }
 
     // 获取历史状态
@@ -317,10 +334,10 @@ export async function getMonitorStatusHistoryById(
       status: 200,
     };
   } catch (error) {
-    console.error("获取监控历史错误:", error);
+    console.error('获取监控历史错误:', error);
     return {
       success: false,
-      message: "获取监控历史失败",
+      message: '获取监控历史失败',
       error: error instanceof Error ? error.message : String(error),
       status: 500,
     };
@@ -336,13 +353,17 @@ export async function getAllMonitorStatusHistory(userId: number) {
   };
 }
 
-export async function manualCheckMonitor(id: number, userId: number, userRole: string) {
+export async function manualCheckMonitor(
+  id: number,
+  userId: number,
+  userRole: string
+) {
   try {
     // 检查监控是否存在并验证权限
     const monitor = await repositories.getMonitorById(id, userId, userRole);
 
     if (!monitor) {
-      return { success: false, message: "监控不存在或无权访问", status: 404 };
+      return { success: false, message: '监控不存在或无权访问', status: 404 };
     }
 
     // 使用抽象出来的通用检查监控函数进行检查
@@ -361,7 +382,7 @@ export async function manualCheckMonitor(id: number, userId: number, userRole: s
         const notificationCheck =
           await NotificationService.shouldSendNotification(
             userId, // 修复: 传入 userId
-            "monitor",
+            'monitor',
             monitor.id,
             result.previous_status,
             result.status
@@ -385,19 +406,19 @@ export async function manualCheckMonitor(id: number, userId: number, userRole: s
           const variables = {
             name: monitor.name,
             status: result.status,
-            previous_status: result.previous_status || "未知",
-            time: new Date().toLocaleString("zh-CN"),
+            previous_status: result.previous_status || '未知',
+            time: new Date().toLocaleString('zh-CN'),
             response_time: `${result.responseTime}ms`,
             url: monitor.url,
             status_code: result.statusCode
               ? result.statusCode.toString()
-              : "无",
+              : '无',
             expected_status: monitor.expected_status.toString(),
-            error: result.error || "无",
+            error: result.error || '无',
             details: `URL: ${monitor.url}\n响应时间: ${
               result.responseTime
-            }ms\n状态码: ${result.statusCode || "无"}\n错误信息: ${
-              result.error || "无"
+            }ms\n状态码: ${result.statusCode || '无'}\n错误信息: ${
+              result.error || '无'
             }`,
           };
 
@@ -406,7 +427,7 @@ export async function manualCheckMonitor(id: number, userId: number, userRole: s
           // 发送通知
           console.log(`开始发送通知...`);
           const notificationResult = await NotificationService.sendNotification(
-            "monitor",
+            'monitor',
             monitor.id,
             variables,
             notificationCheck.channels,
@@ -435,21 +456,21 @@ export async function manualCheckMonitor(id: number, userId: number, userRole: s
         );
       }
     } catch (notificationError) {
-      console.error("处理通知时出错:", notificationError);
+      console.error('处理通知时出错:', notificationError);
       // 通知处理错误不影响主流程返回
     }
 
     return {
       success: true,
-      message: "监控检查完成",
+      message: '监控检查完成',
       result,
       status: 200,
     };
   } catch (error) {
-    console.error("手动检查监控错误:", error);
+    console.error('手动检查监控错误:', error);
     return {
       success: false,
-      message: "手动检查监控失败",
+      message: '手动检查监控失败',
       error: error instanceof Error ? error.message : String(error),
       status: 500,
     };
@@ -463,15 +484,19 @@ function getExpectedStatusDisplay(expectedStatus: number): string {
   return String(expectedStatus);
 }
 
-export async function getMonitorDailyStats(id: number, userId: number, userRole: string) {
+export async function getMonitorDailyStats(
+  id: number,
+  userId: number,
+  userRole: string
+) {
   // 权限检查
   const monitor = await repositories.getMonitorById(id, userId, userRole);
   if (!monitor) {
-    return { 
-      success: false, 
-      message: "监控不存在或无权访问", 
+    return {
+      success: false,
+      message: '监控不存在或无权访问',
       status: 404,
-      dailyStats: []
+      dailyStats: [],
     };
   }
 
@@ -480,7 +505,7 @@ export async function getMonitorDailyStats(id: number, userId: number, userRole:
   return {
     success: true,
     dailyStats: result,
-    message: "获取监控每日统计数据成功",
+    message: '获取监控每日统计数据成功',
     status: 200,
   };
 }
@@ -491,7 +516,7 @@ export async function getAllMonitorDailyStats(userId: number) {
   return {
     success: true,
     dailyStats: result,
-    message: "获取所有监控的每日统计数据成功",
+    message: '获取所有监控的每日统计数据成功',
     status: 200,
   };
 }

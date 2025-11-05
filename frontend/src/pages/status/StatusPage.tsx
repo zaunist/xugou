@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { Box, Flex, Heading, Text, Grid, Theme } from "@radix-ui/themes";
-import { getStatusPageData } from "../../api/status";
-import AgentCard from "../../components/AgentCard";
-import MonitorCard from "../../components/MonitorCard";
-import AgentStatusBar from "../../components/AgentStatusBar";
-import { useTranslation } from "react-i18next";
+import { useState, useEffect } from 'react';
+import { Box, Flex, Heading, Text, Grid, Theme } from '@radix-ui/themes';
+import { getStatusPageData } from '../../api/status';
+import AgentCard from '../../components/AgentCard';
+import MonitorCard from '../../components/MonitorCard';
+import AgentStatusBar from '../../components/AgentStatusBar';
+import { useTranslation } from 'react-i18next';
 import {
   Agent,
   MonitorWithDailyStatsAndStatusHistory,
   MetricHistory,
   AgentWithLatestMetrics,
-} from "../../types";
-import { getLatestAgentMetrics, getAgentMetrics } from "../../api/agents";
-import { useParams } from "react-router-dom";
+} from '../../types';
+import { getLatestAgentMetrics, getAgentMetrics } from '../../api/agents';
+import { useParams } from 'react-router-dom';
 
 const StatusPage = () => {
   const { t } = useTranslation();
@@ -25,9 +25,9 @@ const StatusPage = () => {
     agents: [],
   });
   const [loading, setLoading] = useState(false);
-  const [pageTitle, setPageTitle] = useState<string>(t("statusPage.title"));
+  const [pageTitle, setPageTitle] = useState<string>(t('statusPage.title'));
   const [pageDescription, setPageDescription] = useState<string>(
-    t("statusPage.allOperational")
+    t('statusPage.allOperational')
   );
   const [error, setError] = useState<string | null>(null);
   const [selectedAgent, setSelectedAgent] =
@@ -55,9 +55,9 @@ const StatusPage = () => {
     setLoading(true);
     const response = await getStatusPageData(parseInt(userId, 10));
     if (response) {
-      setPageTitle(response.title || t("statusPage.title"));
+      setPageTitle(response.title || t('statusPage.title'));
       setPageDescription(
-        response.description || t("statusPage.allOperational")
+        response.description || t('statusPage.allOperational')
       );
       // 只保留 AgentWithLatestMetrics 需要的字段，且 metrics 字段为 MetricHistory | undefined
       let agentsWithLatestMetrics: AgentWithLatestMetrics[] = (
@@ -68,7 +68,7 @@ const StatusPage = () => {
       });
       // 只请求最新指标
       await Promise.all(
-        agentsWithLatestMetrics.map(async (agent) => {
+        agentsWithLatestMetrics.map(async agent => {
           const metricsRes = await getLatestAgentMetrics(agent.id);
           // 确保我们只取数组中的第一条记录（最新的）
           const latestMetric = Array.isArray(metricsRes.agent)
@@ -82,7 +82,7 @@ const StatusPage = () => {
         agents: agentsWithLatestMetrics,
       });
     } else {
-      setError(t("statusPage.fetchError"));
+      setError(t('statusPage.fetchError'));
     }
     setLoading(false);
   };
@@ -125,7 +125,7 @@ const StatusPage = () => {
         <Box>
           <div className="page-container">
             <Flex justify="center" align="center">
-              <Text size="3">{t("common.loading")}</Text>
+              <Text size="3">{t('common.loading')}</Text>
             </Flex>
           </div>
         </Box>
@@ -148,11 +148,7 @@ const StatusPage = () => {
             <Heading size="9" align="center">
               {pageTitle}
             </Heading>
-            <Text
-              size="5"
-              align="center"
-              className="whitespace-pre-wrap"
-            >
+            <Text size="5" align="center" className="whitespace-pre-wrap">
               {pageDescription}
             </Text>
           </Flex>
@@ -161,10 +157,10 @@ const StatusPage = () => {
           {data.agents.length > 0 && (
             <Box py="6">
               <Heading size="5" mb="4">
-                {t("statusPage.agentStatus")}
+                {t('statusPage.agentStatus')}
               </Heading>
               <div className="grid grid-cols-1 gap-4">
-                {data.agents.map((agent) => (
+                {data.agents.map(agent => (
                   <div key={agent.id}>
                     <div
                       className="cursor-pointer transition hover:scale-[1.01]"
@@ -181,7 +177,7 @@ const StatusPage = () => {
                         {cardLoading ? (
                           <div className="flex items-center justify-center h-40">
                             <span className="text-lg text-gray-500">
-                              {t("common.loading")}
+                              {t('common.loading')}
                             </span>
                           </div>
                         ) : (
@@ -204,10 +200,10 @@ const StatusPage = () => {
           {data.monitors.length > 0 && (
             <Box py="6">
               <Heading size="5" mb="4">
-                {t("statusPage.apiServices")}
+                {t('statusPage.apiServices')}
               </Heading>
-              <Grid columns={{ initial: "1" }} gap="4">
-                {data.monitors.map((monitor) => (
+              <Grid columns={{ initial: '1' }} gap="4">
+                {data.monitors.map(monitor => (
                   <MonitorCard monitor={monitor} key={monitor.id} />
                 ))}
               </Grid>

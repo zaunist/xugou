@@ -1,8 +1,8 @@
-import { Bindings } from "../models/db";
-import type { Agent } from "../models/agent";
-import * as AgentRepository from "../repositories";
-import { generateToken, verifyToken } from "../utils/jwt";
-import { handleAgentThresholdNotification } from "../jobs/agent-task";
+import { Bindings } from '../models/db';
+import type { Agent } from '../models/agent';
+import * as AgentRepository from '../repositories';
+import { generateToken, verifyToken } from '../utils/jwt';
+import { handleAgentThresholdNotification } from '../jobs/agent-task';
 
 /**
  * 获取所有客户端
@@ -18,10 +18,10 @@ export async function getAgents(userId: number) {
       status: 200,
     };
   } catch (error) {
-    console.error("获取客户端列表错误:", error);
+    console.error('获取客户端列表错误:', error);
     return {
       success: false,
-      message: "获取客户端列表失败",
+      message: '获取客户端列表失败',
       error: error instanceof Error ? error.message : String(error),
       status: 500,
     };
@@ -39,7 +39,7 @@ export async function getAgentDetail(agentId: number) {
   const agent = await AgentRepository.getAgentById(agentId);
 
   if (!agent) {
-    throw new Error("客户端不存在");
+    throw new Error('客户端不存在');
   }
 
   // 不返回令牌，但保留其他所有字段
@@ -59,7 +59,7 @@ export async function getAgentDetail(agentId: number) {
  * @returns 更新结果
  */
 export async function updateAgentService(
-  db: Bindings["DB"],
+  db: Bindings['DB'],
   agentId: number,
   updateData: {
     name?: string;
@@ -75,21 +75,21 @@ export async function updateAgentService(
     const agent = await AgentRepository.getAgentById(agentId);
 
     if (!agent) {
-      return { success: false, message: "客户端不存在", status: 404 };
+      return { success: false, message: '客户端不存在', status: 404 };
     }
 
     // 验证数据
-    if (updateData.name && updateData.name.trim() === "") {
-      return { success: false, message: "客户端名称不能为空", status: 400 };
+    if (updateData.name && updateData.name.trim() === '') {
+      return { success: false, message: '客户端名称不能为空', status: 400 };
     }
 
     if (updateData.ip_addresses && updateData.ip_addresses.length > 0) {
       agent.ip_addresses = JSON.stringify(updateData.ip_addresses);
     } else if (updateData.ip_addresses) {
-      agent.ip_addresses = "[]";
+      agent.ip_addresses = '[]';
     }
 
-    if (typeof updateData.name === "string") {
+    if (typeof updateData.name === 'string') {
       agent.name = updateData.name;
     }
 
@@ -114,15 +114,15 @@ export async function updateAgentService(
 
     return {
       success: true,
-      message: "客户端信息已更新",
+      message: '客户端信息已更新',
       agent: updatedAgent,
       status: 200,
     };
   } catch (error) {
-    console.error("更新客户端错误:", error);
+    console.error('更新客户端错误:', error);
     return {
       success: false,
-      message: "更新客户端失败",
+      message: '更新客户端失败',
       error: error instanceof Error ? error.message : String(error),
       status: 500,
     };
@@ -140,22 +140,21 @@ export async function deleteAgentService(agentId: number, userId: number) {
     // 获取客户端信息
     const agent = await AgentRepository.getAgentById(agentId);
     if (!agent) {
-      throw new Error("客户端不存在");
+      throw new Error('客户端不存在');
     }
 
     // 删除客户端通知设置
-    await AgentRepository.deleteNotificationSettings("agent", agent.id, userId);
+    await AgentRepository.deleteNotificationSettings('agent', agent.id, userId);
 
     // 执行删除客户端
     await AgentRepository.deleteAgent(agent.id);
 
     return true;
   } catch (error) {
-    console.error("删除客户端错误:", error);
+    console.error('删除客户端错误:', error);
     throw error;
   }
 }
-
 
 /**
  * 生成客户端注册令牌
@@ -166,8 +165,8 @@ export async function generateAgentToken(env: any) {
   try {
     return await generateToken(env);
   } catch (error) {
-    console.error("生成令牌错误:", error);
-    throw new Error("生成令牌失败");
+    console.error('生成令牌错误:', error);
+    throw new Error('生成令牌失败');
   }
 }
 
@@ -181,8 +180,8 @@ export async function verifyAgentToken(token: string, env: any) {
   try {
     return await verifyToken(token, env);
   } catch (error) {
-    console.error("验证令牌错误:", error);
-    return { valid: false, message: "令牌验证失败" };
+    console.error('验证令牌错误:', error);
+    return { valid: false, message: '令牌验证失败' };
   }
 }
 
@@ -195,13 +194,13 @@ export function getFormattedIPAddresses(
   ipAddressesJson: string | null
 ): string {
   try {
-    if (!ipAddressesJson) return "未知";
+    if (!ipAddressesJson) return '未知';
     const ipArray = JSON.parse(String(ipAddressesJson));
     return Array.isArray(ipArray) && ipArray.length > 0
-      ? ipArray.join(", ")
-      : "未知";
+      ? ipArray.join(', ')
+      : '未知';
   } catch (e) {
-    return String(ipAddressesJson || "未知");
+    return String(ipAddressesJson || '未知');
   }
 }
 
@@ -217,7 +216,7 @@ export async function registerAgentService(
   try {
     // 验证令牌
     if (!token) {
-      return { success: false, message: "缺少注册令牌", status: 400 };
+      return { success: false, message: '缺少注册令牌', status: 400 };
     }
 
     // 通过token查找客户端
@@ -226,7 +225,7 @@ export async function registerAgentService(
     if (existingAgent && existingAgent.id) {
       return {
         success: true,
-        message: "客户端已存在",
+        message: '客户端已存在',
         status: 200,
         agent: {
           id: existingAgent.id,
@@ -254,24 +253,24 @@ export async function registerAgentService(
       name,
       token,
       adminId,
-      "active",
-      hostname || "unknown",
-      os || "unknown",
-      version || "unknown",
+      'active',
+      hostname || 'unknown',
+      os || 'unknown',
+      version || 'unknown',
       ipAddresses || []
     );
 
     return {
       success: true,
-      message: "客户端注册成功",
+      message: '客户端注册成功',
       agent: { id: newAgent.id },
       status: 201,
     };
   } catch (error) {
-    console.error("客户端注册错误:", error);
+    console.error('客户端注册错误:', error);
     return {
       success: false,
-      message: "客户端注册失败",
+      message: '客户端注册失败',
       error: error instanceof Error ? error.message : String(error),
       status: 500,
     };
@@ -295,19 +294,19 @@ export async function updateAgentStatusService(status: any) {
       os: statusData[0]?.os,
       version: statusData[0]?.version,
       keepalive: statusData[0]?.keepalive,
-      status: "active",
+      status: 'active',
     };
 
-    console.log("norlmalInfo", norlmalInfo);
+    console.log('norlmalInfo', norlmalInfo);
 
     if (!norlmalInfo.token) {
-      throw new Error("缺少API令牌");
+      throw new Error('缺少API令牌');
     }
     // 通过token查找客户端
     const agent = await AgentRepository.getAgentByToken(norlmalInfo.token);
 
     if (
-      agent.status != "active" ||
+      agent.status != 'active' ||
       agent.hostname != norlmalInfo.hostname ||
       agent.ip_addresses != norlmalInfo.ip_addresses ||
       agent.os != norlmalInfo.os ||
@@ -320,14 +319,14 @@ export async function updateAgentStatusService(status: any) {
       agent.keepalive = norlmalInfo.keepalive;
       agent.status = norlmalInfo.status;
 
-      console.log("update agent info: ", agent);
+      console.log('update agent info: ', agent);
 
       await AgentRepository.updateAgent(agent);
     }
 
     // 插入 metric 信息
 
-    const metrics = statusData.map((item) => ({
+    const metrics = statusData.map(item => ({
       agent_id: agent.id,
       timestamp: new Date().toISOString(),
       cpu_usage: item?.cpu?.usage,
@@ -344,24 +343,24 @@ export async function updateAgentStatusService(status: any) {
       network_metrics: JSON.stringify(item?.network || []),
     }));
 
-    console.log("metrics", metrics);
+    console.log('metrics', metrics);
 
     const result = await AgentRepository.insertAgentMetrics(metrics);
-    console.log("插入指标结果:", result);
+    console.log('插入指标结果:', result);
 
     // 取出 metrics中的最新一条数据用于通知
     const latestMetric = metrics[metrics.length - 1];
-    console.log("latestMetric cpu", latestMetric.cpu_usage);
-    console.log("latestMetric memory", latestMetric.memory_usage_rate);
+    console.log('latestMetric cpu', latestMetric.cpu_usage);
+    console.log('latestMetric memory', latestMetric.memory_usage_rate);
     await handleAgentThresholdNotification(
       agent.id,
-      "cpu",
+      'cpu',
       latestMetric.cpu_usage
     );
 
     await handleAgentThresholdNotification(
       agent.id,
-      "memory",
+      'memory',
       latestMetric.memory_usage_rate
     );
 
@@ -369,7 +368,7 @@ export async function updateAgentStatusService(status: any) {
       agentId: agent.id,
     };
   } catch (error) {
-    console.error("更新客户端状态错误:", error);
+    console.error('更新客户端状态错误:', error);
     throw error;
   }
 }

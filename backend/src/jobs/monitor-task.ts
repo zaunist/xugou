@@ -1,22 +1,22 @@
-import { Hono } from "hono";
-import { Bindings } from "../models/db";
-import { Monitor } from "../models/monitor";
-import { getMonitorsToCheck, checkMonitor } from "../services";
-import { shouldSendNotification, sendNotification } from "../services";
-import { db } from "../config";
+import { Hono } from 'hono';
+import { Bindings } from '../models/db';
+import { Monitor } from '../models/monitor';
+import { getMonitorsToCheck, checkMonitor } from '../services';
+import { shouldSendNotification, sendNotification } from '../services';
+import { db } from '../config';
 import {
   monitorDailyStats,
   monitorStatusHistory24h,
   monitors,
-} from "../db/schema";
-import { and, gte, lte } from "drizzle-orm";
+} from '../db/schema';
+import { and, gte, lte } from 'drizzle-orm';
 
 const monitorTask = new Hono<{ Bindings: Bindings }>();
 
 // 监控检查的主要函数
 async function checkMonitors(c: any) {
   try {
-    console.log("开始执行监控检查...");
+    console.log('开始执行监控检查...');
 
     // 查询需要检查的监控
     const monitors = await getMonitorsToCheck();
@@ -24,7 +24,7 @@ async function checkMonitors(c: any) {
     console.log(`找到 ${monitors?.length || 0} 个需要检查的监控`);
 
     if (!monitors || monitors.length === 0) {
-      return { success: true, message: "没有需要检查的监控", checked: 0 };
+      return { success: true, message: '没有需要检查的监控', checked: 0 };
     }
 
     // 检查每个监控
@@ -41,13 +41,13 @@ async function checkMonitors(c: any) {
 
     return {
       success: true,
-      message: "监控检查完成",
+      message: '监控检查完成',
       checked: results.length,
       results: results,
     };
   } catch (error) {
-    console.error("监控检查出错:", error);
-    return { success: false, message: "监控检查出错", error: String(error) };
+    console.error('监控检查出错:', error);
+    return { success: false, message: '监控检查出错', error: String(error) };
   }
 }
 
@@ -78,7 +78,7 @@ async function handleMonitorNotification(
     console.log(`检查通知设置...`);
     const notificationCheck = await shouldSendNotification(
       monitor.created_by, // 修复: 传入 userId
-      "monitor",
+      'monitor',
       monitor.id,
       checkResult.previous_status,
       checkResult.status
@@ -109,19 +109,19 @@ async function handleMonitorNotification(
     const variables = {
       name: monitor.name,
       status: checkResult.status,
-      previous_status: checkResult.previous_status || "未知",
-      time: new Date().toLocaleString("zh-CN"),
+      previous_status: checkResult.previous_status || '未知',
+      time: new Date().toLocaleString('zh-CN'),
       url: monitor.url,
       response_time: `${checkResult.responseTime}ms`,
       status_code: checkResult.statusCode
         ? checkResult.statusCode.toString()
-        : "无",
+        : '无',
       expected_status: monitor.expected_status.toString(),
-      error: checkResult.error || "无",
+      error: checkResult.error || '无',
       details: `URL: ${monitor.url}\n响应时间: ${
         checkResult.responseTime
-      }ms\n状态码: ${checkResult.statusCode || "无"}\n错误信息: ${
-        checkResult.error || "无"
+      }ms\n状态码: ${checkResult.statusCode || '无'}\n错误信息: ${
+        checkResult.error || '无'
       }`,
     };
 
@@ -130,7 +130,7 @@ async function handleMonitorNotification(
     // 发送通知
     console.log(`开始发送通知...`);
     const notificationResult = await sendNotification(
-      "monitor",
+      'monitor',
       monitor.id,
       variables,
       notificationCheck.channels,
@@ -156,12 +156,12 @@ async function handleMonitorNotification(
 // 从24小时热表生成每日监控统计数据的函数
 async function generateDailyStats(c: any) {
   try {
-    console.log("开始从24小时热表生成每日监控统计数据...");
+    console.log('开始从24小时热表生成每日监控统计数据...');
 
     // 获取前一天的日期 (YYYY-MM-DD 格式)
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1); // 修正：获取前一天的日期
-    const dateStr = yesterday.toISOString().split("T")[0];
+    const dateStr = yesterday.toISOString().split('T')[0];
 
     console.log(`正在处理日期 ${dateStr} 的数据`);
 
@@ -173,8 +173,8 @@ async function generateDailyStats(c: any) {
     const monitorsResult = await db.select().from(monitors);
 
     if (!monitorsResult || monitorsResult.length === 0) {
-      console.log("没有找到监控");
-      return { success: true, message: "没有监控", processed: 0 };
+      console.log('没有找到监控');
+      return { success: true, message: '没有监控', processed: 0 };
     }
 
     const allMonitors = monitorsResult as Monitor[];
@@ -200,7 +200,7 @@ async function generateDailyStats(c: any) {
 
     if (!historyResult || historyResult.length === 0) {
       console.log(`在 ${dateStr} 没有找到任何监控历史记录`);
-      return { success: true, message: "没有历史记录", processed: 0 };
+      return { success: true, message: '没有历史记录', processed: 0 };
     }
 
     console.log(`找到 ${historyResult.length} 条历史记录`);
@@ -232,9 +232,9 @@ async function generateDailyStats(c: any) {
       const stats = statsMap.get(monitorId);
       stats.totalChecks++;
 
-      if (record.status === "up") {
+      if (record.status === 'up') {
         stats.upChecks++;
-      } else if (record.status === "down") {
+      } else if (record.status === 'down') {
         stats.downChecks++;
       }
 
@@ -323,15 +323,15 @@ async function generateDailyStats(c: any) {
 
     return {
       success: true,
-      message: "每日统计数据生成完成",
+      message: '每日统计数据生成完成',
       processed: processed,
       date: dateStr,
     };
   } catch (error) {
-    console.error("生成每日统计数据时出错:", error);
+    console.error('生成每日统计数据时出错:', error);
     return {
       success: false,
-      message: "生成每日统计数据时出错",
+      message: '生成每日统计数据时出错',
       error: String(error),
     };
   }
@@ -351,9 +351,9 @@ export default {
     if (hour == 0 && minute == 5) {
       // 生成每日监控统计数据
       const statsResult = await generateDailyStats(c);
-      console.log("生成每日监控统计测试");
+      console.log('生成每日监控统计测试');
       if (statsResult.error) {
-        console.error("生成每日监控统计数据时出错:", statsResult.error);
+        console.error('生成每日监控统计数据时出错:', statsResult.error);
       }
     }
 

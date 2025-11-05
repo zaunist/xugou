@@ -1,44 +1,44 @@
-import { createBrowserRouter, RouteObject, Outlet } from "react-router-dom";
-import { lazy, Suspense, ReactNode } from "react";
+import { createBrowserRouter, RouteObject, Outlet } from 'react-router-dom';
+import { lazy, Suspense, ReactNode } from 'react';
 
 // 布局
-import Layout from "../components/Layout";
-import UsersList from "../pages/users/UsersList";
-import UserProfile from "../pages/users/UserProfile";
+import Layout from '../components/Layout';
+import UsersList from '../pages/users/UsersList';
+import UserProfile from '../pages/users/UserProfile';
 
 // 懒加载页面组件
-const Dashboard = lazy(() => import("../pages/Dashboard"));
-const Home = lazy(() => import("../pages/Home"));
-const NotFound = lazy(() => import("../pages/NotFound"));
+const Dashboard = lazy(() => import('../pages/Dashboard'));
+const Home = lazy(() => import('../pages/Home'));
+const NotFound = lazy(() => import('../pages/NotFound'));
 
 // 代理页面组件
-const AgentsList = lazy(() => import("../pages/agents/AgentsList"));
-const AgentDetail = lazy(() => import("../pages/agents/AgentDetail"));
-const CreateAgent = lazy(() => import("../pages/agents/CreateAgent"));
-const EditAgent = lazy(() => import("../pages/agents/EditAgent"));
+const AgentsList = lazy(() => import('../pages/agents/AgentsList'));
+const AgentDetail = lazy(() => import('../pages/agents/AgentDetail'));
+const CreateAgent = lazy(() => import('../pages/agents/CreateAgent'));
+const EditAgent = lazy(() => import('../pages/agents/EditAgent'));
 
 // 状态页面组件
-const StatusPage = lazy(() => import("../pages/status/StatusPage"));
-const StatusPageConfig = lazy(() => import("../pages/status/StatusPageConfig"));
+const StatusPage = lazy(() => import('../pages/status/StatusPage'));
+const StatusPageConfig = lazy(() => import('../pages/status/StatusPageConfig'));
 
 // 监控页面组件
-const MonitorsList = lazy(() => import("../pages/monitors/MonitorsList"));
-const MonitorDetail = lazy(() => import("../pages/monitors/MonitorDetail"));
-const CreateMonitor = lazy(() => import("../pages/monitors/CreateMonitor"));
-const EditMonitor = lazy(() => import("../pages/monitors/EditMonitor"));
+const MonitorsList = lazy(() => import('../pages/monitors/MonitorsList'));
+const MonitorDetail = lazy(() => import('../pages/monitors/MonitorDetail'));
+const CreateMonitor = lazy(() => import('../pages/monitors/CreateMonitor'));
+const EditMonitor = lazy(() => import('../pages/monitors/EditMonitor'));
 
 // 通知页面组件
 const NotificationsConfig = lazy(
-  () => import("../pages/notifications/NotificationsConfig")
+  () => import('../pages/notifications/NotificationsConfig')
 );
 
 // 认证页面组件
-const Login = lazy(() => import("../pages/auth/Login"));
-const Register = lazy(() => import("../pages/auth/Register"));
+const Login = lazy(() => import('../pages/auth/Login'));
+const Register = lazy(() => import('../pages/auth/Register'));
 
 // 用户管理页面组件
-const CreateUser = lazy(() => import("../pages/users/CreateUser"));
-const EditUser = lazy(() => import("../pages/users/EditUser"));
+const CreateUser = lazy(() => import('../pages/users/CreateUser'));
+const EditUser = lazy(() => import('../pages/users/EditUser'));
 
 // 用于包装Layout并提供children
 interface LayoutWrapperProps {
@@ -46,14 +46,14 @@ interface LayoutWrapperProps {
 }
 const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
   // 检查当前路径是否为状态页面，如果是则不使用Layout包裹
-  const isStatusPage = window.location.pathname.startsWith("/status/public");
+  const isStatusPage = window.location.pathname.startsWith('/status/public');
   return isStatusPage ? <>{children}</> : <Layout>{children}</Layout>;
 };
 
 // 需要授权的路由
 const protectedRoutes: RouteObject[] = [
   {
-    path: "/dashboard",
+    path: '/dashboard',
     element: (
       <Suspense fallback={<div>加载中...</div>}>
         <Dashboard />
@@ -62,10 +62,10 @@ const protectedRoutes: RouteObject[] = [
   },
   // 代理页面
   {
-    path: "/agents",
+    path: '/agents',
     children: [
       {
-        path: "",
+        path: '',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <AgentsList />
@@ -73,7 +73,7 @@ const protectedRoutes: RouteObject[] = [
         ),
       },
       {
-        path: ":id",
+        path: ':id',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <AgentDetail />
@@ -81,7 +81,7 @@ const protectedRoutes: RouteObject[] = [
         ),
       },
       {
-        path: "create",
+        path: 'create',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <CreateAgent />
@@ -89,7 +89,7 @@ const protectedRoutes: RouteObject[] = [
         ),
       },
       {
-        path: "edit/:id",
+        path: 'edit/:id',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <EditAgent />
@@ -100,10 +100,10 @@ const protectedRoutes: RouteObject[] = [
   },
   // 状态页面
   {
-    path: "/status",
+    path: '/status',
     children: [
       {
-        path: "public/:userId",
+        path: 'public/:userId',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <StatusPage />
@@ -111,7 +111,7 @@ const protectedRoutes: RouteObject[] = [
         ),
       },
       {
-        path: "config",
+        path: 'config',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <StatusPageConfig />
@@ -122,10 +122,10 @@ const protectedRoutes: RouteObject[] = [
   },
   // 监控页面
   {
-    path: "/monitors",
+    path: '/monitors',
     children: [
       {
-        path: "",
+        path: '',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <MonitorsList />
@@ -133,7 +133,7 @@ const protectedRoutes: RouteObject[] = [
         ),
       },
       {
-        path: ":id",
+        path: ':id',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <MonitorDetail />
@@ -141,7 +141,7 @@ const protectedRoutes: RouteObject[] = [
         ),
       },
       {
-        path: "create",
+        path: 'create',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <CreateMonitor />
@@ -149,7 +149,7 @@ const protectedRoutes: RouteObject[] = [
         ),
       },
       {
-        path: "edit/:id",
+        path: 'edit/:id',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <EditMonitor />
@@ -160,7 +160,7 @@ const protectedRoutes: RouteObject[] = [
   },
   // 通知页面
   {
-    path: "/notifications",
+    path: '/notifications',
     element: (
       <Suspense fallback={<div>加载中...</div>}>
         <NotificationsConfig />
@@ -169,10 +169,10 @@ const protectedRoutes: RouteObject[] = [
   },
   // 用户管理
   {
-    path: "/users",
+    path: '/users',
     children: [
       {
-        path: "",
+        path: '',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <UsersList />
@@ -180,7 +180,7 @@ const protectedRoutes: RouteObject[] = [
         ),
       },
       {
-        path: "create",
+        path: 'create',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <CreateUser />
@@ -188,7 +188,7 @@ const protectedRoutes: RouteObject[] = [
         ),
       },
       {
-        path: ":id",
+        path: ':id',
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <EditUser />
@@ -200,7 +200,7 @@ const protectedRoutes: RouteObject[] = [
 
   // 个人资料
   {
-    path: "/profile",
+    path: '/profile',
     element: (
       <Suspense fallback={<div>加载中...</div>}>
         <UserProfile />
@@ -212,7 +212,7 @@ const protectedRoutes: RouteObject[] = [
 // 公共路由
 const publicRoutes: RouteObject[] = [
   {
-    path: "/",
+    path: '/',
     element: (
       <Suspense fallback={<div>加载中...</div>}>
         <Home />
@@ -220,7 +220,7 @@ const publicRoutes: RouteObject[] = [
     ),
   },
   {
-    path: "/login",
+    path: '/login',
     element: (
       <Suspense fallback={<div>加载中...</div>}>
         <Login />
@@ -228,7 +228,7 @@ const publicRoutes: RouteObject[] = [
     ),
   },
   {
-    path: "/register",
+    path: '/register',
     element: (
       <Suspense fallback={<div>加载中...</div>}>
         <Register />
@@ -236,7 +236,7 @@ const publicRoutes: RouteObject[] = [
     ),
   },
   {
-    path: "*",
+    path: '*',
     element: (
       <Suspense fallback={<div>加载中...</div>}>
         <NotFound />

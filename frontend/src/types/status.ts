@@ -2,8 +2,8 @@
  * 状态页面相关类型定义
  */
 
-import { Agent } from "./agents";
-import { MonitorWithDailyStatsAndStatusHistory } from "./monitors";
+import { Agent } from './agents';
+import { MonitorWithDailyStatsAndStatusHistory } from './monitors';
 
 export interface ConfigMonitor {
   id: number;

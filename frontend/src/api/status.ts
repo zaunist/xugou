@@ -1,16 +1,15 @@
-import api from "./client";
+import api from './client';
 import {
   StatusPageConfig,
   StatusPageConfigResponse,
   StatusPageData,
-} from "../types/status";
+} from '../types/status';
 
 // 获取状态页配置
 export const getStatusPageConfig =
   async (): Promise<StatusPageConfigResponse> => {
-    const response = await api.get<StatusPageConfigResponse>(
-      "/api/status/config"
-    );
+    const response =
+      await api.get<StatusPageConfigResponse>('/api/status/config');
     return response.data;
   };
 
@@ -19,14 +18,18 @@ export const saveStatusPageConfig = async (
   config: StatusPageConfig
 ): Promise<StatusPageConfigResponse> => {
   const response = await api.post<StatusPageConfigResponse>(
-    "/api/status/config",
+    '/api/status/config',
     config
   );
   return response.data;
 };
 
 // 获取状态页数据
-export const getStatusPageData = async (userId: number): Promise<StatusPageData> => {
-  const response = await api.get<StatusPageData>(`/api/status/public/${userId}/data`);
+export const getStatusPageData = async (
+  userId: number
+): Promise<StatusPageData> => {
+  const response = await api.get<StatusPageData>(
+    `/api/status/public/${userId}/data`
+  );
   return response.data;
 };

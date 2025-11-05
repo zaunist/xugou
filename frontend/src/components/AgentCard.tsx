@@ -1,9 +1,9 @@
-import { Box, Card, Flex, Text } from "@radix-ui/themes";
-import { Tabs, TabsContent, TabsList, TabsTrigger, Badge } from "./ui";
-import { GlobeIcon } from "@radix-ui/react-icons";
-import MetricsChart from "./MetricsChart";
-import { useTranslation } from "react-i18next";
-import { AgentCardProps, MetricType } from "../types";
+import { Box, Card, Flex, Text } from '@radix-ui/themes';
+import { Tabs, TabsContent, TabsList, TabsTrigger, Badge } from './ui';
+import { GlobeIcon } from '@radix-ui/react-icons';
+import MetricsChart from './MetricsChart';
+import { useTranslation } from 'react-i18next';
+import { AgentCardProps, MetricType } from '../types';
 
 /**
  * 客户端状态卡片组件
@@ -17,37 +17,37 @@ const AgentCard = ({
 }: AgentCardProps) => {
   const { t } = useTranslation();
 
-  console.log(t("agentCard.receivedData"), agent);
+  console.log(t('agentCard.receivedData'), agent);
 
   // 根据status属性判断状态
-  const agentStatus = agent.status || "inactive";
+  const agentStatus = agent.status || 'inactive';
 
   // 状态颜色映射
   const statusColors: { [key: string]: string } = {
-    active: "green",
-    inactive: "amber",
-    connecting: "yellow",
+    active: 'green',
+    inactive: 'amber',
+    connecting: 'yellow',
   };
 
   // 状态文本映射
   const statusText: { [key: string]: string } = {
-    active: t("agentCard.status.active"),
-    inactive: t("agentCard.status.inactive"),
-    connecting: t("agentCard.status.connecting"),
+    active: t('agentCard.status.active'),
+    inactive: t('agentCard.status.inactive'),
+    connecting: t('agentCard.status.connecting'),
   };
 
   // 获取IP地址显示的文本
   const getIpAddressText = () => {
-    if (!agent.ip_addresses) return t("common.notFound");
+    if (!agent.ip_addresses) return t('common.notFound');
     const ipArray = JSON.parse(String(agent.ip_addresses));
     return Array.isArray(ipArray) && ipArray.length > 0
-      ? ipArray[0] + (ipArray.length > 1 ? ` (+${ipArray.length - 1})` : "")
+      ? ipArray[0] + (ipArray.length > 1 ? ` (+${ipArray.length - 1})` : '')
       : String(agent.ip_addresses);
   };
 
   // 格式化最后更新时间
   const formatLastUpdated = () => {
-    if (!agent.updated_at) return "";
+    if (!agent.updated_at) return '';
 
     try {
       return new Date(agent.updated_at).toLocaleString();
@@ -58,11 +58,11 @@ const AgentCard = ({
 
   // 定义所有可用的指标类型
   const metricTypes: MetricType[] = [
-    "cpu",
-    "memory",
-    "disk",
-    "network",
-    "load",
+    'cpu',
+    'memory',
+    'disk',
+    'network',
+    'load',
   ];
 
   return (
@@ -73,7 +73,7 @@ const AgentCard = ({
             <Box
               style={{
                 color:
-                  agentStatus === "active" ? "var(--green-9)" : "var(--gray-9)",
+                  agentStatus === 'active' ? 'var(--green-9)' : 'var(--gray-9)',
               }}
             >
               <GlobeIcon width="16" height="16" />
@@ -95,7 +95,7 @@ const AgentCard = ({
         </Flex>
         {showLastUpdated && agent.updated_at && (
           <Text size="1" color="gray" mt="2" mb="2">
-            {t("agent.lastUpdated")}: {formatLastUpdated()}
+            {t('agent.lastUpdated')}: {formatLastUpdated()}
           </Text>
         )}
         <Badge color={statusColors[agentStatus] as any}>
@@ -107,14 +107,14 @@ const AgentCard = ({
         {/* 指标图表区域 */}
         <Tabs defaultValue="cpu">
           <TabsList>
-            {metricTypes.map((type) => (
+            {metricTypes.map(type => (
               <TabsTrigger key={type} value={type}>
                 {t(`agent.metrics.${type}.title`) || type.toUpperCase()}
               </TabsTrigger>
             ))}
           </TabsList>
 
-          {metricTypes.map((type) => (
+          {metricTypes.map(type => (
             <TabsContent key={type} value={type}>
               <MetricsChart
                 history={agent.metrics}

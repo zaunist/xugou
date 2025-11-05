@@ -1,11 +1,9 @@
 /**
  * 组件相关类型定义
  */
-import { Monitor } from "./monitors";
-import { Agent, MetricHistory } from "./agents";
-import { NotificationChannel } from "./notification";
-
-
+import { Monitor } from './monitors';
+import { Agent, MetricHistory } from './agents';
+import { NotificationChannel } from './notification';
 
 // ChannelSelector 组件类型
 export interface ChannelSelectorProps {
@@ -20,22 +18,22 @@ export interface StatusItem {
   id: string;
   name: string;
   status:
-    | "up"
-    | "down"
-    | "pending"
-    | "unknown"
-    | "active"
-    | "inactive"
-    | "online"
-    | "offline"
-    | "error";
+    | 'up'
+    | 'down'
+    | 'pending'
+    | 'unknown'
+    | 'active'
+    | 'inactive'
+    | 'online'
+    | 'offline'
+    | 'error';
   time?: string;
 }
 
 export interface StatusSummaryCardProps {
   title: string;
   items: StatusItem[];
-  type: "monitors" | "agents";
+  type: 'monitors' | 'agents';
 }
 
 // MonitorCard 组件类型

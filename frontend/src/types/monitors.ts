@@ -12,7 +12,7 @@ export interface Monitor {
   expected_status?: number;
   interval: number;
   timeout: number;
-  status: "up" | "down" | "pending" | "unknown" | "error";
+  status: 'up' | 'down' | 'pending' | 'unknown' | 'error';
   last_checked?: string;
   response_time?: number;
   user_id: number;
@@ -30,7 +30,7 @@ export interface MonitorWithDailyStatsAndStatusHistory extends Monitor {
 export interface MonitorStatusHistory {
   id: number;
   monitor_id: number;
-  status: "up" | "down";
+  status: 'up' | 'down';
   response_time?: number;
   timestamp?: string;
   status_code?: number;

@@ -59,7 +59,7 @@ XUGOU adopts a modern system architecture, including the following components:
 
 ### Deployment Guide
 
-Default username: admin  Default password: admin123
+Default username: admin Default password: admin123
 
 [XUGOU wiki Deployment Guide](https://github.com/zaunist/xugou/wiki)
 
@@ -93,7 +93,7 @@ Thanks to the following sponsors for supporting the development of XUGOU:
 
 ## 📄 License
 
-This project is open-sourced under the MIT License. See the [LICENSE](./LICENSE) file for details. 
+This project is open-sourced under the MIT License. See the [LICENSE](./LICENSE) file for details.
 
 ## 🔥 Star History
 

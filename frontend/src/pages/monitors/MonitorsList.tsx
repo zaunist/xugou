@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Flex,
@@ -8,7 +8,7 @@ import {
   IconButton,
   Grid,
   Container,
-} from "@radix-ui/themes";
+} from '@radix-ui/themes';
 import {
   Button,
   Table,
@@ -26,7 +26,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from "@/components/ui";
+} from '@/components/ui';
 
 import {
   PlusIcon,
@@ -39,16 +39,16 @@ import {
   ViewGridIcon,
   ReloadIcon,
   InfoCircledIcon,
-} from "@radix-ui/react-icons";
+} from '@radix-ui/react-icons';
 import {
   getAllMonitors,
   deleteMonitor,
   getAllDailyStats,
   getAllMonitorHistory,
-} from "../../api/monitors";
-import { MonitorWithDailyStatsAndStatusHistory } from "../../types/monitors";
-import MonitorCard from "../../components/MonitorCard";
-import { useTranslation } from "react-i18next";
+} from '../../api/monitors';
+import { MonitorWithDailyStatsAndStatusHistory } from '../../types/monitors';
+import MonitorCard from '../../components/MonitorCard';
+import { useTranslation } from 'react-i18next';
 
 const MonitorsList = () => {
   const navigate = useNavigate();
@@ -57,7 +57,7 @@ const MonitorsList = () => {
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<"list" | "grid">("grid");
+  const [view, setView] = useState<'list' | 'grid'>('grid');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedMonitorId, setSelectedMonitorId] = useState<number | null>(
     null
@@ -69,7 +69,7 @@ const MonitorsList = () => {
 
     // 设置定时器，每分钟刷新一次数据
     const intervalId = setInterval(() => {
-      console.log("MonitorsList: 自动刷新数据...");
+      console.log('MonitorsList: 自动刷新数据...');
       fetchData();
     }, 60000); // 60000ms = 1分钟
 
@@ -84,21 +84,21 @@ const MonitorsList = () => {
     const responseDailyStats = await getAllDailyStats();
     const responseMonitorHistory = await getAllMonitorHistory();
 
-    console.log("responseDailyStats: ", responseDailyStats);
+    console.log('responseDailyStats: ', responseDailyStats);
 
     if (
       response.success &&
       responseDailyStats.success &&
       responseMonitorHistory.success
     ) {
-      const monitorsWithData = response.monitors?.map((monitor) => {
+      const monitorsWithData = response.monitors?.map(monitor => {
         // 将与当前监控相关的 dailyStats 数据附加到 monitor 上
         const dailyStats = (responseDailyStats.dailyStats || []).filter(
-          (stat) => stat.monitor_id === monitor.id
+          stat => stat.monitor_id === monitor.id
         );
         // 将与当前监控相关的 monitorHistory 数据附加到 monitor 上
         const history = (responseMonitorHistory.history || []).filter(
-          (item) => item.monitor_id === monitor.id
+          item => item.monitor_id === monitor.id
         );
         // 返回附加了相关数据的 monitor
         return {
@@ -107,10 +107,10 @@ const MonitorsList = () => {
           history: history,
         };
       });
-      console.log("monitorsWithData: ", monitorsWithData);
+      console.log('monitorsWithData: ', monitorsWithData);
       setMonitors(monitorsWithData || []);
     } else {
-      setError(response.message || t("monitors.loadingError"));
+      setError(response.message || t('monitors.loadingError'));
     }
     setLoading(false);
   };
@@ -136,14 +136,14 @@ const MonitorsList = () => {
         if (response.success) {
           // 更新列表，移除已删除的监控
           setMonitors(
-            monitors.filter((monitor) => monitor.id !== selectedMonitorId)
+            monitors.filter(monitor => monitor.id !== selectedMonitorId)
           );
         } else {
-          setError(response.message || t("monitors.delete.failed"));
+          setError(response.message || t('monitors.delete.failed'));
         }
       } catch (err) {
-        console.error(t("monitors.delete.failed"), err);
-        setError(t("monitors.delete.failed"));
+        console.error(t('monitors.delete.failed'), err);
+        setError(t('monitors.delete.failed'));
       } finally {
         setDeleteDialogOpen(false);
         setSelectedMonitorId(null);
@@ -155,20 +155,20 @@ const MonitorsList = () => {
   // 状态图标
   const StatusIcon = ({ status }: { status: string }) => {
     switch (status) {
-      case "up":
-        return <CheckCircledIcon style={{ color: "var(--green-9)" }} />;
-      case "down":
-        return <CrossCircledIcon style={{ color: "var(--red-9)" }} />;
+      case 'up':
+        return <CheckCircledIcon style={{ color: 'var(--green-9)' }} />;
+      case 'down':
+        return <CrossCircledIcon style={{ color: 'var(--red-9)' }} />;
       default:
-        return <QuestionMarkCircledIcon style={{ color: "var(--gray-9)" }} />;
+        return <QuestionMarkCircledIcon style={{ color: 'var(--gray-9)' }} />;
     }
   };
 
   // 状态颜色映射
-  const statusColors: { [key: string]: "green" | "red" | "gray" } = {
-    up: "green",
-    down: "red",
-    pending: "gray",
+  const statusColors: { [key: string]: 'green' | 'red' | 'gray' } = {
+    up: 'green',
+    down: 'red',
+    pending: 'gray',
   };
 
   // 加载中显示
@@ -176,7 +176,7 @@ const MonitorsList = () => {
     return (
       <Box>
         <Flex justify="center" align="center" p="4">
-          <Text>{t("common.loading")}</Text>
+          <Text>{t('common.loading')}</Text>
         </Flex>
       </Box>
     );
@@ -192,7 +192,7 @@ const MonitorsList = () => {
           </Flex>
         </Card>
         <Button variant="secondary" onClick={() => window.location.reload()}>
-          {t("monitors.retry")}
+          {t('monitors.retry')}
         </Button>
       </Box>
     );
@@ -200,15 +200,19 @@ const MonitorsList = () => {
 
   return (
     <Container className="sm:px-6 lg:px-[8%]">
-      <Flex justify="between" align="start" direction={{ initial: "column", sm: "row" }}>
-        <Heading size="6">{t("monitors.pageTitle")}</Heading>
+      <Flex
+        justify="between"
+        align="start"
+        direction={{ initial: 'column', sm: 'row' }}
+      >
+        <Heading size="6">{t('monitors.pageTitle')}</Heading>
         <Flex className="mt-4 space-x-2">
           <Tabs defaultValue="grid">
             <TabsList>
-              <TabsTrigger value="grid" onClick={() => setView("grid")}>
+              <TabsTrigger value="grid" onClick={() => setView('grid')}>
                 <ViewGridIcon />
               </TabsTrigger>
-              <TabsTrigger value="list" onClick={() => setView("list")}>
+              <TabsTrigger value="list" onClick={() => setView('list')}>
                 <LayoutIcon />
               </TabsTrigger>
             </TabsList>
@@ -219,14 +223,14 @@ const MonitorsList = () => {
             disabled={loading}
           >
             <ReloadIcon />
-            {t("monitors.refresh")}
+            {t('monitors.refresh')}
           </Button>
           <Button
             variant="secondary"
-            onClick={() => navigate("/monitors/create")}
+            onClick={() => navigate('/monitors/create')}
           >
             <PlusIcon />
-            {t("monitors.create")}
+            {t('monitors.create')}
           </Button>
         </Flex>
       </Flex>
@@ -241,28 +245,28 @@ const MonitorsList = () => {
               p="6"
               gap="3"
             >
-              <Text>{t("monitors.notFound")}</Text>
-              <Button onClick={() => navigate("/monitors/create")}>
+              <Text>{t('monitors.notFound')}</Text>
+              <Button onClick={() => navigate('/monitors/create')}>
                 <PlusIcon />
-                {t("monitors.addOne")}
+                {t('monitors.addOne')}
               </Button>
             </Flex>
           </Card>
-        ) : view === "list" ? (
+        ) : view === 'list' ? (
           // 列表视图
           <Table>
             <TableHeader>
               <TableRow>
-                <TableCell>{t("monitors.table.name")}</TableCell>
-                <TableCell>{t("monitors.table.url")}</TableCell>
-                <TableCell>{t("monitors.table.status")}</TableCell>
-                <TableCell>{t("monitors.table.responseTime")}</TableCell>
-                <TableCell>{t("monitors.table.actions")}</TableCell>
+                <TableCell>{t('monitors.table.name')}</TableCell>
+                <TableCell>{t('monitors.table.url')}</TableCell>
+                <TableCell>{t('monitors.table.status')}</TableCell>
+                <TableCell>{t('monitors.table.responseTime')}</TableCell>
+                <TableCell>{t('monitors.table.actions')}</TableCell>
               </TableRow>
             </TableHeader>
 
             <TableBody>
-              {monitors.map((monitor) => (
+              {monitors.map(monitor => (
                 <TableRow key={`${monitor.id}-${Math.random()}`}>
                   <TableCell>
                     <Text weight="medium">{monitor.name}</Text>
@@ -274,11 +278,11 @@ const MonitorsList = () => {
                     <Flex align="center" gap="2">
                       <StatusIcon status={monitor.status} />
                       <Badge color={statusColors[monitor.status]}>
-                        {monitor.status === "up"
-                          ? t("monitors.status.up")
-                          : monitor.status === "down"
-                          ? t("monitors.status.down")
-                          : t("monitor.status.pending")}
+                        {monitor.status === 'up'
+                          ? t('monitors.status.up')
+                          : monitor.status === 'down'
+                            ? t('monitors.status.down')
+                            : t('monitor.status.pending')}
                       </Badge>
                     </Flex>
                   </TableCell>
@@ -286,7 +290,7 @@ const MonitorsList = () => {
                     <Text>
                       {monitor.response_time
                         ? `${monitor.response_time}ms`
-                        : "-"}
+                        : '-'}
                     </Text>
                   </TableCell>
                   <TableCell>
@@ -294,14 +298,14 @@ const MonitorsList = () => {
                       <IconButton
                         variant="soft"
                         onClick={() => navigate(`/monitors/${monitor.id}`)}
-                        title={t("monitors.viewDetails")}
+                        title={t('monitors.viewDetails')}
                       >
                         <InfoCircledIcon />
                       </IconButton>
                       <IconButton
                         variant="soft"
                         onClick={() => navigate(`/monitors/edit/${monitor.id}`)}
-                        title={t("monitors.edit")}
+                        title={t('monitors.edit')}
                       >
                         <Pencil1Icon />
                       </IconButton>
@@ -309,7 +313,7 @@ const MonitorsList = () => {
                         variant="soft"
                         color="red"
                         onClick={() => handleDeleteClick(monitor.id)}
-                        title={t("monitors.delete")}
+                        title={t('monitors.delete')}
                       >
                         <TrashIcon />
                       </IconButton>
@@ -321,8 +325,8 @@ const MonitorsList = () => {
           </Table>
         ) : (
           // 网格视图 - 使用 MonitorCard 组件
-          <Grid columns={{ initial: "1" }} gap="4">
-            {monitors.map((monitor) => (
+          <Grid columns={{ initial: '1' }} gap="4">
+            {monitors.map(monitor => (
               <Box key={`${monitor.id}-${Math.random()}`} className="relative">
                 <MonitorCard monitor={monitor} />
                 <Flex gap="2" className="absolute top-4 right-4">
@@ -330,7 +334,7 @@ const MonitorsList = () => {
                     variant="ghost"
                     size="1"
                     onClick={() => navigate(`/monitors/${monitor.id}`)}
-                    title={t("monitors.viewDetails")}
+                    title={t('monitors.viewDetails')}
                   >
                     <InfoCircledIcon />
                   </IconButton>
@@ -338,7 +342,7 @@ const MonitorsList = () => {
                     variant="ghost"
                     size="1"
                     onClick={() => navigate(`/monitors/edit/${monitor.id}`)}
-                    title={t("monitors.edit")}
+                    title={t('monitors.edit')}
                   >
                     <Pencil1Icon />
                   </IconButton>
@@ -347,7 +351,7 @@ const MonitorsList = () => {
                     size="1"
                     color="red"
                     onClick={() => handleDeleteClick(monitor.id)}
-                    title={t("monitors.delete")}
+                    title={t('monitors.delete')}
                   >
                     <TrashIcon />
                   </IconButton>
@@ -361,15 +365,15 @@ const MonitorsList = () => {
       {/* 删除确认对话框 */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
-          <DialogTitle>{t("common.deleteConfirmation")}</DialogTitle>
+          <DialogTitle>{t('common.deleteConfirmation')}</DialogTitle>
           <DialogDescription>
-            {t("common.deleteConfirmMessage")}
+            {t('common.deleteConfirmMessage')}
           </DialogDescription>
           <Flex gap="3" mt="4" justify="end">
             <DialogClose>
-              <Button variant="secondary">{t("common.cancel")}</Button>
+              <Button variant="secondary">{t('common.cancel')}</Button>
             </DialogClose>
-            <Button onClick={handleDeleteConfirm}>{t("common.delete")}</Button>
+            <Button onClick={handleDeleteConfirm}>{t('common.delete')}</Button>
           </Flex>
         </DialogContent>
       </Dialog>

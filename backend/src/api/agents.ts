@@ -1,6 +1,6 @@
-import { Hono } from "hono";
-import { Bindings } from "../models/db";
-import { Agent } from "../models/agent";
+import { Hono } from 'hono';
+import { Bindings } from '../models/db';
+import { Agent } from '../models/agent';
 import {
   getAgents,
   getAgentDetail,
@@ -11,7 +11,7 @@ import {
   updateAgentStatusService,
   getAgentMetrics,
   getLatestAgentMetrics,
-} from "../services/AgentService";
+} from '../services/AgentService';
 
 const agents = new Hono<{
   Bindings: Bindings;
@@ -19,8 +19,8 @@ const agents = new Hono<{
 }>();
 
 // 获取所有客户端
-agents.get("/", async (c) => {
-  const payload = c.get("jwtPayload");
+agents.get('/', async c => {
+  const payload = c.get('jwtPayload');
   const result = await getAgents(payload.id);
 
   return c.json(
@@ -34,9 +34,9 @@ agents.get("/", async (c) => {
 });
 
 // 更新客户端信息
-agents.put("/:id", async (c) => {
-  const agentId = Number(c.req.param("id"));
-  const payload = c.get("jwtPayload");
+agents.put('/:id', async c => {
+  const agentId = Number(c.req.param('id'));
+  const payload = c.get('jwtPayload');
   const updateData = await c.req.json();
 
   const result = await updateAgentService(c.env.DB, agentId, updateData);
@@ -52,17 +52,17 @@ agents.put("/:id", async (c) => {
 });
 
 // 删除客户端
-agents.delete("/:id", async (c) => {
+agents.delete('/:id', async c => {
   try {
-    const agentId = Number(c.req.param("id"));
-    const payload = c.get("jwtPayload"); // 获取用户信息
+    const agentId = Number(c.req.param('id'));
+    const payload = c.get('jwtPayload'); // 获取用户信息
 
     await deleteAgentService(agentId, payload.id); // 传入 userId
 
     return c.json(
       {
         success: true,
-        message: "客户端已删除",
+        message: '客户端已删除',
       },
       200
     );
@@ -77,9 +77,8 @@ agents.delete("/:id", async (c) => {
   }
 });
 
-
 // 生成客户端Token
-agents.post("/token/generate", async (c) => {
+agents.post('/token/generate', async c => {
   // 生成新令牌
   const newToken = await generateAgentToken(c.env);
 
@@ -88,19 +87,20 @@ agents.post("/token/generate", async (c) => {
 
   return c.json({
     success: true,
-    message: "已生成客户端注册令牌",
+    message: '已生成客户端注册令牌',
     token: newToken,
   });
 });
 
 // 客户端自注册接口
-agents.post("/register", async (c) => {
-  const { token, name, hostname, ip_addresses, os, version } = await c.req.json();
+agents.post('/register', async c => {
+  const { token, name, hostname, ip_addresses, os, version } =
+    await c.req.json();
 
   const result = await registerAgentService(
     c.env,
     token,
-    name || "New Agent",
+    name || 'New Agent',
     hostname,
     ip_addresses,
     os,
@@ -118,18 +118,18 @@ agents.post("/register", async (c) => {
 });
 
 // 通过令牌更新客户端状态
-agents.post("/status", async (c) => {
+agents.post('/status', async c => {
   // 获取客户端发送的所有数据并打印日志
   const statusData = await c.req.json();
 
-  console.log("statusData: ", statusData);
+  console.log('statusData: ', statusData);
 
   try {
     await updateAgentStatusService(statusData);
     return c.json(
       {
         success: true,
-        message: "客户端状态已更新",
+        message: '客户端状态已更新',
       },
       200
     );
@@ -145,40 +145,40 @@ agents.post("/status", async (c) => {
 });
 
 // 获取单个客户端的指标
-agents.get("/:id/metrics", async (c) => {
-  const agentId = Number(c.req.param("id"));
+agents.get('/:id/metrics', async c => {
+  const agentId = Number(c.req.param('id'));
   const result = await getAgentMetrics(agentId);
   return c.json(
     {
       success: true,
       agent: result,
-      message: "获取客户端指标成功",
+      message: '获取客户端指标成功',
     },
     200
   );
 });
 
 // 获取单个客户端的最新指标
-agents.get("/:id/metrics/latest", async (c) => {
-  const agentId = Number(c.req.param("id"));
+agents.get('/:id/metrics/latest', async c => {
+  const agentId = Number(c.req.param('id'));
   const result = await getLatestAgentMetrics(agentId);
   return c.json(
     {
       success: true,
       agent: result,
-      message: "获取客户端最新指标成功",
+      message: '获取客户端最新指标成功',
     },
     200
   );
 });
 
 // 获取单个客户端
-agents.get("/:id", async (c) => {
-  const agentId = Number(c.req.param("id"));
+agents.get('/:id', async c => {
+  const agentId = Number(c.req.param('id'));
 
   const result = await getAgentDetail(agentId);
 
-  console.log("result: ", result);
+  console.log('result: ', result);
 
   return c.json(
     {
