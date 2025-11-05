@@ -1,4 +1,5 @@
 import { Bindings } from "../models/db";
+import type { Agent } from "../models/agent";
 import * as AgentRepository from "../repositories";
 import { generateToken, verifyToken } from "../utils/jwt";
 import { handleAgentThresholdNotification } from "../jobs/agent-task";
@@ -84,15 +85,29 @@ export async function updateAgentService(
 
     if (updateData.ip_addresses && updateData.ip_addresses.length > 0) {
       agent.ip_addresses = JSON.stringify(updateData.ip_addresses);
-    } else {
+    } else if (updateData.ip_addresses) {
       agent.ip_addresses = "[]";
     }
 
-    agent.name = updateData.name;
-    agent.hostname = updateData.hostname;
-    agent.os = updateData.os;
-    agent.version = updateData.version;
-    agent.status = updateData.status;
+    if (typeof updateData.name === "string") {
+      agent.name = updateData.name;
+    }
+
+    if (updateData.hostname !== undefined) {
+      agent.hostname = updateData.hostname ?? null;
+    }
+
+    if (updateData.os !== undefined) {
+      agent.os = updateData.os ?? null;
+    }
+
+    if (updateData.version !== undefined) {
+      agent.version = updateData.version ?? null;
+    }
+
+    if (updateData.status !== undefined) {
+      agent.status = updateData.status ?? null;
+    }
 
     // 执行更新
     const updatedAgent = await AgentRepository.updateAgent(agent);
@@ -359,8 +374,9 @@ export async function updateAgentStatusService(status: any) {
   }
 }
 
-export async function getAgentById(id: number) {
-  return await AgentRepository.getAgentById(id);
+export async function getAgentById(id: number): Promise<Agent | null> {
+  const agent = await AgentRepository.getAgentById(id);
+  return agent ?? null;
 }
 
 export async function getActiveAgents() {
