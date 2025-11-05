@@ -99,8 +99,7 @@ async function handleAgentOfflineNotification(
 
     // 获取客户端完整信息
     const agent = await getAgentById(agentId);
-    const agentData = agent[0];
-    if (!agentData) {
+    if (!agent) {
       console.error(`找不到客户端数据 (ID: ${agentId})`);
       return;
     }
@@ -111,16 +110,16 @@ async function handleAgentOfflineNotification(
       status: "offline",
       previous_status: "online", // 添加previous_status变量
       time: new Date().toLocaleString("zh-CN"),
-      hostname: agentData.hostname || "未知",
-      ip_addresses: getFormattedIPAddresses(agentData.ip_addresses),
-      os: agentData.os || "未知",
+      hostname: agent.hostname || "未知",
+      ip_addresses: getFormattedIPAddresses(agent.ip_addresses),
+      os: agent.os || "未知",
       error: "客户端连接超时",
       details: `主机名: ${
-        agentData.hostname || "未知"
+        agent.hostname || "未知"
       }\nIP地址: ${getFormattedIPAddresses(
-        agentData.ip_addresses
-      )}\n操作系统: ${agentData.os || "未知"}\n最后连接时间: ${new Date(
-        agentData.updated_at
+        agent.ip_addresses
+      )}\n操作系统: ${agent.os || "未知"}\n最后连接时间: ${new Date(
+        agent.updated_at
       ).toLocaleString("zh-CN")}`,
     };
 
@@ -163,8 +162,7 @@ export async function handleAgentThresholdNotification(
       console.error(`找不到客户端 (ID: ${agentId})`);
       throw new Error(`找不到客户端 (ID: ${agentId})`);
     }
-    
-    // @ts-ignore
+
     const userId = agent.created_by; // 获取 userId
 
     // 根据具体的指标类型

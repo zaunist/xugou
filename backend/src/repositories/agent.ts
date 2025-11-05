@@ -31,12 +31,17 @@ export async function getAgentMetricsByIds(agentIds: number[]) {
 }
 
 // 获取单个客户端详情
-export async function getAgentById(id: number) {
+export async function getAgentById(id: number): Promise<Agent | null> {
   const agent = await db
     .select()
     .from(agents)
     .where(eq(agents.id, id))
     .limit(1);
+
+  if (!agent || agent.length === 0) {
+    return null;
+  }
+
   return agent[0];
 }
 
