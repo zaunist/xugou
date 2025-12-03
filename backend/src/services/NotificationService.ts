@@ -652,6 +652,44 @@ async function sendWeComNotification(
 
 registerSender("wecom", sendWeComNotification);
 
+/**
+ * 为用户创建默认通知模板（仅模板，不包括渠道和设置）
+ * 用于在发送通知时，如果用户没有任何模板，则自动创建默认模板
+ * @param userId 用户ID
+ */
+async function createDefaultTemplatesForUser(userId: number): Promise<void> {
+  try {
+    console.log(`为用户 ${userId} 创建默认通知模板...`);
+
+    // 创建 Monitor 监控模板
+    await repositories.createNotificationTemplate({
+      name: "Monitor监控模板",
+      type: "monitor",
+      subject: "【${status}】${name} 监控状态变更",
+      content:
+        "🔔 网站监控状态变更通知\n\n📊 服务: ${name}\n🔄 状态: ${status} (之前: ${previous_status})\n🕒 时间: ${time}\n\n🔗 地址: ${url}\n⏱️ 响应时间: ${response_time}\n📝 实际状态码: ${status_code}\n🎯 期望状态码: ${expected_status}\n\n❗ 错误信息: ${error}",
+      is_default: true,
+      created_by: userId,
+    });
+
+    // 创建 Agent 监控模板
+    await repositories.createNotificationTemplate({
+      name: "Agent监控模板",
+      type: "agent",
+      subject: "【${status}】${name} 客户端状态变更",
+      content:
+        "🔔 客户端状态变更通知\n\n📊 主机: ${name}\n🔄 状态: ${status} (之前: ${previous_status})\n🕒 时间: ${time}\n\n🖥️ 主机信息:\n  主机名: ${hostname}\n  IP地址: ${ip_addresses}\n  操作系统: ${os}\n\n❗ 错误信息: ${error}",
+      is_default: true,
+      created_by: userId,
+    });
+
+    console.log(`为用户 ${userId} 创建默认通知模板成功`);
+  } catch (error) {
+    console.error(`为用户 ${userId} 创建默认通知模板失败:`, error);
+    // 不抛出异常，让调用方继续执行
+  }
+}
+
 export async function sendNotification(
   type: "monitor" | "agent" | "system",
   targetId: number | null,
@@ -674,8 +712,22 @@ export async function sendNotification(
     }
 
     // 获取默认的通知模板
-    const templates = await repositories.getNotificationTemplates(userId);
+    let templates = await repositories.getNotificationTemplates(userId);
     console.log(`[发送通知] 获取到${templates.length}个通知模板`);
+
+    // 如果用户没有任何模板，为其创建默认模板
+    if (templates.length === 0) {
+      console.log(`[发送通知] 用户${userId}没有通知模板，正在创建默认模板...`);
+      await createDefaultTemplatesForUser(userId);
+      // 重新获取模板
+      templates = await repositories.getNotificationTemplates(userId);
+      console.log(`[发送通知] 为用户${userId}创建默认模板后，获取到${templates.length}个通知模板`);
+      
+      // 如果模板创建后仍然为空，记录警告
+      if (templates.length === 0) {
+        console.error(`[发送通知] 为用户${userId}创建默认模板失败，请检查日志`);
+      }
+    }
 
     let defaultTemplate = templates.find(
       (t) => t.is_default && t.type === type
