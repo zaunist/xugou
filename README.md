@@ -1,12 +1,10 @@
-# XUGOU - 基于CloudFlare搭建的轻量化监控平台
+# XUGOU - 基于 CloudFlare 搭建的轻量化监控平台
 
 <div align="center">
 
 ![XUGOU Logo](frontend/public/logo.svg)
 
 XUGOU 是一个基于 CloudFlare 的轻量化系统监控平台，提供系统监控和状态页面功能。
-
-[English](./README_EN.md) | 简体中文
 
 </div>
 
@@ -18,26 +16,30 @@ XUGOU 是一个基于 CloudFlare 的轻量化系统监控平台，提供系统�
 - ✅ HTTP 监控 - API 接口健康检测
 - ✅ 数据可视化 - 实时数据展示与历史趋势
 - ✅ 状态页面 - 可定制的服务状态页面
-- ✅ 告警通知 - 异常事件通过多渠道通知（电子邮件、Telegram等）
+- ✅ 告警通知 - 异常事件通过多渠道通知（电子邮件、Telegram 等）
 - ✅ 用户管理 - 支持用户注册、多用户管理，可分配不同权限
 
 ## ✨ 核心特性
 
 - 🖥️ **系统监控**
+
   - 实时监控 CPU、内存、磁盘、网络等系统指标
   - 支持自定义监控间隔
-  - 全平台支持（agent由go编写，理论上go能编译的平台都可以支持）
+  - 全平台支持（agent 由 go 编写，理论上 go 能编译的平台都可以支持）
 
 - 🌐 **HTTP 监控**
+
   - 支持 HTTP/HTTPS 接口监控
   - 自定义请求方法、头部和请求体
   - 响应时间、状态码和内容检查
 
 - 📊 **数据可视化**
+
   - 实时数据图表展示
   - 自定义仪表盘
 
 - 🌍 **状态页面**
+
   - 自定义状态页面
   - 支持多监控项展示
   - 响应式设计
@@ -61,20 +63,25 @@ XUGOU 采用现代化的系统架构，包含以下组件：
 
 默认用户名：admin 默认密码: admin123
 
-[XUGOU wiki 部署指南](https://github.com/zaunist/xugou/wiki)
+[部署指南](./docs/部署指南.md)
+
+### 开发指南
+
+[开发指南](./docs/开发指南.md)
 
 ## 常见问题
 
-[XUGOU wiki 常见问题](https://github.com/zaunist/xugou/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)
+[常见问题](./docs/常见问题.md)
 
 ## ⭐ 支持一下作者
-
-- Gitfish: [Gitfish 赞助](https://www.gitfish.dev/repo/zaunist/xugou)
 
 <div align="center">
   <a href="https://buymeacoffee.com/real_zaunist" target="_blank">
     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200" height="51">
   </a>
+  <div style="margin-top: 12px;">
+    <img src="./docs/mm_reward_qrcode.png" alt="赞赏码" width="240">
+  </div>
 </div>
 
 ## 🤝 贡献
