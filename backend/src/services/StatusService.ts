@@ -63,9 +63,7 @@ export async function getStatusPageConfig(userId: number) {
 
     // 构建返回的客户端列表，标记哪些客户端被选中
     const agents = allAgents.map((agent: any) => {
-      const isSelected = agentsResult.some(
-        (a: any) => a.agent_id === agent.id
-      );
+      const isSelected = agentsResult.some((a: any) => a.agent_id === agent.id);
       return { ...agent, selected: isSelected };
     });
 
@@ -203,8 +201,9 @@ export async function getStatusPagePublicData(userId: number) {
         );
         if (monitor) {
           // 确保监控项存在
-          const monitorDailyStats =
-            await repositories.getMonitorDailyStatsById(monitorId);
+          const monitorDailyStats = await repositories.getMonitorDailyStatsById(
+            monitorId
+          );
           const monitorHistory =
             await repositories.getMonitorStatusHistoryIn24h(monitorId);
           monitors.push({
@@ -223,10 +222,8 @@ export async function getStatusPagePublicData(userId: number) {
     const agentIds = selectedAgents.map((a: any) => a.agent_id);
     if (agentIds.length > 0) {
       const agentsResult = await repositories.getAgentsByIds(agentIds);
-      // @ts-ignore
-      if (agentsResult && agentsResult.results) {
-        // @ts-ignore
-        agents = agentsResult.results as Agent[];
+      if (agentsResult) {
+        agents = agentsResult as Agent[];
       }
     }
   }
