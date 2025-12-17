@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Flex, Heading, Text, Code, TextField } from "@radix-ui/themes";
-import { Button, Card, Separator, Switch } from "@/components/ui";
+import { Box, Flex, Heading, Text, Code } from "@radix-ui/themes";
+import { Button, Card, Separator, Switch, Input } from "@/components/ui";
 import {
   ArrowLeftIcon,
   CopyIcon,
@@ -66,7 +66,8 @@ const CreateAgent = () => {
 
   // 根据是否使用代理生成安装脚本 URL
   const getInstallScriptUrl = () => {
-    const baseUrl = "https://github.com/zaunist/xugou/blob/main/install-agent.sh";
+    const baseUrl =
+      "https://github.com/zaunist/xugou/blob/main/install-agent.sh";
     if (useProxy) {
       return `${customProxyUrl}${baseUrl}`;
     }
@@ -109,7 +110,11 @@ const CreateAgent = () => {
             </Text>
             <Flex gap="2" align="center">
               <Text className="token-display">{serverUrl}</Text>
-              <Button variant="secondary" onClick={handleCopyServerUrl} className="ml-2">
+              <Button
+                variant="secondary"
+                onClick={handleCopyServerUrl}
+                className="ml-2"
+              >
                 {serverUrlCopied ? <CheckIcon /> : <CopyIcon />}
                 {serverUrlCopied ? t("common.copied") : t("common.copy")}
               </Button>
@@ -171,7 +176,8 @@ const CreateAgent = () => {
               {useProxy && (
                 <Flex direction="column" gap="1" pl="6">
                   <Text size="2">自定义代理地址 (可选):</Text>
-                  <TextField.Input
+                  <Input
+                    className="h-10"
                     value={customProxyUrl}
                     onChange={(e) => setCustomProxyUrl(e.target.value)}
                     placeholder="例如: https://gh-proxy.com/"
@@ -188,7 +194,9 @@ const CreateAgent = () => {
                     "一键安装命令 (Linux/macOS/Windows):"
                   )}
                 </Text>
-                <Code size="2" className="break-all">{oneLinerInstallCommand}</Code>
+                <Code size="2" className="break-all">
+                  {oneLinerInstallCommand}
+                </Code>
                 <Button variant="secondary" onClick={handleCopyInstallCommand}>
                   {installCommandCopied ? <CheckIcon /> : <CopyIcon />}
                   {installCommandCopied ? t("common.copied") : t("common.copy")}

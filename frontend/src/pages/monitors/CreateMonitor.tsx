@@ -1,13 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Flex,
-  Heading,
-  Text,
-  TextField,
-  IconButton,
-} from "@radix-ui/themes";
+import { Box, Flex, Heading, Text, IconButton } from "@radix-ui/themes";
 import {
   Button,
   Card,
@@ -22,6 +15,7 @@ import {
   TableRow,
   TableBody,
   TableHeader,
+  Input,
 } from "@/components/ui";
 import { ArrowLeftIcon, PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { createMonitor } from "../../api/monitors";
@@ -160,7 +154,8 @@ const CreateMonitor = () => {
                 <Text as="label" size="2">
                   {t("monitor.form.name")} *
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
@@ -173,7 +168,8 @@ const CreateMonitor = () => {
                 <Text as="label" size="2">
                   URL *
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   name="url"
                   value={formData.url}
                   onChange={handleChange}
@@ -211,7 +207,8 @@ const CreateMonitor = () => {
                   <Text as="label" size="2">
                     {t("monitor.form.interval")} *
                   </Text>
-                  <TextField.Input
+                  <Input
+                    className="h-10"
                     name="interval"
                     type="number"
                     value={formData.interval.toString()}
@@ -228,7 +225,8 @@ const CreateMonitor = () => {
                   <Text as="label" size="2">
                     {t("monitor.form.timeout")} *
                   </Text>
-                  <TextField.Input
+                  <Input
+                    className="h-10"
                     name="timeout"
                     type="number"
                     value={formData.timeout.toString()}
@@ -267,7 +265,7 @@ const CreateMonitor = () => {
                       {headers.map((header, index) => (
                         <TableRow key={index}>
                           <TableCell>
-                            <TextField.Input
+                            <Input
                               placeholder={t(
                                 "monitor.form.headerNamePlaceholder"
                               )}
@@ -278,7 +276,7 @@ const CreateMonitor = () => {
                             />
                           </TableCell>
                           <TableCell>
-                            <TextField.Input
+                            <Input
                               placeholder={t(
                                 "monitor.form.headerValuePlaceholder"
                               )}

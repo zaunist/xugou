@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Flex, Heading, Text, TextField } from "@radix-ui/themes";
+import { Box, Flex, Heading, Text } from "@radix-ui/themes";
 import {
   Button,
   Card,
@@ -9,6 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Input,
 } from "@/components/ui";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { createUser } from "../../api/users";
@@ -76,7 +77,8 @@ const CreateUser = () => {
                 <Text as="label" size="2">
                   {t("user.username")} *
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
@@ -89,7 +91,8 @@ const CreateUser = () => {
                 <Text as="label" size="2">
                   密码 *
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   name="password"
                   type="password"
                   value={formData.password}
@@ -103,7 +106,8 @@ const CreateUser = () => {
                 <Text as="label" size="2">
                   {t("user.email")}
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   name="email"
                   type="email"
                   value={formData.email}

@@ -4,7 +4,6 @@ import {
   Flex,
   Heading,
   Text,
-  TextField,
   Container,
   TextArea,
 } from "@radix-ui/themes";
@@ -27,6 +26,7 @@ import {
   SelectContent,
   SelectValue,
   Switch,
+  Input,
 } from "@/components/ui";
 
 import { BellIcon, PlusIcon } from "@radix-ui/react-icons";
@@ -892,13 +892,15 @@ const NotificationsConfig = () => {
                           <Text size="2">
                             {t("notifications.threshold.label")}
                           </Text>
-                          <TextField.Input
-                            size="1"
+                          <Input
+                            className="w-20 h-8"
                             type="number"
                             min="0"
                             max="100"
                             value={settings.agents.cpuThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
                               handleAgentSettingChange(
                                 "cpuThreshold",
                                 Number(e.target.value)
@@ -929,13 +931,15 @@ const NotificationsConfig = () => {
                           <Text size="2">
                             {t("notifications.threshold.label")}
                           </Text>
-                          <TextField.Input
-                            size="1"
+                          <Input
+                            className="w-20 h-8"
                             type="number"
                             min="0"
                             max="100"
                             value={settings.agents.memoryThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
                               handleAgentSettingChange(
                                 "memoryThreshold",
                                 Number(e.target.value)
@@ -963,13 +967,15 @@ const NotificationsConfig = () => {
                           <Text size="2">
                             {t("notifications.threshold.label")}
                           </Text>
-                          <TextField.Input
-                            size="1"
+                          <Input
+                            className="w-20 h-8"
                             type="number"
                             min="0"
                             max="100"
                             value={settings.agents.diskThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
                               handleAgentSettingChange(
                                 "diskThreshold",
                                 Number(e.target.value)
@@ -1032,12 +1038,12 @@ const NotificationsConfig = () => {
             <Card key={monitorId} className="px-4">
               <Flex direction="column" gap="3">
                 <Flex justify="between" align="center">
-                  <Box>
+                  <Flex direction="column">
                     <Text weight="medium">{monitor.name}</Text>
                     <Text size="1" color="gray">
                       {monitor.url}
                     </Text>
-                  </Box>
+                  </Flex>
                   <Switch
                     checked={specificSettings.enabled}
                     onCheckedChange={(checked) =>
@@ -1144,7 +1150,7 @@ const NotificationsConfig = () => {
             <Card key={agentId} className="px-4">
               <Flex direction="column" gap="3">
                 <Flex justify="between" align="center">
-                  <Box>
+                  <Flex direction="column">
                     <Text weight="medium">{agent.name}</Text>
                     <Text size="1" color="gray">
                       {(() => {
@@ -1160,7 +1166,7 @@ const NotificationsConfig = () => {
                         }
                       })()}
                     </Text>
-                  </Box>
+                  </Flex>
                   <Switch
                     checked={specificSettings.enabled}
                     onCheckedChange={(checked) =>
@@ -1225,13 +1231,15 @@ const NotificationsConfig = () => {
                           <Text size="2">
                             {t("notifications.threshold.label")}
                           </Text>
-                          <TextField.Input
-                            size="1"
+                          <Input
+                            className="w-20 h-8"
                             type="number"
                             min="0"
                             max="100"
                             value={specificSettings.cpuThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
                               handleSpecificAgentSettingChange(
                                 agentId,
                                 "cpuThreshold",
@@ -1264,13 +1272,15 @@ const NotificationsConfig = () => {
                           <Text size="2">
                             {t("notifications.threshold.label")}
                           </Text>
-                          <TextField.Input
-                            size="1"
+                          <Input
+                            className="w-20 h-8"
                             type="number"
                             min="0"
                             max="100"
                             value={specificSettings.memoryThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
                               handleSpecificAgentSettingChange(
                                 agentId,
                                 "memoryThreshold",
@@ -1303,13 +1313,15 @@ const NotificationsConfig = () => {
                           <Text size="2">
                             {t("notifications.threshold.label")}
                           </Text>
-                          <TextField.Input
-                            size="1"
+                          <Input
+                            className="w-20 h-8"
                             type="number"
                             min="0"
                             max="100"
                             value={specificSettings.diskThreshold.toString()}
-                            onChange={(e) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
                               handleSpecificAgentSettingChange(
                                 agentId,
                                 "diskThreshold",
@@ -1366,170 +1378,235 @@ const NotificationsConfig = () => {
           }
         }}
       >
-        <DialogContent>
+        <DialogContent style={{ maxWidth: 500 }}>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm text-gray-500 mb-4">
             {t("notifications.channels.dialogDescription")}
           </DialogDescription>
-          <Flex direction="column" gap="3" mt="4">
-            <TextField.Input
-              placeholder={t("notifications.channels.name")}
-              value={channelForm.name}
-              onChange={(e) =>
-                setChannelForm({ ...channelForm, name: e.target.value })
-              }
-            />
-            {channelFormErrors.name && (
-              <Text size="1" color="red">
-                {channelFormErrors.name}
+          <Flex direction="column" gap="5">
+            <Box>
+              <Text as="div" size="2" mb="2" weight="bold">
+                {t("notifications.channels.name")}
               </Text>
-            )}
-            <Select
-              value={channelForm.type}
-              onValueChange={(value) =>
-                setChannelForm({ ...channelForm, type: value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="telegram">
-                  {t("notifications.channels.type.telegram")}
-                </SelectItem>
-                <SelectItem value="resend">
-                  {t("notifications.channels.type.resend")}
-                </SelectItem>
-                <SelectItem value="feishu">
-                  {t("notifications.channels.type.feishu")}
-                </SelectItem>
-                <SelectItem value="wecom">
-                  {t("notifications.channels.type.wecom")}
-                </SelectItem>
-                <SelectItem value="webhook" disabled>
-                  {t("notifications.channels.type.webhook")} (Coming Soon)
-                </SelectItem>
-                <SelectItem value="slack" disabled>
-                  {t("notifications.channels.type.slack")} (Coming Soon)
-                </SelectItem>
-                <SelectItem value="dingtalk" disabled>
-                  {t("notifications.channels.type.dingtalk")} (Coming Soon)
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            {channelForm.type === "telegram" && (
-              <>
-                <TextField.Input
-                  placeholder="Bot Token"
-                  value={channelForm.config.botToken}
-                  onChange={(e) =>
-                    setChannelForm({
-                      ...channelForm,
-                      config: {
-                        ...channelForm.config,
-                        botToken: e.target.value,
-                      },
-                    })
-                  }
-                />
-                {channelFormErrors.botToken && (
-                  <Text size="1" color="red">
-                    {channelFormErrors.botToken}
-                  </Text>
+              <Input
+                className="h-10"
+                placeholder={t("notifications.channels.name")}
+                value={channelForm.name}
+                onChange={(e) =>
+                  setChannelForm({ ...channelForm, name: e.target.value })
+                }
+              />
+              {channelFormErrors.name && (
+                <Text size="1" color="red">
+                  {channelFormErrors.name}
+                </Text>
+              )}
+            </Box>
+
+            <Box>
+              <Text as="div" size="2" mb="2" weight="bold">
+                {t("notifications.channels.type")}
+              </Text>
+              <Select
+                value={channelForm.type}
+                onValueChange={(value) =>
+                  setChannelForm({ ...channelForm, type: value })
+                }
+              >
+                <SelectTrigger className="h-[40px]">
+                  <SelectValue placeholder={t("notifications.channels.type")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="telegram">
+                    {t("notifications.channels.type.telegram")}
+                  </SelectItem>
+                  <SelectItem value="resend">
+                    {t("notifications.channels.type.resend")}
+                  </SelectItem>
+                  <SelectItem value="feishu">
+                    {t("notifications.channels.type.feishu")}
+                  </SelectItem>
+                  <SelectItem value="wecom">
+                    {t("notifications.channels.type.wecom")}
+                  </SelectItem>
+                  <SelectItem value="webhook" disabled>
+                    {t("notifications.channels.type.webhook")} (Coming Soon)
+                  </SelectItem>
+                  <SelectItem value="slack" disabled>
+                    {t("notifications.channels.type.slack")} (Coming Soon)
+                  </SelectItem>
+                  <SelectItem value="dingtalk" disabled>
+                    {t("notifications.channels.type.dingtalk")} (Coming Soon)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </Box>
+
+            <Card className="p-4 bg-gray-50">
+              <Flex direction="column" gap="4">
+                {channelForm.type === "telegram" && (
+                  <>
+                    <Box>
+                      <Text as="div" size="2" mb="2" weight="bold">
+                        Bot Token
+                      </Text>
+                      <Input
+                        className="h-10"
+                        placeholder="123456789:ABCdef..."
+                        value={channelForm.config.botToken}
+                        onChange={(e) =>
+                          setChannelForm({
+                            ...channelForm,
+                            config: {
+                              ...channelForm.config,
+                              botToken: e.target.value,
+                            },
+                          })
+                        }
+                      />
+                      {channelFormErrors.botToken && (
+                        <Text size="1" color="red">
+                          {channelFormErrors.botToken}
+                        </Text>
+                      )}
+                    </Box>
+                    <Box>
+                      <Text as="div" size="2" mb="2" weight="bold">
+                        Chat ID
+                      </Text>
+                      <Input
+                        className="h-10"
+                        placeholder="-100123456789"
+                        value={channelForm.config.chatId}
+                        onChange={(e) =>
+                          setChannelForm({
+                            ...channelForm,
+                            config: {
+                              ...channelForm.config,
+                              chatId: e.target.value,
+                            },
+                          })
+                        }
+                      />
+                      {channelFormErrors.chatId && (
+                        <Text size="1" color="red">
+                          {channelFormErrors.chatId}
+                        </Text>
+                      )}
+                    </Box>
+                  </>
                 )}
-                <TextField.Input
-                  placeholder="Chat ID"
-                  value={channelForm.config.chatId}
-                  onChange={(e) =>
-                    setChannelForm({
-                      ...channelForm,
-                      config: { ...channelForm.config, chatId: e.target.value },
-                    })
-                  }
-                />
-                {channelFormErrors.chatId && (
-                  <Text size="1" color="red">
-                    {channelFormErrors.chatId}
-                  </Text>
+                {channelForm.type === "resend" && (
+                  <>
+                    <Box>
+                      <Text as="div" size="2" mb="2" weight="bold">
+                        {t("notifications.channels.apiKey")}
+                      </Text>
+                      <Input
+                        className="h-10"
+                        placeholder="re_123..."
+                        value={channelForm.config.apiKey}
+                        onChange={(e) =>
+                          setChannelForm({
+                            ...channelForm,
+                            config: {
+                              ...channelForm.config,
+                              apiKey: e.target.value,
+                            },
+                          })
+                        }
+                      />
+                      {channelFormErrors.apiKey && (
+                        <Text size="1" color="red">
+                          {channelFormErrors.apiKey}
+                        </Text>
+                      )}
+                    </Box>
+                    <Flex gap="4">
+                      <Box className="flex-1">
+                        <Text as="div" size="2" mb="2" weight="bold">
+                          {t("notifications.channels.from")}
+                        </Text>
+                        <Input
+                          className="h-10"
+                          placeholder="onboarding@resend.dev"
+                          value={channelForm.config.from}
+                          onChange={(e) =>
+                            setChannelForm({
+                              ...channelForm,
+                              config: {
+                                ...channelForm.config,
+                                from: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                        {channelFormErrors.from && (
+                          <Text size="1" color="red">
+                            {channelFormErrors.from}
+                          </Text>
+                        )}
+                      </Box>
+                      <Box className="flex-1">
+                        <Text as="div" size="2" mb="2" weight="bold">
+                          {t("notifications.channels.to")}
+                        </Text>
+                        <Input
+                          className="h-10"
+                          placeholder="user@example.com"
+                          value={channelForm.config.to}
+                          onChange={(e) =>
+                            setChannelForm({
+                              ...channelForm,
+                              config: {
+                                ...channelForm.config,
+                                to: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                        {channelFormErrors.to && (
+                          <Text size="1" color="red">
+                            {channelFormErrors.to}
+                          </Text>
+                        )}
+                      </Box>
+                    </Flex>
+                  </>
                 )}
-              </>
-            )}
-            {channelForm.type === "resend" && (
-              <>
-                <TextField.Input
-                  placeholder={t("notifications.channels.apiKey")}
-                  value={channelForm.config.apiKey}
-                  onChange={(e) =>
-                    setChannelForm({
-                      ...channelForm,
-                      config: { ...channelForm.config, apiKey: e.target.value },
-                    })
-                  }
-                />
-                {channelFormErrors.apiKey && (
-                  <Text size="1" color="red">
-                    {channelFormErrors.apiKey}
-                  </Text>
+                {(channelForm.type === "feishu" ||
+                  channelForm.type === "wecom") && (
+                  <Box>
+                    <Text as="div" size="2" mb="2" weight="bold">
+                      {t("notifications.channels.webhookUrl")}
+                    </Text>
+                    <Input
+                      className="h-10"
+                      placeholder="https://..."
+                      value={channelForm.config.webhookUrl}
+                      onChange={(e) =>
+                        setChannelForm({
+                          ...channelForm,
+                          config: {
+                            ...channelForm.config,
+                            webhookUrl: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                    {channelFormErrors.webhookUrl && (
+                      <Text size="1" color="red">
+                        {channelFormErrors.webhookUrl}
+                      </Text>
+                    )}
+                  </Box>
                 )}
-                <TextField.Input
-                  placeholder={t("notifications.channels.from")}
-                  value={channelForm.config.from}
-                  onChange={(e) =>
-                    setChannelForm({
-                      ...channelForm,
-                      config: { ...channelForm.config, from: e.target.value },
-                    })
-                  }
-                />
-                {channelFormErrors.from && (
-                  <Text size="1" color="red">
-                    {channelFormErrors.from}
-                  </Text>
-                )}
-                <TextField.Input
-                  placeholder={t("notifications.channels.to")}
-                  value={channelForm.config.to}
-                  onChange={(e) =>
-                    setChannelForm({
-                      ...channelForm,
-                      config: { ...channelForm.config, to: e.target.value },
-                    })
-                  }
-                />
-                {channelFormErrors.to && (
-                  <Text size="1" color="red">
-                    {channelFormErrors.to}
-                  </Text>
-                )}
-              </>
-            )}
-            {(channelForm.type === "feishu" ||
-              channelForm.type === "wecom") && (
-              <>
-                <TextField.Input
-                  placeholder={t("notifications.channels.webhookUrl")}
-                  value={channelForm.config.webhookUrl}
-                  onChange={(e) =>
-                    setChannelForm({
-                      ...channelForm,
-                      config: {
-                        ...channelForm.config,
-                        webhookUrl: e.target.value,
-                      },
-                    })
-                  }
-                />
-                {channelFormErrors.webhookUrl && (
-                  <Text size="1" color="red">
-                    {channelFormErrors.webhookUrl}
-                  </Text>
-                )}
-              </>
-            )}
+              </Flex>
+            </Card>
           </Flex>
-          <Flex gap="3" mt="4" justify="end">
+          <Flex gap="3" mt="5" justify="end">
             <DialogClose asChild>
-              <Button variant="ghost">{t("common.cancel")}</Button>
+              <Button variant="secondary">{t("common.cancel")}</Button>
             </DialogClose>
             <Button onClick={handleSaveChannel} disabled={saving}>
               {saving ? t("common.savingChanges") : t("common.save")}
@@ -1579,8 +1656,9 @@ const NotificationsConfig = () => {
               ? t("notifications.templates.edit")
               : t("notifications.templates.add")}
           </DialogTitle>
-          <Flex direction="column" gap="3" mt="4">
-            <TextField.Input
+          <Flex direction="column" gap="4" mt="4">
+            <Input
+              className="h-10"
               placeholder={t("notifications.templates.name")}
               value={templateForm.name}
               onChange={(e) =>
@@ -1605,7 +1683,8 @@ const NotificationsConfig = () => {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <TextField.Input
+            <Input
+              className="h-10"
               placeholder={t("notifications.templates.subject")}
               value={templateForm.subject}
               onChange={(e) =>

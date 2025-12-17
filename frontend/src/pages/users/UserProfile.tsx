@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Flex, Heading, Text, TextField, Box } from "@radix-ui/themes";
-import { Button, Card } from "@/components/ui";
+import { Flex, Heading, Text, Box } from "@radix-ui/themes";
+import { Button, Card, Input } from "@/components/ui";
 import { useAuth } from "../../providers/AuthProvider";
 import { updateUser, changePassword, getUser } from "../../api/users";
 import { UpdateUserRequest, ChangePasswordRequest } from "../../types/users";
@@ -122,7 +122,8 @@ const UserProfile = () => {
                 <Text size="2" weight="medium">
                   {t("user.username")}
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   value={username}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setUsername(e.target.value)
@@ -135,7 +136,8 @@ const UserProfile = () => {
                 <Text size="2" weight="medium">
                   {t("user.email")}
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   type="email"
                   value={email}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -164,7 +166,8 @@ const UserProfile = () => {
                 <Text size="2" weight="medium">
                   {t("profile.currentPassword")}
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   type="password"
                   value={currentPassword}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -178,7 +181,8 @@ const UserProfile = () => {
                 <Text size="2" weight="medium">
                   {t("profile.newPassword")}
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   type="password"
                   value={newPassword}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -192,7 +196,8 @@ const UserProfile = () => {
                 <Text size="2" weight="medium">
                   {t("profile.confirmNewPassword")}
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   type="password"
                   value={confirmPassword}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

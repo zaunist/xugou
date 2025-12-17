@@ -5,7 +5,6 @@ import {
   Flex,
   Heading,
   Text,
-  TextField,
   IconButton,
   Container,
 } from "@radix-ui/themes";
@@ -24,6 +23,7 @@ import {
   TableRow,
   TableCell,
   Textarea,
+  Input,
 } from "@/components/ui";
 import {
   ArrowLeftIcon,
@@ -268,7 +268,8 @@ const EditMonitor = () => {
                 <Text as="label" size="2">
                   {t("monitor.form.name")} *
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
@@ -281,7 +282,8 @@ const EditMonitor = () => {
                 <Text as="label" size="2">
                   URL *
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   name="url"
                   value={formData.url}
                   onChange={handleChange}
@@ -319,7 +321,8 @@ const EditMonitor = () => {
                   <Text as="label" size="2">
                     {t("monitor.form.interval")} *
                   </Text>
-                  <TextField.Input
+                  <Input
+                    className="h-10"
                     name="interval"
                     type="number"
                     value={formData.interval.toString()}
@@ -336,7 +339,8 @@ const EditMonitor = () => {
                   <Text as="label" size="2">
                     {t("monitor.form.timeout")} *
                   </Text>
-                  <TextField.Input
+                  <Input
+                    className="h-10"
                     name="timeout"
                     type="number"
                     value={formData.timeout.toString()}
@@ -374,7 +378,7 @@ const EditMonitor = () => {
                       {headers.map((header, index) => (
                         <TableRow key={index}>
                           <TableCell>
-                            <TextField.Input
+                            <Input
                               placeholder={t(
                                 "monitor.form.headerNamePlaceholder"
                               )}
@@ -385,7 +389,7 @@ const EditMonitor = () => {
                             />
                           </TableCell>
                           <TableCell>
-                            <TextField.Input
+                            <Input
                               placeholder={t(
                                 "monitor.form.headerValuePlaceholder"
                               )}

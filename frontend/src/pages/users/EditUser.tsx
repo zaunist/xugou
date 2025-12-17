@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Flex, Heading, Text, TextField } from "@radix-ui/themes";
+import { Box, Flex, Heading, Text } from "@radix-ui/themes";
 import {
   Button,
   Card,
@@ -9,6 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Input,
 } from "@/components/ui";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { getUser, updateUser } from "../../api/users";
@@ -105,7 +106,8 @@ const EditUser = () => {
                 <Text as="label" size="2">
                   {t("user.username")} *
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
@@ -118,7 +120,8 @@ const EditUser = () => {
                 <Text as="label" size="2">
                   {t("user.email")}
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   name="email"
                   type="email"
                   value={formData.email}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Flex, Heading, Text, TextField } from "@radix-ui/themes";
-import { Button, Card } from "@/components/ui";
+import { Box, Flex, Heading, Text } from "@radix-ui/themes";
+import { Button, Card, Input } from "@/components/ui";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { getAgent, updateAgent } from "../../api/agents";
 import { useTranslation } from "react-i18next";
@@ -125,7 +125,8 @@ const EditAgent = () => {
                     *
                   </Text>
                 </Text>
-                <TextField.Input
+                <Input
+                  className="h-10"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}

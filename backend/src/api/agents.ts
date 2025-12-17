@@ -77,7 +77,6 @@ agents.delete("/:id", async (c) => {
   }
 });
 
-
 // 生成客户端Token
 agents.post("/token/generate", async (c) => {
   // 生成新令牌
@@ -95,7 +94,8 @@ agents.post("/token/generate", async (c) => {
 
 // 客户端自注册接口
 agents.post("/register", async (c) => {
-  const { token, name, hostname, ip_addresses, os, version } = await c.req.json();
+  const { token, name, hostname, ip_addresses, os, version } =
+    await c.req.json();
 
   const result = await registerAgentService(
     c.env,
@@ -121,8 +121,6 @@ agents.post("/register", async (c) => {
 agents.post("/status", async (c) => {
   // 获取客户端发送的所有数据并打印日志
   const statusData = await c.req.json();
-
-  console.log("statusData: ", statusData);
 
   try {
     await updateAgentStatusService(statusData);

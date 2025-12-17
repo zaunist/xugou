@@ -127,10 +127,10 @@ export async function createNotificationChannelsAndSettings(): Promise<void> {
 
     await db.insert(notificationChannels).values({
       id: 1,
-      name: "默认Telegram通知渠道(https://t.me/xugou_group)",
+      name: "测试Bot(https://t.me/xugou_bot)",
       type: "telegram",
       config:
-        '{"botToken": "8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU", "chatId": "-1002608818360"}',
+        '{"botToken": "8538953065:AAG51lJ31MNLWe3na5wai4SBRiZ8T-sOC3c", "chatId": "1111111111"}',
       enabled: 1,
       created_by: userId,
       created_at: now,

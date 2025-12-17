@@ -2,9 +2,9 @@ import * as models from "../models";
 import * as repositories from "../repositories";
 
 // 通知渠道相关服务
-export async function getNotificationChannels(userId: number): Promise<
-  models.NotificationChannel[]
-> {
+export async function getNotificationChannels(
+  userId: number
+): Promise<models.NotificationChannel[]> {
   return await repositories.getNotificationChannels(userId);
 }
 
@@ -39,7 +39,11 @@ export async function updateNotificationChannel(
   >
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    const result = await repositories.updateNotificationChannel(id, userId, channel);
+    const result = await repositories.updateNotificationChannel(
+      id,
+      userId,
+      channel
+    );
     return {
       success: result,
       message: result ? "通知渠道更新成功" : "通知渠道不存在或未做任何更改",
@@ -55,7 +59,7 @@ export async function updateNotificationChannel(
 
 export async function deleteNotificationChannel(
   id: number,
-  userId: number,
+  userId: number
 ): Promise<{ success: boolean; message?: string }> {
   try {
     const result = await repositories.deleteNotificationChannel(id, userId);
@@ -76,15 +80,15 @@ export async function deleteNotificationChannel(
 }
 
 // 通知模板相关服务
-export async function getNotificationTemplates(userId: number): Promise<
-  models.NotificationTemplate[]
-> {
+export async function getNotificationTemplates(
+  userId: number
+): Promise<models.NotificationTemplate[]> {
   return await repositories.getNotificationTemplates(userId);
 }
 
 export async function getNotificationTemplateById(
   id: number,
-  userId: number,
+  userId: number
 ): Promise<models.NotificationTemplate | null> {
   return await repositories.getNotificationTemplateById(id, userId);
 }
@@ -115,7 +119,11 @@ export async function updateNotificationTemplate(
   >
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    const result = await repositories.updateNotificationTemplate(id, userId, template);
+    const result = await repositories.updateNotificationTemplate(
+      id,
+      userId,
+      template
+    );
     return {
       success: result,
       message: result ? "通知模板更新成功" : "通知模板不存在或未做任何更改",
@@ -131,7 +139,7 @@ export async function updateNotificationTemplate(
 
 export async function deleteNotificationTemplate(
   id: number,
-  userId: number,
+  userId: number
 ): Promise<{ success: boolean; message?: string }> {
   try {
     const result = await repositories.deleteNotificationTemplate(id, userId);
@@ -149,7 +157,9 @@ export async function deleteNotificationTemplate(
 }
 
 // 通知设置相关服务,获取所有的通知设置
-export async function getNotificationConfig(userId: number): Promise<models.NotificationConfig> {
+export async function getNotificationConfig(
+  userId: number
+): Promise<models.NotificationConfig> {
   return await repositories.getNotificationConfig(userId);
 }
 
@@ -218,8 +228,6 @@ interface WeComConfig {
   webhookUrl: string;
 }
 
-
-
 /**
  * 解析通知渠道配置
  */
@@ -276,7 +284,6 @@ function parseChannelConfig<T>(channel: models.NotificationChannel): T {
     return {} as T;
   }
 }
-
 
 // =================================================================
 // Section: 各渠道发送器实现 (Sender Implementations)
@@ -470,7 +477,7 @@ interface NotificationSender {
 /**
  * 发送器注册表。
  * 这是一个从渠道类型字符串到其发送器实现的映射。
- * "Talk is cheap. Show me the code." 
+ * "Talk is cheap. Show me the code."
  * 这段代码取代了原来愚蠢的 if-else 链。
  */
 const senderRegistry: Record<string, NotificationSender> = {};
@@ -487,7 +494,6 @@ function registerSender(type: string, sender: NotificationSender) {
   senderRegistry[type] = sender;
   console.log(`[通知注册] 成功注册发送器: ${type}`);
 }
-
 
 /**
  * 根据渠道类型发送通知 (重构后)
@@ -517,8 +523,6 @@ async function sendNotificationByChannel(
     return { success: false, error: `不支持的通知渠道类型: ${channel.type}` };
   }
 }
-
-
 
 /**
  * 发送飞书通知
@@ -557,7 +561,7 @@ async function sendFeishuNotification(
         ],
       },
     };
-    
+
     console.log("[飞书通知] 准备发送通知到:", webhookUrl);
     const response = await fetch(webhookUrl, {
       method: "POST",
@@ -707,7 +711,9 @@ export async function sendNotification(
     // 获取所有通知渠道
     console.log(`[发送通知] 开始获取${channelIds.length}个通知渠道的详细信息`);
     const channels = await Promise.all(
-      channelIds.map((id) => repositories.getNotificationChannelById(id, userId))
+      channelIds.map((id) =>
+        repositories.getNotificationChannelById(id, userId)
+      )
     );
 
     // 过滤掉不存在的渠道
@@ -853,7 +859,11 @@ export async function shouldSendNotification(
   }
 
   // 获取此对象的特定设置
-  const specificSettings = await repositories.getSpecificSettings(userId, type, id);
+  const specificSettings = await repositories.getSpecificSettings(
+    userId,
+    type,
+    id
+  );
 
   console.log(
     `[通知触发检查] 获取到特定设置数量: ${
@@ -993,7 +1003,9 @@ export async function deleteNotificationSettings(
   userId: number
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    console.log(`[删除通知设置] 开始删除${type}通知设置，ID=${id}，用户ID=${userId}`);
+    console.log(
+      `[删除通知设置] 开始删除${type}通知设置，ID=${id}，用户ID=${userId}`
+    );
     // 执行删除操作
     await repositories.deleteNotificationSettings(type, id, userId);
   } catch (error) {
@@ -1013,7 +1025,9 @@ export async function deleteNotificationSettings(
  * 为新用户创建默认的通知设置
  * @param userId 新用户的ID
  */
-export async function createDefaultNotificationSettingsForUser(userId: number): Promise<void> {
+export async function createDefaultNotificationSettingsForUser(
+  userId: number
+): Promise<void> {
   try {
     console.log(`为新用户 ${userId} 创建默认通知设置...`);
     const now = new Date().toISOString();
@@ -1041,10 +1055,10 @@ export async function createDefaultNotificationSettingsForUser(userId: number): 
 
     // 创建默认通知渠道
     const defaultChannelId = await repositories.createNotificationChannel({
-      name: "默认Telegram通知渠道",
+      name: "TG测试Bot(仅提供了Token，请自行填写ChatID或者使用你的Bot)",
       type: "telegram",
       config:
-        '{"botToken": "8163201319:AAGyY7FtdaRb6o8NCVXSbBUb6ofDK45cNJU", "chatId": "-1002608818360"}',
+        '{"botToken": "8538953065:AAG51lJ31MNLWe3na5wai4SBRiZ8T-sOC3c", "chatId": "111111111"}',
       enabled: true,
       created_by: userId,
     });

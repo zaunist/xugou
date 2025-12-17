@@ -156,7 +156,6 @@ export async function deleteAgentService(agentId: number, userId: number) {
   }
 }
 
-
 /**
  * 生成客户端注册令牌
  * @param env 环境变量
@@ -347,7 +346,6 @@ export async function updateAgentStatusService(status: any) {
     console.log("metrics", metrics);
 
     const result = await AgentRepository.insertAgentMetrics(metrics);
-    console.log("插入指标结果:", result);
 
     // 取出 metrics中的最新一条数据用于通知
     const latestMetric = metrics[metrics.length - 1];

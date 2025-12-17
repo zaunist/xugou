@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Flex,
-  Heading,
-  Text,
-  TextField,
-  Container,
-} from "@radix-ui/themes";
+import { Box, Flex, Heading, Text, Container } from "@radix-ui/themes";
 import {
   Card,
   Button,
@@ -16,6 +9,7 @@ import {
   TabsTrigger,
   Textarea,
   Checkbox,
+  Input,
 } from "@/components/ui";
 import { EyeOpenIcon, CopyIcon, CheckIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
@@ -66,12 +60,12 @@ const StatusPageConfig = () => {
     monitors: [],
     agents: [],
   });
-  
+
   useEffect(() => {
     if (user) {
-      setConfig(prev => ({
+      setConfig((prev) => ({
         ...prev,
-        publicUrl: `${window.location.origin}/status/public/${user.id}`
+        publicUrl: `${window.location.origin}/status/public/${user.id}`,
       }));
     }
   }, [user]);
@@ -201,7 +195,11 @@ const StatusPageConfig = () => {
   return (
     <Container>
       <Box>
-        <Flex justify="between" align="start" direction={{ initial: "column", sm: "row" }}>
+        <Flex
+          justify="between"
+          align="start"
+          direction={{ initial: "column", sm: "row" }}
+        >
           <Flex align="center">
             <Heading size="5" weight="medium">
               {t("statusPageConfig.title")}
@@ -282,7 +280,8 @@ const StatusPageConfig = () => {
                   <Text as="label" className="text-sm font-medium">
                     {t("statusPageConfig.pageTitle")}
                   </Text>
-                  <TextField.Input
+                  <Input
+                    className="h-10"
                     name="title"
                     value={config.title}
                     onChange={handleChange}
@@ -310,10 +309,10 @@ const StatusPageConfig = () => {
                   </Text>
                   <Flex gap="2">
                     <Box className="flex-1 relative">
-                      <TextField.Input
+                      <Input
+                        className="h-10"
                         value={config.publicUrl}
                         readOnly
-                        className="w-full overflow-hidden text-ellipsis whitespace-nowrap pr-4"
                       />
                     </Box>
                     <Button variant="secondary" onClick={handleCopyUrl}>
