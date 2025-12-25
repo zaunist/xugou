@@ -67,7 +67,7 @@ const CreateAgent = () => {
   // 根据是否使用代理生成安装脚本 URL
   const getInstallScriptUrl = () => {
     const baseUrl =
-      "https://github.com/zaunist/xugou/blob/main/install-agent.sh";
+      "https://raw.githubusercontent.com/zaunist/xugou/refs/heads/main/install-agent.sh";
     if (useProxy) {
       return `${customProxyUrl}${baseUrl}`;
     }
