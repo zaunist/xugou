@@ -18,7 +18,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <Theme appearance="light">
-      <Flex direction="column" className="min-h-[100vh]" >
+      <Flex direction="column" className="min-h-[100vh]">
         {/* 顶部导航栏 */}
         <Navbar />
 
@@ -36,16 +36,11 @@ const Layout = ({ children }: LayoutProps) => {
               <Flex gap="3" mt="2" direction={{ initial: "column", sm: "row" }}>
                 <Button variant="link" asChild>
                   <a
-                    href="https://zaunist.com"
+                    href="https://ajielu.vercel.app"
                     target="_blank"
                     rel="noopener noreferrer"
-                  
                   >
-                    <FontAwesomeIcon
-                      icon={faRss}
-                      size="lg"
-                     
-                    />
+                    <FontAwesomeIcon icon={faRss} size="lg" />
                     <Text size="2">{t("footer.blog")}</Text>
                   </a>
                 </Button>
@@ -54,13 +49,8 @@ const Layout = ({ children }: LayoutProps) => {
                     href="https://www.youtube.com/@zaunist"
                     target="_blank"
                     rel="noopener noreferrer"
-                
                   >
-                    <FontAwesomeIcon
-                      icon={faYoutube}
-                      size="lg"
-                  
-                    />
+                    <FontAwesomeIcon icon={faYoutube} size="lg" />
                     <Text size="2">{t("footer.youtube")}</Text>
                   </a>
                 </Button>
@@ -69,13 +59,8 @@ const Layout = ({ children }: LayoutProps) => {
                     href="https://mail.mdzz.uk"
                     target="_blank"
                     rel="noopener noreferrer"
-                  
                   >
-                    <FontAwesomeIcon
-                      icon={faEnvelope}
-                      size="lg"
-                   
-                    />
+                    <FontAwesomeIcon icon={faEnvelope} size="lg" />
                     <Text size="2">{t("footer.tempMail")}</Text>
                   </a>
                 </Button>
@@ -83,7 +68,7 @@ const Layout = ({ children }: LayoutProps) => {
             </Flex>
           </Container>
         </Box>
-        <Toaster /> 
+        <Toaster />
       </Flex>
     </Theme>
   );
