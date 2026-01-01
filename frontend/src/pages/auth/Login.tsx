@@ -14,10 +14,18 @@ const Login = () => {
   const [message, setMessage] = useState("");
   const [showRegister, setShowRegister] = useState(false); // 新增状态
 
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+
+  // 如果已登录，重定向到 dashboard 或原来要访问的页面
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = (location.state as any)?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
 
   // 检查是否有来自注册页面的消息
   useEffect(() => {
@@ -47,7 +55,9 @@ const Login = () => {
     try {
       const result = await login({ username, password });
       if (result.success) {
-        navigate("/dashboard");
+        // 登录成功后，重定向到用户原来要访问的页面，或默认到 dashboard
+        const from = (location.state as any)?.from?.pathname || "/dashboard";
+        navigate(from, { replace: true });
       } else {
         setError(result.message);
       }

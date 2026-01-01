@@ -2,6 +2,8 @@
  * JWT工具类，提供JWT相关的通用功能
  */
 
+import { JWT_CONFIG } from "../config";
+
 /**
  * 获取JWT密钥
  * 优先从环境变量中获取JWT_SECRET，如果不存在则使用默认值
@@ -13,7 +15,7 @@ export const getJwtSecret = (c: any): string => {
   // 检查是否直接包含 CF_VERSION_METADATA
   if (c.CF_VERSION_METADATA) {
     const { id: versionId } = c.CF_VERSION_METADATA;
-    return versionId || "your-secret-key-change-in-production";
+    return versionId || JWT_CONFIG.DEFAULT_SECRET;
   }
 
   // 检查是否在 env 属性下包含 CF_VERSION_METADATA
@@ -21,11 +23,11 @@ export const getJwtSecret = (c: any): string => {
     console.log("context.env 包含 CF_VERSION_METADATA");
     const { id: versionId } = c.env.CF_VERSION_METADATA;
     console.log("解析出的 versionId:", versionId);
-    return versionId || "your-secret-key-change-in-production";
+    return versionId || JWT_CONFIG.DEFAULT_SECRET;
   }
 
   console.error("错误: 未找到 CF_VERSION_METADATA");
-  return "your-secret-key-change-in-production";
+  return JWT_CONFIG.DEFAULT_SECRET;
 };
 
 /**

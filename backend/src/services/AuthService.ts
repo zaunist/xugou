@@ -10,6 +10,7 @@ import { getJwtSecret } from "../utils/jwt";
 import { Bindings } from "../models/db";
 import * as SettingsService from "./SettingsService";
 import * as NotificationService from "./NotificationService";
+import { JWT_CONFIG, AUTH_CONFIG } from "../config";
 
 /**
  * 用户登录
@@ -78,7 +79,10 @@ export async function loginUser(
       const secret = getJwtSecret(env);
       console.log("获取到的 JWT secret:", secret);
 
-      const token = jsonwebtoken.sign(payload, secret, { expiresIn: "24h" });
+      // 使用配置的 token 有效期（30天）
+      const token = jsonwebtoken.sign(payload, secret, {
+        expiresIn: JWT_CONFIG.ACCESS_TOKEN_EXPIRES_IN,
+      } as jsonwebtoken.SignOptions) as string;
       console.log("成功生成 JWT token, 长度:", token.length);
 
       return {
@@ -121,7 +125,8 @@ export async function registerUser(
 ): Promise<{ success: boolean; message: string; user?: any }> {
   try {
     // 新增：检查是否允许新用户注册
-    const isRegistrationAllowed = await SettingsService.getAllowNewUserRegistration();
+    const isRegistrationAllowed =
+      await SettingsService.getAllowNewUserRegistration();
     if (!isRegistrationAllowed) {
       return { success: false, message: "新用户注册功能已关闭" };
     }
@@ -132,8 +137,8 @@ export async function registerUser(
       return { success: false, message: "用户名已存在" };
     }
 
-    // 密码加密
-    const salt = await bcrypt.genSalt(10);
+    // 密码加密（使用配置的盐轮数）
+    const salt = await bcrypt.genSalt(AUTH_CONFIG.BCRYPT_SALT_ROUNDS);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // 创建用户, 默认角色为 'user'
@@ -146,7 +151,9 @@ export async function registerUser(
 
     // 为新用户创建默认的通知设置
     if (newUser && newUser.id) {
-      await NotificationService.createDefaultNotificationSettingsForUser(newUser.id);
+      await NotificationService.createDefaultNotificationSettingsForUser(
+        newUser.id
+      );
     }
 
     return {

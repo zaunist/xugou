@@ -11,12 +11,7 @@ import {
   getCurrentUser,
 } from "../api/auth";
 import { getAllowNewUserRegistration } from "../api/settings"; // 新增
-import {
-  User,
-  LoginRequest,
-  RegisterRequest,
-  AuthContextType,
-} from "../types";
+import { User, LoginRequest, RegisterRequest, AuthContextType } from "../types";
 import { useTranslation } from "react-i18next";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,11 +32,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
-      setIsLoading(false);
+      // 验证 token 是否有效
+      verifyToken();
     } else {
       setIsLoading(false);
     }
   }, []);
+
+  // 验证 token 是否有效
+  const verifyToken = async () => {
+    try {
+      const response = await getCurrentUser();
+      if (response.success && response.user) {
+        setUser(response.user);
+        localStorage.setItem("user", JSON.stringify(response.user));
+      } else {
+        // Token 无效，清除登录状态
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setToken(null);
+        setUser(null);
+      }
+    } catch (error) {
+      console.error(t("auth.error.fetchUser"), error);
+      // Token 验证失败，清除登录状态
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setToken(null);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     // 如果有 token，但没有 user，则获取用户信息
@@ -93,7 +115,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       // 客户端再次检查是否允许注册
       const allowResponse = await getAllowNewUserRegistration();
       if (!allowResponse.success || !allowResponse.allow) {
-          return { success: false, message: t('register.disabled') };
+        return { success: false, message: t("register.disabled") };
       }
       const response = await apiRegister(data);
       return { success: response.success, message: response.message };

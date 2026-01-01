@@ -5,6 +5,7 @@ import { lazy, Suspense, ReactNode } from "react";
 import Layout from "../components/Layout";
 import UsersList from "../pages/users/UsersList";
 import UserProfile from "../pages/users/UserProfile";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 // 懒加载页面组件
 const Dashboard = lazy(() => import("../pages/Dashboard"));
@@ -55,9 +56,11 @@ const protectedRoutes: RouteObject[] = [
   {
     path: "/dashboard",
     element: (
-      <Suspense fallback={<div>加载中...</div>}>
-        <Dashboard />
-      </Suspense>
+      <ProtectedRoute>
+        <Suspense fallback={<div>加载中...</div>}>
+          <Dashboard />
+        </Suspense>
+      </ProtectedRoute>
     ),
   },
   // 代理页面
@@ -67,33 +70,41 @@ const protectedRoutes: RouteObject[] = [
       {
         path: "",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <AgentsList />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <AgentsList />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: ":id",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <AgentDetail />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <AgentDetail />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: "create",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <CreateAgent />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <CreateAgent />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: "edit/:id",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <EditAgent />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <EditAgent />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
     ],
@@ -113,9 +124,11 @@ const protectedRoutes: RouteObject[] = [
       {
         path: "config",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <StatusPageConfig />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <StatusPageConfig />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
     ],
@@ -127,33 +140,41 @@ const protectedRoutes: RouteObject[] = [
       {
         path: "",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <MonitorsList />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <MonitorsList />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: ":id",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <MonitorDetail />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <MonitorDetail />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: "create",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <CreateMonitor />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <CreateMonitor />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: "edit/:id",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <EditMonitor />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <EditMonitor />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
     ],
@@ -162,9 +183,11 @@ const protectedRoutes: RouteObject[] = [
   {
     path: "/notifications",
     element: (
-      <Suspense fallback={<div>加载中...</div>}>
-        <NotificationsConfig />
-      </Suspense>
+      <ProtectedRoute>
+        <Suspense fallback={<div>加载中...</div>}>
+          <NotificationsConfig />
+        </Suspense>
+      </ProtectedRoute>
     ),
   },
   // 用户管理
@@ -174,25 +197,31 @@ const protectedRoutes: RouteObject[] = [
       {
         path: "",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <UsersList />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <UsersList />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: "create",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <CreateUser />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <CreateUser />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: ":id",
         element: (
-          <Suspense fallback={<div>加载中...</div>}>
-            <EditUser />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<div>加载中...</div>}>
+              <EditUser />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
     ],
@@ -202,9 +231,11 @@ const protectedRoutes: RouteObject[] = [
   {
     path: "/profile",
     element: (
-      <Suspense fallback={<div>加载中...</div>}>
-        <UserProfile />
-      </Suspense>
+      <ProtectedRoute>
+        <Suspense fallback={<div>加载中...</div>}>
+          <UserProfile />
+        </Suspense>
+      </ProtectedRoute>
     ),
   },
 ];
@@ -246,7 +277,7 @@ const publicRoutes: RouteObject[] = [
 ];
 
 // 创建路由
-const router = createBrowserRouter(
+const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter(
   [
     {
       element: (
