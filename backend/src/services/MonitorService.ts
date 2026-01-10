@@ -7,69 +7,58 @@ export async function getMonitorsToCheck() {
 }
 
 export async function checkMonitor(monitor: models.Monitor) {
+  console.log(`开始检查监控项: ${monitor.name} (${monitor.url})`);
+
+  // 记录监控之前的状态
+  const previousStatus = monitor.status;
+  const startTime = Date.now();
+  
+  // 初始化结果变量
+  let status = "down"; // 默认为 down，除非请求成功且符合预期
+  let responseTime = 0;
+  let statusCode: number | null = null;
+  let error: string | null = null;
+  let response: Response | null = null;
+
   try {
-    console.log(`开始检查监控项: ${monitor.name} (${monitor.url})`);
+    // 设置超时
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      (monitor.timeout || 30) * 1000
+    );
 
-    // 记录监控之前的状态
-    const previousStatus = monitor.status;
-
-    const startTime = Date.now();
-    let response;
+    // 准备 Headers
     let headers: Headers = new Headers();
-    let error = null;
-
-    try {
-      // 设置超时
-      const controller = new AbortController();
-      const timeoutId = setTimeout(
-        () => controller.abort(),
-        (monitor.timeout || 30) * 1000
-      );
-
-      // 如果headers是字符串，则转换为对象
-      if (typeof monitor.headers === "string") {
+    if (typeof monitor.headers === "string") {
+      try {
         const parseHeaders = JSON.parse(monitor.headers);
         if (
           parseHeaders &&
           typeof parseHeaders === "object" &&
           !Array.isArray(parseHeaders)
         ) {
-          const headerObj = Object.assign({}, parseHeaders);
-          if (Object.keys(headerObj).length === 0) {
-            headers = new Headers();
-          } else {
-            headers = new Headers(headerObj);
-          }
+          headers = new Headers(parseHeaders);
         }
+      } catch (e) {
+        // header 解析失败忽略
       }
-
-      // 发送请求
-      response = await fetch(monitor.url, {
-        method: monitor.method || "GET",
-        headers: headers,
-        body: monitor.method !== "GET" && monitor.method !== "HEAD" ? monitor.body || "" : undefined,
-        signal: controller.signal,
-      });
-
-      // 清除超时
-      clearTimeout(timeoutId);
-    } catch (e) {
-      // 处理请求错误
-      error = e instanceof Error ? e.message : String(e);
-      console.error(`监控 ${monitor.name} (${monitor.url}) 请求失败: ${error}`);
-
-      return {
-        success: false,
-        status: "down",
-        previous_status: previousStatus,
-        error,
-        responseTime: Date.now() - startTime,
-        statusCode: null,
-      };
     }
 
+    // 发送请求
+    response = await fetch(monitor.url, {
+      method: monitor.method || "GET",
+      headers: headers,
+      body: monitor.method !== "GET" && monitor.method !== "HEAD" ? monitor.body || "" : undefined,
+      signal: controller.signal,
+    });
+
+    // 清除超时
+    clearTimeout(timeoutId);
+
     // 计算响应时间
-    const responseTime = Date.now() - startTime;
+    responseTime = Date.now() - startTime;
+    statusCode = response.status;
 
     // 检查状态码是否符合预期
     let isExpectedStatus = false;
@@ -77,53 +66,57 @@ export async function checkMonitor(monitor: models.Monitor) {
 
     // 处理范围状态码：如果预期状态码为个位数（1-5），则视为范围检查
     if (expectedStatus >= 1 && expectedStatus <= 5) {
-      // 例如，当预期状态码为2时，匹配所有2xx状态码
-      const statusCodeFirstDigit = Math.floor(response.status / 100);
+      const statusCodeFirstDigit = Math.floor(statusCode / 100);
       isExpectedStatus = statusCodeFirstDigit === expectedStatus;
     } else {
-      // 精确匹配状态码
-      isExpectedStatus = response.status === expectedStatus;
+      isExpectedStatus = statusCode === expectedStatus;
     }
 
-    const status = isExpectedStatus ? "up" : "down";
+    // 确定最终状态
+    status = isExpectedStatus ? "up" : "down";
+    
+    // 如果状态码不符合预期，记录错误信息
+    if (!isExpectedStatus) {
+      error = `状态码不符合预期: ${statusCode}, 预期: ${getExpectedStatusDisplay(expectedStatus)}`;
+    }
 
-    // 记录状态历史
+  } catch (e) {
+    // 处理请求错误 (连接超时, DNS错误等)
+    status = "down";
+    error = e instanceof Error ? e.message : String(e);
+    responseTime = Date.now() - startTime;
+    console.error(`监控 ${monitor.name} (${monitor.url}) 请求失败: ${error}`);
+  }
+
+  // 确保数据库一定会被更新
+  try {
+    // 1. 记录状态历史
     await repositories.insertMonitorStatusHistory(
       monitor.id,
       status,
       responseTime,
-      response.status,
+      statusCode ?? 0,
       error
     );
 
-    console.log(`监控 ${monitor.name} (${monitor.url}) 检查完成.`);
-
-    // 更新监控状态
+    // 2. 更新监控状态，防止重复通知
     await repositories.updateMonitorStatus(monitor.id, status, responseTime);
+    
+    console.log(`监控 ${monitor.name} (${monitor.url}) 检查完成. 结果: ${status}`);
 
-    return {
-      success: true,
-      status,
-      previous_status: previousStatus,
-      responseTime,
-      statusCode: response.status,
-      error: isExpectedStatus
-        ? null
-        : `状态码不符合预期: ${
-            response.status
-          }, 预期: ${getExpectedStatusDisplay(expectedStatus)}`,
-    };
-  } catch (error) {
-    console.error(`检查监控出错 (${monitor.name}):`, error);
-    return {
-      success: false,
-      status: "error",
-      previous_status: monitor.status,
-      error: error instanceof Error ? error.message : String(error),
-      responseTime: 0,
-      statusCode: null,
-    };
+  } catch (dbError) {
+    console.error(`更新数据库失败 (${monitor.name}):`, dbError);
+    // 即使数据库更新失败也返回检查结果，以免阻塞流程
   }
+
+  return {
+    success: true,
+    status,
+    previous_status: previousStatus,
+    responseTime,
+    statusCode,
+    error,
+  };
 }
 
 export async function getAllMonitors(userId: number) {
@@ -363,7 +356,7 @@ export async function manualCheckMonitor(id: number, userId: number, userRole: s
             userId, // 修复: 传入 userId
             "monitor",
             monitor.id,
-            result.previous_status,
+            result.previous_status || "unknown",
             result.status
           );
 
@@ -380,20 +373,28 @@ export async function manualCheckMonitor(id: number, userId: number, userRole: s
           console.log(
             `监控 ${monitor.name} (ID: ${monitor.id}) 状态变更，正在发送通知...`
           );
+          
+          // 信息添加红绿灯
+          let errorMsg = result.error || "无";
+          if (result.status === "up") {
+            errorMsg = "服务已恢复访问 🟢";
+          } else if (result.status === "down") {
+             errorMsg = `${result.error || "服务无法访问"} 🔴`;
+          }
 
           // 准备通知变量
           const variables = {
             name: monitor.name,
             status: result.status,
             previous_status: result.previous_status || "未知",
-            time: new Date().toLocaleString("zh-CN"),
+            time: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" }),
             response_time: `${result.responseTime}ms`,
             url: monitor.url,
             status_code: result.statusCode
               ? result.statusCode.toString()
               : "无",
             expected_status: monitor.expected_status.toString(),
-            error: result.error || "无",
+            error: errorMsg,
             details: `URL: ${monitor.url}\n响应时间: ${
               result.responseTime
             }ms\n状态码: ${result.statusCode || "无"}\n错误信息: ${

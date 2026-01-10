@@ -109,11 +109,11 @@ async function handleAgentOfflineNotification(
       name: agentName,
       status: "offline",
       previous_status: "online", // 添加previous_status变量
-      time: new Date().toLocaleString("zh-CN"),
+      time: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" }),
       hostname: agent.hostname || "未知",
       ip_addresses: getFormattedIPAddresses(agent.ip_addresses),
       os: agent.os || "未知",
-      error: "客户端连接超时",
+      error: "客户端连接超时 🔴",
       details: `主机名: ${
         agent.hostname || "未知"
       }\nIP地址: ${getFormattedIPAddresses(
@@ -140,6 +140,85 @@ async function handleAgentOfflineNotification(
   } catch (error) {
     console.error(
       `处理客户端离线通知时出错 (${agentName}, ID: ${agentId}):`,
+      error
+    );
+  }
+}
+
+/**
+ * 处理客户端上线通知
+ * @param env 环境变量
+ * @param agentId 客户端ID
+ * @param agentName 客户端名称
+ * @param userId 用户ID
+ */
+export async function handleAgentOnlineNotification(
+  env: any,
+  agentId: number,
+  agentName: string,
+  userId: number
+) {
+  try {
+    // 检查是否需要发送通知
+    // 注意：这里状态是从 offline 变为 online
+    const notificationCheck = await shouldSendNotification(
+      userId,
+      "agent",
+      agentId,
+      "offline", // 上一个状态
+      "online"   // 当前状态
+    );
+
+    if (
+      !notificationCheck.shouldSend ||
+      notificationCheck.channels.length === 0
+    ) {
+      return;
+    }
+
+    console.log(`客户端 ${agentName} (ID: ${agentId}) 已恢复上线，正在发送通知...`);
+
+    // 获取客户端完整信息
+    const agent = await getAgentById(agentId);
+    if (!agent) {
+      console.error(`找不到客户端数据 (ID: ${agentId})`);
+      return;
+    }
+
+    // 准备通知变量
+    const variables = {
+      name: agentName,
+      status: "online",
+      previous_status: "offline",
+      time: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" }),
+      hostname: agent.hostname || "未知",
+      ip_addresses: getFormattedIPAddresses(agent.ip_addresses),
+      os: agent.os || "未知",
+      error: "客户端连接已恢复 🟢",
+      details: `主机名: ${
+        agent.hostname || "未知"
+      }\nIP地址: ${getFormattedIPAddresses(
+        agent.ip_addresses
+      )}\n操作系统: ${agent.os || "未知"}\n恢复时间: ${new Date().toLocaleString("zh-CN")}`,
+    };
+
+    // 发送通知
+    const notificationResult = await sendNotification(
+      "agent",
+      agentId,
+      variables,
+      notificationCheck.channels,
+      userId
+    );
+
+    if (notificationResult.success) {
+      console.log(`客户端 ${agentName} (ID: ${agentId}) 上线通知发送成功`);
+    } else {
+      console.error(`客户端 ${agentName} (ID: ${agentId}) 上线通知发送失败`);
+    }
+  } catch (error) {
+    console.error(
+      `处理客户端上线通知时出错 (${agentName}, ID: ${agentId}):`,
       error
     );
   }
@@ -261,7 +340,7 @@ export async function handleAgentThresholdNotification(
       name: agent.name,
       status: `${metricName}告警`,
       previous_status: "normal", // 添加previous_status变量
-      time: new Date().toLocaleString("zh-CN"),
+      time: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" }),
       hostname: agent.hostname || "未知",
       ip_addresses: getFormattedIPAddresses(agent.ip_addresses),
       os: agent.os || "未知",

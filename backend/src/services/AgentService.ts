@@ -2,7 +2,7 @@ import { Bindings } from "../models/db";
 import type { Agent } from "../models/agent";
 import * as AgentRepository from "../repositories";
 import { generateToken, verifyToken } from "../utils/jwt";
-import { handleAgentThresholdNotification } from "../jobs/agent-task";
+import { handleAgentThresholdNotification, handleAgentOnlineNotification } from "../jobs/agent-task"; // 引入上线通知处理函数
 
 /**
  * 获取所有客户端
@@ -304,6 +304,19 @@ export async function updateAgentStatusService(status: any) {
     }
     // 通过token查找客户端
     const agent = await AgentRepository.getAgentByToken(norlmalInfo.token);
+
+    if (!agent) {
+      throw new Error("找不到对应的Agent");
+    }
+
+    // 检测上线状态
+    if (agent.status !== "active") {
+      console.log(`[AgentService] 客户端 ${agent.name} (ID: ${agent.id}) 恢复上线，触发通知...`);
+      
+      // 异步触发上线通知，不阻塞主流程
+      handleAgentOnlineNotification({}, agent.id, agent.name, agent.created_by)
+        .catch(err => console.error(`[AgentService] 触发上线通知失败:`, err));
+    }
 
     if (
       agent.status != "active" ||
