@@ -60,18 +60,22 @@ async function handleMonitorNotification(
   try {
     console.log(`======= 通知检查开始 =======`);
     console.log(`监控: ${monitor.name} (ID: ${monitor.id})`);
-    console.log(
-      `上一状态: ${checkResult.previous_status}, 当前状态: ${checkResult.status}`
-    );
+    // console.log(
+    //   `上一状态: ${checkResult.previous_status}, 当前状态: ${checkResult.status}`
+    // );
 
-    // 如果监控状态没有变化，不需要继续处理
-    if (checkResult.status === checkResult.previous_status) {
-      console.log(`状态未变化，不发送通知`);
+    // 如果监控状态没有变化，不需要继续处理，使用 monitor.status (数据库里的最新状态) 与刚才检查到的状态 (checkResult.status)
+    if (monitor.status === checkResult.status) {
+      console.log(`[Monitor] ${monitor.name} 状态未变化 (${monitor.status})，忽略通知`);
       return;
     }
 
+    // 定义当前状态和前一个状态
+    const currentStatus = checkResult.status;
+    const previousStatus = monitor.status || "unknown"; // 使用 monitor.status 作为前一个状态
+
     console.log(
-      `状态已变化: ${checkResult.previous_status} -> ${checkResult.status}`
+      `状态已变化: ${previousStatus} -> ${currentStatus}`
     );
 
     // 检查是否需要发送通知
@@ -80,8 +84,8 @@ async function handleMonitorNotification(
       monitor.created_by, // 修复: 传入 userId
       "monitor",
       monitor.id,
-      checkResult.previous_status,
-      checkResult.status
+      previousStatus,
+      currentStatus
     );
 
     console.log(
@@ -105,19 +109,28 @@ async function handleMonitorNotification(
     );
     console.log(`通知渠道: ${JSON.stringify(notificationCheck.channels)}`);
 
+    // 信息添加红绿灯
+    let errorMsg = checkResult.error || "无";
+    if (currentStatus === "up") {
+        errorMsg = "服务已恢复访问 🟢";
+    } 
+    else if (currentStatus === "down") {
+        errorMsg = `${checkResult.error || "服务无法访问"} 🔴`;
+    }
+
     // 准备通知变量
     const variables = {
       name: monitor.name,
-      status: checkResult.status,
-      previous_status: checkResult.previous_status || "未知",
-      time: new Date().toLocaleString("zh-CN"),
+      status: currentStatus,
+      previous_status: previousStatus,
+      time: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" }),
       url: monitor.url,
       response_time: `${checkResult.responseTime}ms`,
       status_code: checkResult.statusCode
         ? checkResult.statusCode.toString()
         : "无",
       expected_status: monitor.expected_status.toString(),
-      error: checkResult.error || "无",
+      error: errorMsg,
       details: `URL: ${monitor.url}\n响应时间: ${
         checkResult.responseTime
       }ms\n状态码: ${checkResult.statusCode || "无"}\n错误信息: ${
