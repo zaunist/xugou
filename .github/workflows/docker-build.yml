@@ -1,9 +1,9 @@
 name: Docker image build
 
 on:
-  push:
-    branches:
-      - 'main'
+  release:
+    types: [published]
+  workflow_dispatch:
 
 jobs:
   docker:

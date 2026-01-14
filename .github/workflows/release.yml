@@ -12,6 +12,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get Hitokoto
+        id: hitokoto
+        run: |
+          HITOKOTO=$(curl -s 'https://v1.hitokoto.cn/' | jq -r '.hitokoto')
+          echo "sentence=$HITOKOTO" >> $GITHUB_OUTPUT
+
       - name: Generate Changelog
         id: changelog
         run: |
@@ -46,7 +52,7 @@ jobs:
           token: ${{ secrets.TOKEN }}
           generate_release_notes: true
           tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }} - ${{ steps.hitokoto.outputs.sentence }}
           body: |
             ${{ github.event.head_commit.message }}
             
