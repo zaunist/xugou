@@ -40,6 +40,7 @@ export const jwtMiddleware = async (c: Context, next: Next) => {
   }
   const middleware = jwt({
     secret: getJwtSecret(c),
+    alg: 'HS256',
   });
   return middleware(c, next);
 };
