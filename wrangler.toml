@@ -9,6 +9,7 @@ minify = true # 生产环境压缩代码
 [triggers]
 crons = ["* * * * *"]
 
+
 [[d1_databases]]
 binding = "DB"
 database_name = "${D1_DATABASE_NAME}" # 使用占位符
