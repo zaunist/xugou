@@ -1,9 +1,10 @@
 import { Hono } from "hono";
+import { JwtPayload } from "../types";
 import { Bindings } from "../models/db";
 import * as SettingsService from "../services/SettingsService";
 import { jwtMiddleware } from "../middlewares";
 
-const settings = new Hono<{ Bindings: Bindings; Variables: { jwtPayload: any } }>();
+const settings = new Hono<{ Bindings: Bindings; Variables: { jwtPayload: JwtPayload } }>();
 
 // 公开端点，用于检查是否允许注册
 settings.get("/allow_new_user_registration", async (c) => {
@@ -16,7 +17,7 @@ settings.use("/*", jwtMiddleware);
 
 // 获取所有设置
 settings.get("/", async (c) => {
-    const payload = c.get("jwtPayload");
+    const payload = c.get("jwtPayload") as JwtPayload;
     if (payload.role !== 'admin') {
         return c.json({ success: false, message: '无权访问' }, 403);
     }
@@ -26,7 +27,7 @@ settings.get("/", async (c) => {
 
 // 更新新用户注册设置
 settings.put("/allow_new_user_registration", async (c) => {
-    const payload = c.get("jwtPayload");
+    const payload = c.get("jwtPayload") as JwtPayload;
     if (payload.role !== 'admin') {
         return c.json({ success: false, message: '无权操作' }, 403);
     }

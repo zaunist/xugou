@@ -1,6 +1,7 @@
 import { Context, Next } from "hono";
 import { jwt } from "hono/jwt";
 import { getJwtSecret } from "../utils/jwt";
+import { JwtPayload } from "../types";
 
 /**
  * JWT认证中间件
@@ -42,5 +43,9 @@ export const jwtMiddleware = async (c: Context, next: Next) => {
     secret: getJwtSecret(c),
     alg: 'HS256',
   });
-  return middleware(c, next);
+  return middleware(c, async () => {
+    const payload = c.get("jwtPayload") as JwtPayload;
+    c.set("jwtPayload", payload);
+    await next();
+  });
 };

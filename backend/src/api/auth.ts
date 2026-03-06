@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { JwtPayload } from "../types";
 import { jwtMiddleware } from "../middlewares";
 import {
   loginUser,
@@ -9,7 +10,7 @@ import { Bindings } from "../models/db";
 import { db } from "../config";
 
 
-const auth = new Hono<{ Bindings: Bindings }>();
+const auth = new Hono<{ Bindings: Bindings; Variables: { jwtPayload: JwtPayload } }>();
 
 // 注册路由
 auth.post("/register", async (c) => {
@@ -91,7 +92,7 @@ auth.use("/me", jwtMiddleware);
 
 auth.get("/me", async (c) => {
   try {
-    const payload = c.get("jwtPayload");
+    const payload = c.get("jwtPayload") as JwtPayload;
 
     // 调用 AuthService 的获取当前用户方法
     const result = await getCurrentUser(c.env, payload.id);

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { JwtPayload } from "../types";
 import { Bindings } from "../models/db";
 import {
   getAllUsersService,
@@ -9,12 +10,12 @@ import {
   changePasswordService,
 } from "../services/UserService";
 
-const users = new Hono<{ Bindings: Bindings }>();
+const users = new Hono<{ Bindings: Bindings; Variables: { jwtPayload: JwtPayload } }>();
 
 // 获取所有用户（仅管理员）
 users.get("/", async (c) => {
   try {
-    const payload = c.get("jwtPayload");
+    const payload = c.get("jwtPayload") as JwtPayload;
 
     const result = await getAllUsersService(payload.role);
 
@@ -32,7 +33,7 @@ users.get("/", async (c) => {
 users.get("/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
-    const payload = c.get("jwtPayload");
+    const payload = c.get("jwtPayload") as JwtPayload;
 
     const result = await getUserByIdService(id, payload.id, payload.role);
 
@@ -49,7 +50,7 @@ users.get("/:id", async (c) => {
 // 创建用户（仅管理员）
 users.post("/", async (c) => {
   try {
-    const payload = c.get("jwtPayload");
+    const payload = c.get("jwtPayload") as JwtPayload;
     const userData = await c.req.json();
 
     const result = await createUserService(userData, payload.role);
@@ -68,7 +69,7 @@ users.post("/", async (c) => {
 users.put("/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
-    const payload = c.get("jwtPayload");
+    const payload = c.get("jwtPayload") as JwtPayload;
     const updateData = await c.req.json();
 
     const result = await updateUserService(
@@ -92,7 +93,7 @@ users.put("/:id", async (c) => {
 users.delete("/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
-    const payload = c.get("jwtPayload");
+    const payload = c.get("jwtPayload") as JwtPayload;
 
     const result = await deleteUserService(id, payload.id, payload.role);
 

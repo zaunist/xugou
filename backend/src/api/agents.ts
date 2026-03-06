@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { JwtPayload } from "../types";
 import { Bindings } from "../models/db";
 import { Agent } from "../models/agent";
 import {
@@ -15,12 +16,12 @@ import {
 
 const agents = new Hono<{
   Bindings: Bindings;
-  Variables: { agent: Agent; jwtPayload: any };
+  Variables: { agent: Agent; jwtPayload: JwtPayload };
 }>();
 
 // 获取所有客户端
 agents.get("/", async (c) => {
-  const payload = c.get("jwtPayload");
+  const payload = c.get("jwtPayload") as JwtPayload;
   const result = await getAgents(payload.id);
 
   return c.json(
@@ -36,7 +37,7 @@ agents.get("/", async (c) => {
 // 更新客户端信息
 agents.put("/:id", async (c) => {
   const agentId = Number(c.req.param("id"));
-  const payload = c.get("jwtPayload");
+  const payload = c.get("jwtPayload") as JwtPayload;
   const updateData = await c.req.json();
 
   const result = await updateAgentService(c.env.DB, agentId, updateData);
@@ -55,7 +56,7 @@ agents.put("/:id", async (c) => {
 agents.delete("/:id", async (c) => {
   try {
     const agentId = Number(c.req.param("id"));
-    const payload = c.get("jwtPayload"); // 获取用户信息
+    const payload = c.get("jwtPayload") as JwtPayload; // 获取用户信息
 
     await deleteAgentService(agentId, payload.id); // 传入 userId
 

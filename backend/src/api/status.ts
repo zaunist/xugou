@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { JwtPayload } from "../types";
 import { Bindings } from "../models/db";
 import {
   getStatusPageConfig,
@@ -17,11 +18,11 @@ interface StatusPageConfig {
 }
 
 // 创建API路由
-const status = new Hono<{ Bindings: Bindings }>();
+const status = new Hono<{ Bindings: Bindings; Variables: { jwtPayload: JwtPayload } }>();
 
 // 获取状态页配置(管理员)
 status.get("/config", async (c) => {
-  const payload = c.get("jwtPayload");
+  const payload = c.get("jwtPayload") as JwtPayload;
   const userId = payload.id;
 
   try {
@@ -35,7 +36,7 @@ status.get("/config", async (c) => {
 
 // 保存状态页配置
 status.post("/config", async (c) => {
-  const payload = c.get("jwtPayload");
+  const payload = c.get("jwtPayload") as JwtPayload;
   const userId = payload.id;
   const data = (await c.req.json()) as StatusPageConfig;
 
