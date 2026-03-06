@@ -9,7 +9,8 @@ const notifications = new Hono<{ Bindings: Bindings; Variables: { jwtPayload: Jw
 // 获取通知配置
 notifications.get("/", async (c) => {
   try {
-    const userId = (c.get("jwtPayload") as JwtPayload).id;
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id;
     const config = await NotificationService.getNotificationConfig(userId);
 
     return c.json({
@@ -32,7 +33,8 @@ notifications.get("/", async (c) => {
 // 获取通知渠道列表
 notifications.get("/channels", async (c) => {
   try {
-    const userId = (c.get("jwtPayload") as JwtPayload).id;
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id;
     const channels = await NotificationService.getNotificationChannels(userId);
 
     return c.json({
@@ -56,7 +58,8 @@ notifications.get("/channels", async (c) => {
 notifications.get("/channels/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
-    const userId = (c.get("jwtPayload") as JwtPayload).id;
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id;
 
     if (isNaN(id)) {
       return c.json(
@@ -100,7 +103,8 @@ notifications.get("/channels/:id", async (c) => {
 // 创建通知渠道
 notifications.post("/channels", async (c) => {
   try {
-    const userId = (c.get("jwtPayload") as JwtPayload).id;
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id;
     const body = await c.req.json();
 
     // 验证请求数据
@@ -161,7 +165,8 @@ notifications.post("/channels", async (c) => {
 notifications.put("/channels/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
-    const userId = (c.get("jwtPayload") as JwtPayload).id;
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id;
 
     if (isNaN(id)) {
       return c.json(
@@ -226,7 +231,8 @@ notifications.put("/channels/:id", async (c) => {
 notifications.delete("/channels/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
-    const userId = (c.get("jwtPayload") as JwtPayload).id;
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id;
 
     if (isNaN(id)) {
       return c.json(
@@ -271,7 +277,8 @@ notifications.delete("/channels/:id", async (c) => {
 // 获取通知模板列表
 notifications.get("/templates", async (c) => {
   try {
-    const userId = (c.get("jwtPayload") as JwtPayload).id;
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id;
     const templates = await NotificationService.getNotificationTemplates(userId);
 
     return c.json({
@@ -295,7 +302,8 @@ notifications.get("/templates", async (c) => {
 notifications.get("/templates/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
-    const userId = (c.get("jwtPayload") as JwtPayload).id; // 获取 userId
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id; // 获取 userId
 
     if (isNaN(id)) {
       return c.json(
@@ -339,7 +347,8 @@ notifications.get("/templates/:id", async (c) => {
 // 创建通知模板
 notifications.post("/templates", async (c) => {
   try {
-    const userId = (c.get("jwtPayload") as JwtPayload).id;
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id;
     const body = await c.req.json();
 
     // 验证请求数据
@@ -403,7 +412,8 @@ notifications.post("/templates", async (c) => {
 notifications.put("/templates/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
-    const userId = (c.get("jwtPayload") as JwtPayload).id; // 获取 userId
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id; // 获取 userId
 
     if (isNaN(id)) {
       return c.json(
@@ -466,7 +476,8 @@ notifications.put("/templates/:id", async (c) => {
 notifications.delete("/templates/:id", async (c) => {
   try {
     const id = parseInt(c.req.param("id"));
-    const userId = (c.get("jwtPayload") as JwtPayload).id; // 获取 userId
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id; // 获取 userId
 
     if (isNaN(id)) {
       return c.json(
@@ -511,7 +522,8 @@ notifications.delete("/templates/:id", async (c) => {
 // 保存通知设置
 notifications.post("/settings", async (c) => {
   try {
-    const userId = (c.get("jwtPayload") as JwtPayload).id;
+    const payload = c.get("jwtPayload") as JwtPayload;
+    const userId = payload.id;
     const body = await c.req.json();
 
     const schema = z.object({
